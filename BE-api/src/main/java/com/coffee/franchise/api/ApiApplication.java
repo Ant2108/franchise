@@ -1,5 +1,6 @@
 package com.coffee.franchise.api;
 
+import com.coffee.franchise.api.config.DotEnvConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,7 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ApiApplication.class, args);
+        DotEnvConfig.loadEnv();
+        SpringApplication.run(ApiApplication.class, args);
 	}
 
 }
