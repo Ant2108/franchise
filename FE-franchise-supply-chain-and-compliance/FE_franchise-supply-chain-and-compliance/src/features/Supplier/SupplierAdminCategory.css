@@ -1,0 +1,95 @@
+/* ================== WRAPPER ================== */
+.admin-category {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  min-height: calc(100vh - 120px);
+}
+
+/* ================== TITLE ================== */
+.admin-category h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* ================== TOP ACTION ================== */
+.admin-category .top-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ================== TABS ================== */
+.admin-category .ant-tabs {
+  margin-bottom: 12px;
+}
+
+/* ================== TABLE ================== */
+.admin-category .ant-table {
+  border-radius: 10px;
+}
+
+.admin-category .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.admin-category .ant-table-row:hover td {
+  background: #fff7e6;
+}
+
+/* ================== BUTTON ================== */
+.admin-category .ant-btn-primary {
+  background: #fa8c16;
+  border-color: #fa8c16;
+}
+
+.admin-category .ant-btn-primary:hover {
+  background: #ff9c2a;
+  border-color: #ff9c2a;
+}
+
+/* Danger button */
+.admin-category .ant-btn-dangerous {
+  border-radius: 6px;
+}
+
+/* ================== MODAL ================== */
+.admin-category .ant-modal-content {
+  border-radius: 12px;
+}
+
+.admin-category .ant-modal-header {
+  border-radius: 12px 12px 0 0;
+}
+
+/* ================== FORM ================== */
+.admin-category .ant-form-item-label > label {
+  font-weight: 500;
+}
+
+.admin-category .ant-input {
+  border-radius: 6px;
+}
+
+/* ================== EMPTY STATE ================== */
+.admin-category .empty-box {
+  text-align: center;
+  padding: 40px 0;
+  color: #999;
+}
+
+/* ================== RESTORE BUTTON ================== */
+.admin-category .restore-btn {
+  background: #52c41a;
+  border-color: #52c41a;
+  color: #fff;
+}
+
+.admin-category .restore-btn:hover {
+  background: #73d13d;
+  border-color: #73d13d;
+  color: #fff;
+}

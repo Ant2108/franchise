@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import AdminPage from "./layouts/AdminPage";
+import SupplierAdminCategory from "./features/Supplier/SupplierAdminCategory";
+
+import WarehouseLayout from "./features/Warehouse/WareHouseLayout";
+import WareHouseDashboard from "./features/Warehouse/WareHouseDashboard";
+import WareHouseInventory from "./features/Warehouse/WareHouseInventory";
+import WareHouseOrders from "./features/Warehouse/WareHouseOrders";
+import WareHouseShipments from "./features/Warehouse/WareHouseShipments";
+import WareHouseReceiving from "./features/Warehouse/WareHouseReceiving";
+import WareHouseReports from "./features/Warehouse/WareHouseReports";
+
+import "./index.css";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+
+        {/* ================= ADMIN ================= */}
+        <Route path="/admin" element={<AdminPage />}>
+          <Route path="category" element={<SupplierAdminCategory />} />
+        </Route>
+
+        {/* ================= WAREHOUSE ================= */}
+        <Route path="/warehouse" element={<WarehouseLayout />}>
+          <Route index element={<WareHouseDashboard />} />
+          <Route path="inventory" element={<WareHouseInventory />} />
+          <Route path="orders" element={<WareHouseOrders />} />
+          <Route path="shipments" element={<WareHouseShipments />} />
+          <Route path="receiving" element={<WareHouseReceiving />} />
+          <Route path="reports" element={<WareHouseReports />} />
+        </Route>
+
+        {/* Global 404 */}
+        <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
