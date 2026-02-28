@@ -27,5 +27,6 @@ public class Warehouse {
     private UUID managerId; // Soft link to AuthStaff
 
     @Enumerated(EnumType.STRING)
+    
     private WarehouseStatus status;
 }

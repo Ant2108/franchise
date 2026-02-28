@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import AdminPage from "./layouts/AdminPage";
 import SupplierAdminCategory from "./features/Supplier/SupplierAdminCategory";
+import InboundList from "./features/Inbound/InboundList";
+import OutboundList from "./features/Outbound/OutboundList";
 
 import WarehouseLayout from "./features/Warehouse/WareHouseLayout";
 import WareHouseDashboard from "./features/Warehouse/WareHouseDashboard";
@@ -21,6 +23,8 @@ function App() {
         {/* ================= ADMIN ================= */}
         <Route path="/admin" element={<AdminPage />}>
           <Route path="category" element={<SupplierAdminCategory />} />
+          <Route path="inbound" element={<InboundList />} />
+          <Route path="outbound" element={<OutboundList />} />
         </Route>
 
         {/* ================= WAREHOUSE ================= */}
