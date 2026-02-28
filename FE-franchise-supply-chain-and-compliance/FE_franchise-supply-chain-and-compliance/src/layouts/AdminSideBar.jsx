@@ -33,6 +33,15 @@ const AdminSidebar = () => {
     },
     {
       type: "folder",
+      name: "Quản lý Kho bãi",
+      icon: <Car size={20} />,
+      items: [
+        { name: "Nhập hàng", path: "/admin/inbound", icon: <MapPin size={18} /> },
+        { name: "Xuất hàng", path: "/admin/outbound", icon: <MapPin size={18} /> },
+      ]
+    },
+    {
+      type: "folder",
       name: "Báo cáo & Đánh giá",
       icon: <BarChart3 size={20} />,
       items: [
@@ -119,7 +128,7 @@ const AdminSidebar = () => {
       </nav>
 
       {/* Dashboard Static Section */}
-      
+
 
       {/* User Section */}
       <div className="user-section">

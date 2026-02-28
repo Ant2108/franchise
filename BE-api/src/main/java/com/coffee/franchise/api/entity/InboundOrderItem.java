@@ -28,6 +28,9 @@ public class InboundOrderItem {
 
     private BigDecimal quantity;
 
+    @Column(name = "received_quantity")
+    private BigDecimal receivedQuantity;
+
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 }
