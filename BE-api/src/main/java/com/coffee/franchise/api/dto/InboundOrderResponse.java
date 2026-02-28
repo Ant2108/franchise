@@ -18,7 +18,9 @@ import java.util.UUID;
 public class InboundOrderResponse {
     private UUID id;
     private UUID warehouseId;
+    private String warehouseName;
     private UUID supplierId;
+    private String supplierName;
     private InboundOrderStatus status;
     private BigDecimal totalAmount;
     private LocalDateTime expectedDate;
@@ -32,7 +34,10 @@ public class InboundOrderResponse {
     public static class InboundOrderItemResponse {
         private UUID id;
         private UUID ingredientId;
+        private String ingredientName;
+        private String unit;
         private BigDecimal quantity;
+        private BigDecimal receivedQuantity;
         private BigDecimal unitPrice;
     }
 }

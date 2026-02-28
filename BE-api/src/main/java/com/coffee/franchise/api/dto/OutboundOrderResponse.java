@@ -18,7 +18,9 @@ import java.util.UUID;
 public class OutboundOrderResponse {
     private UUID id;
     private UUID warehouseId;
+    private String warehouseName;
     private UUID destinationFranchiseId;
+    private String destinationFranchiseName;
     private OutboundOrderStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -31,6 +33,8 @@ public class OutboundOrderResponse {
     public static class OutboundOrderItemResponse {
         private UUID id;
         private UUID ingredientId;
+        private String ingredientName;
+        private String unit;
         private BigDecimal quantity;
     }
 }

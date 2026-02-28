@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +28,9 @@ public class InboundOrderRequest {
     @AllArgsConstructor
     public static class InboundOrderItemRequest {
         private UUID ingredientId;
+
+        @NotNull(message = "Quantity cannot be null")
+        @Positive(message = "Quantity must be greater than zero")
         private BigDecimal quantity;
-        private BigDecimal unitPrice;
     }
 }

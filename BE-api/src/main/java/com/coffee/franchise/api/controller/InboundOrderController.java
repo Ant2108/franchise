@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +22,7 @@ public class InboundOrderController {
     private final InboundOrderService inboundOrderService;
 
     @PostMapping
-    public ResponseEntity<InboundOrderResponse> createInboundOrder(@RequestBody InboundOrderRequest request) {
+    public ResponseEntity<InboundOrderResponse> createInboundOrder(@Valid @RequestBody InboundOrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(inboundOrderService.createInboundOrder(request));
     }
 
