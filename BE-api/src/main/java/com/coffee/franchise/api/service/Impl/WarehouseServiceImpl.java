@@ -3,6 +3,7 @@ package com.coffee.franchise.api.service.Impl;
 import com.coffee.franchise.api.dto.Request.WarehouseRequest;
 import com.coffee.franchise.api.dto.Response.WarehouseResponse;
 import com.coffee.franchise.api.entity.Warehouse;
+import com.coffee.franchise.api.enums.WarehouseStatus;
 import com.coffee.franchise.api.repository.WarehouseRepository;
 import com.coffee.franchise.api.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,11 +33,12 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public WarehouseResponse createWarehouse(WarehouseRequest warehouse) {
-
+    public WarehouseResponse createWarehouse(WarehouseRequest request) {
         Warehouse newWarehouse = Warehouse.builder()
-                .name(warehouse.getName())
-                .location(warehouse.getLocation())
+                .name(request.getName())
+                .location(request.getLocation())
+                .managerId(UUID.randomUUID())
+                .status(WarehouseStatus.ACTIVE)
                 .build();
 
         Warehouse savedWarehouse = warehouseRepository.save(newWarehouse);
@@ -55,13 +58,33 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         existingWarehouse.setName(warehouse.getName());
         existingWarehouse.setLocation(warehouse.getLocation());
-        existingWarehouse.setManagerId(warehouse.getManagerId());
-        existingWarehouse.setStatus(warehouse.getStatus());
-
         Warehouse updatedWarehouse = warehouseRepository.save(existingWarehouse);
 
         return mapToResponse(updatedWarehouse);
     }
+
+    @Override
+    public WarehouseResponse updateStatus(UUID id, WarehouseStatus status) {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Warehouse not found with id " + id
+                        ));
+
+        warehouse.setStatus(status);
+
+        return mapToResponse(warehouseRepository.save(warehouse));
+    }
+
+    @Override
+    public List<WarehouseResponse> getAllWarehouses() {
+        return warehouseRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
 
     // ===== Mapper =====
     private WarehouseResponse mapToResponse(Warehouse warehouse) {
@@ -72,6 +95,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .managerId(warehouse.getManagerId())
                 .status(String.valueOf(warehouse.getStatus()))
                 .build();
+    }
+    private UUID generateRandomUUID() {
+        return UUID.randomUUID();
     }
 
 

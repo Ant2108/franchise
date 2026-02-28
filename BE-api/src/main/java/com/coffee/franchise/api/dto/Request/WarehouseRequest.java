@@ -9,7 +9,7 @@ import java.util.UUID;
 public class WarehouseRequest {
     private String name;
     private String location;
-    private UUID managerId;
-    private WarehouseStatus status;
+
 }
+
 
