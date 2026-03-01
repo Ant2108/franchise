@@ -1,5 +1,6 @@
 package com.coffee.franchise.api.service;
 
+import com.coffee.franchise.api.dto.Response.InventoryResponse;
 import com.coffee.franchise.api.entity.Ingredient;
 import com.coffee.franchise.api.entity.Inventory;
 import com.coffee.franchise.api.entity.Warehouse;
@@ -21,6 +22,7 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final WarehouseRepository warehouseRepository;
     private final IngredientRepository ingredientRepository;
+
 
     @Transactional
     public void addInventory(UUID warehouseId, UUID ingredientId, BigDecimal quantityToAdd) {
