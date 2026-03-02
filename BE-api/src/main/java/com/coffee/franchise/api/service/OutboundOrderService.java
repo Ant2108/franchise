@@ -10,7 +10,6 @@ import com.coffee.franchise.api.repository.IngredientRepository;
 import com.coffee.franchise.api.repository.OutboundOrderItemRepository;
 import com.coffee.franchise.api.repository.OutboundOrderRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
-import com.coffee.franchise.api.service.Impl.InventoryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,7 @@ public class OutboundOrderService {
         private final OutboundOrderItemRepository outboundOrderItemRepository;
         private final WarehouseRepository warehouseRepository;
         private final IngredientRepository ingredientRepository;
-        private final InventoryServiceImpl inventoryServiceImpl;
+        private final InventoryService inventoryService;
 
         @Transactional
         public OutboundOrderResponse createOutboundOrder(OutboundOrderRequest request) {
@@ -56,7 +55,7 @@ public class OutboundOrderService {
                                 outboundOrderItemRepository.save(item);
 
                                 // Reserve inventory when order is created
-                                inventoryServiceImpl.reserveInventory(savedOrder.getWarehouse().getId(),
+                                inventoryService.reserveInventory(savedOrder.getWarehouse().getId(),
                                                 item.getIngredient().getId(),
                                                 item.getQuantity());
                         });
@@ -92,7 +91,7 @@ public class OutboundOrderService {
                                         .collect(Collectors.toList());
 
                         for (OutboundOrderItem item : items) {
-                                inventoryServiceImpl.confirmOutboundInventory(order.getWarehouse().getId(),
+                                inventoryService.confirmOutboundInventory(order.getWarehouse().getId(),
                                                 item.getIngredient().getId(),
                                                 item.getQuantity());
                         }

@@ -27,7 +27,20 @@ public class InventoryController {
     public ResponseEntity<InventoryResponse> addInventory(@Valid @RequestBody InventoryRequest request) {
         InventoryResponse response = inventoryService.addInventory(request.getWarrehouseId(), request.getIngredientId(), request.getQuantitytoAdd());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    // ================= TRACK =================
+    }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<LowStockAlertResponse>> getLowStockAlerts() {
+        List<LowStockAlertResponse> alerts = inventoryService.getLowStockAlerts();
+        return ResponseEntity.ok(alerts);
+    }
+
+    @GetMapping("/low-stock/warehouse/{warehouseId}")
+    public ResponseEntity<List<LowStockAlertResponse>> getLowStockAlertsByWarehouse(@PathVariable UUID warehouseId) {
+        List<LowStockAlertResponse> alerts = inventoryService.getLowStockAlertsByWarehouse(warehouseId);
+        return ResponseEntity.ok(alerts);
+    }
+
     @GetMapping("/track")
     public ResponseEntity<InventoryResponseDTO> trackInventory(
             @RequestParam UUID warehouseId,
@@ -38,11 +51,6 @@ public class InventoryController {
         );
     }
 
-    @GetMapping("/low-stock")
-    public ResponseEntity<List<LowStockAlertResponse>> getLowStockAlerts() {
-        List<LowStockAlertResponse> alerts = inventoryService.getLowStockAlerts();
-        return ResponseEntity.ok(alerts);
-    // ================= INCREASE =================
     @PostMapping("/increase")
     public ResponseEntity<InventoryResponseDTO> increaseInventory(
             @Valid @RequestBody InventoryQuantityRequestDTO request
@@ -52,11 +60,6 @@ public class InventoryController {
         );
     }
 
-    @GetMapping("/low-stock/warehouse/{warehouseId}")
-    public ResponseEntity<List<LowStockAlertResponse>> getLowStockAlertsByWarehouse(@PathVariable UUID warehouseId) {
-        List<LowStockAlertResponse> alerts = inventoryService.getLowStockAlertsByWarehouse(warehouseId);
-        return ResponseEntity.ok(alerts);
-    // ================= DECREASE =================
     @PostMapping("/decrease")
     public ResponseEntity<InventoryResponseDTO> decreaseInventory(
             @Valid @RequestBody InventoryQuantityRequestDTO request
@@ -66,9 +69,15 @@ public class InventoryController {
         );
     }
 
+    @PostMapping("/adjust")
+    public ResponseEntity<InventoryResponseDTO> adjustInventory(
+            @Valid @RequestBody InventoryQuantityRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                inventoryService.adjust(request)
+        );
     }
 
-    // ================= RESERVATION SYNC =================
     @PostMapping("/reservation/sync")
     public ResponseEntity<InventoryResponseDTO> syncReservation(
             @Valid @RequestBody ReservationSyncRequestDTO request
@@ -77,4 +86,5 @@ public class InventoryController {
                 inventoryService.syncReservation(request)
         );
     }
+
 }

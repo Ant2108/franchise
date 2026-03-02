@@ -13,7 +13,6 @@ import com.coffee.franchise.api.repository.SupplierIngredientRepository;
 import com.coffee.franchise.api.repository.SupplierRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
 import com.coffee.franchise.api.entity.SupplierIngredient;
-import com.coffee.franchise.api.service.Impl.InventoryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,7 @@ public class InboundOrderService {
         private final SupplierRepository supplierRepository;
         private final IngredientRepository ingredientRepository;
         private final SupplierIngredientRepository supplierIngredientRepository;
-        private final InventoryServiceImpl inventoryServiceImpl;
+        private final InventoryService inventoryService;
 
         @Transactional
         public InboundOrderResponse createInboundOrder(InboundOrderRequest request) {
@@ -124,7 +123,7 @@ public class InboundOrderService {
                                         .collect(Collectors.toList());
 
                         for (InboundOrderItem item : orderItems) {
-                                inventoryServiceImpl.addInventory(order.getWarehouse().getId(),
+                                inventoryService.addInventory(order.getWarehouse().getId(),
                                                 item.getIngredient().getId(),
                                                 item.getQuantity());
                         }
