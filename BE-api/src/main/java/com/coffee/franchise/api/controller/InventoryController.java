@@ -3,6 +3,9 @@ package com.coffee.franchise.api.controller;
 import com.coffee.franchise.api.dto.Request.InventoryRequest;
 import com.coffee.franchise.api.dto.Response.InventoryResponse;
 import com.coffee.franchise.api.dto.Response.LowStockAlertResponse;
+import com.coffee.franchise.api.dto.Request.InventoryQuantityRequestDTO;
+import com.coffee.franchise.api.dto.Request.ReservationSyncRequestDTO;
+import com.coffee.franchise.api.dto.Response.InventoryResponseDTO;
 import com.coffee.franchise.api.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,52 @@ public class InventoryController {
     public ResponseEntity<List<LowStockAlertResponse>> getLowStockAlertsByWarehouse(@PathVariable UUID warehouseId) {
         List<LowStockAlertResponse> alerts = inventoryService.getLowStockAlertsByWarehouse(warehouseId);
         return ResponseEntity.ok(alerts);
+    }
+
+    @GetMapping("/track")
+    public ResponseEntity<InventoryResponseDTO> trackInventory(
+            @RequestParam UUID warehouseId,
+            @RequestParam UUID ingredientId
+    ) {
+        return ResponseEntity.ok(
+                inventoryService.track(warehouseId, ingredientId)
+        );
+    }
+
+    @PostMapping("/increase")
+    public ResponseEntity<InventoryResponseDTO> increaseInventory(
+            @Valid @RequestBody InventoryQuantityRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                inventoryService.increase(request)
+        );
+    }
+
+    @PostMapping("/decrease")
+    public ResponseEntity<InventoryResponseDTO> decreaseInventory(
+            @Valid @RequestBody InventoryQuantityRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                inventoryService.decrease(request)
+        );
+    }
+
+    @PostMapping("/adjust")
+    public ResponseEntity<InventoryResponseDTO> adjustInventory(
+            @Valid @RequestBody InventoryQuantityRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                inventoryService.adjust(request)
+        );
+    }
+
+    @PostMapping("/reservation/sync")
+    public ResponseEntity<InventoryResponseDTO> syncReservation(
+            @Valid @RequestBody ReservationSyncRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                inventoryService.syncReservation(request)
+        );
     }
 
 }
