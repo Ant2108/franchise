@@ -73,8 +73,15 @@ const InboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Kho hàng">{order.warehouseName}</Descriptions.Item>
                         <Descriptions.Item label="Nhà cung cấp">{order.supplierName}</Descriptions.Item>
-                        <Descriptions.Item label="Ngày dự kiến giao">{order.expectedDate}</Descriptions.Item>
-                        <Descriptions.Item label="Ngày giao thực tế">{order.actualDate || "Chưa giao"}</Descriptions.Item>
+                        <Descriptions.Item label="Tổng giá trị">
+                            <span style={{ color: "red", fontWeight: "bold" }}>
+                                {order.totalAmount
+                                    ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(order.totalAmount)
+                                    : "0 ₫"}
+                            </span>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ngày dự kiến giao">{order.expectedDate ? new Date(order.expectedDate).toLocaleString() : ""}</Descriptions.Item>
+                        <Descriptions.Item label="Ngày giao thực tế">{order.actualDate ? new Date(order.actualDate).toLocaleString() : "Chưa giao"}</Descriptions.Item>
                     </Descriptions>
 
                     <h4 style={{ marginBottom: 10 }}>Danh sách nguyên liệu</h4>
@@ -86,26 +93,6 @@ const InboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
                         size="small"
                         style={{ marginBottom: 20 }}
                     />
-
-                    <div style={{ background: "#f5f5f5", padding: 16, borderRadius: 8 }}>
-                        <h4>Cập nhật trạng thái</h4>
-                        <Form form={form} layout="inline" onFinish={handleUpdateStatus}>
-                            <Form.Item name="status" rules={[{ required: true }]}>
-                                <Select style={{ width: 150 }}>
-                                    <Option value="PENDING">Chờ xử lý</Option>
-                                    <Option value="APPROVED">Đã duyệt</Option>
-                                    <Option value="DELIVERING">Đang giao</Option>
-                                    <Option value="COMPLETED">Hoàn tất</Option>
-                                    <Option value="CANCELLED">Đã hủy</Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit" loading={updating}>
-                                    Cập nhật
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </div>
                 </>
             ) : (
                 <p>Không tìm thấy dữ liệu.</p>

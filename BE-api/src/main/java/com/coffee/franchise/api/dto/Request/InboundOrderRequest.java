@@ -1,4 +1,4 @@
-package com.coffee.franchise.api.dto;
+package com.coffee.franchise.api.dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

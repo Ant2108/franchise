@@ -1,8 +1,8 @@
 package com.coffee.franchise.api.service.Impl;
 
-import com.coffee.franchise.api.dto.InboundOrderRequest;
-import com.coffee.franchise.api.dto.InboundOrderResponse;
-import com.coffee.franchise.api.dto.InboundOrderStatusUpdateRequest;
+import com.coffee.franchise.api.dto.Request.InboundOrderRequest;
+import com.coffee.franchise.api.dto.Response.InboundOrderResponse;
+import com.coffee.franchise.api.dto.Request.InboundOrderStatusUpdateRequest;
 import com.coffee.franchise.api.entity.InboundOrder;
 import com.coffee.franchise.api.entity.InboundOrderItem;
 import com.coffee.franchise.api.enums.InboundOrderStatus;
@@ -101,6 +101,14 @@ public class InboundOrderServiceImpl implements InboundOrderService {
     @Transactional(readOnly = true)
     public List<InboundOrderResponse> getAllInboundOrders() {
         return inboundOrderRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InboundOrderResponse> getAllInboundOrdersByWarehouseId(UUID warehouseId) {
+        return inboundOrderRepository.findByWarehouseId(warehouseId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

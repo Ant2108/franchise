@@ -1,8 +1,8 @@
 package com.coffee.franchise.api.service;
 
-import com.coffee.franchise.api.dto.OutboundOrderRequest;
-import com.coffee.franchise.api.dto.OutboundOrderResponse;
-import com.coffee.franchise.api.dto.OutboundOrderStatusUpdateRequest;
+import com.coffee.franchise.api.dto.Request.OutboundOrderRequest;
+import com.coffee.franchise.api.dto.Response.OutboundOrderResponse;
+import com.coffee.franchise.api.dto.Request.OutboundOrderStatusUpdateRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,6 +12,8 @@ public interface OutboundOrderService {
         OutboundOrderResponse createOutboundOrder(OutboundOrderRequest request);
 
         List<OutboundOrderResponse> getAllOutboundOrders();
+
+        List<OutboundOrderResponse> getAllOutboundOrdersByWarehouseId(UUID warehouseId);
 
         OutboundOrderResponse getOutboundOrderById(UUID id);
 

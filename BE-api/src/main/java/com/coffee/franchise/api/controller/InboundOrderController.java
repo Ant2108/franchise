@@ -1,8 +1,8 @@
 package com.coffee.franchise.api.controller;
 
-import com.coffee.franchise.api.dto.InboundOrderRequest;
-import com.coffee.franchise.api.dto.InboundOrderResponse;
-import com.coffee.franchise.api.dto.InboundOrderStatusUpdateRequest;
+import com.coffee.franchise.api.dto.Request.InboundOrderRequest;
+import com.coffee.franchise.api.dto.Response.InboundOrderResponse;
+import com.coffee.franchise.api.dto.Request.InboundOrderStatusUpdateRequest;
 import com.coffee.franchise.api.service.InboundOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,12 +22,21 @@ public class InboundOrderController {
     private final InboundOrderService inboundOrderService;
 
     @PostMapping
-    public ResponseEntity<InboundOrderResponse> createInboundOrder(@Valid @RequestBody InboundOrderRequest request) {
+    public ResponseEntity<InboundOrderResponse> createInboundOrder(
+            @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId,
+            @Valid @RequestBody InboundOrderRequest request) {
+        if (warehouseId != null) {
+            request.setWarehouseId(warehouseId);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(inboundOrderService.createInboundOrder(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<InboundOrderResponse>> getAllInboundOrders() {
+    public ResponseEntity<List<InboundOrderResponse>> getAllInboundOrders(
+            @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId) {
+        if (warehouseId != null) {
+            return ResponseEntity.ok(inboundOrderService.getAllInboundOrdersByWarehouseId(warehouseId));
+        }
         return ResponseEntity.ok(inboundOrderService.getAllInboundOrders());
     }
 

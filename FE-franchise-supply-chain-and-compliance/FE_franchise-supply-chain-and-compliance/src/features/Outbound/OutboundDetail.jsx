@@ -85,26 +85,6 @@ const OutboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
                         size="small"
                         style={{ marginBottom: 20 }}
                     />
-
-                    <div style={{ background: "#f5f5f5", padding: 16, borderRadius: 8 }}>
-                        <h4>Cập nhật trạng thái</h4>
-                        <Form form={form} layout="inline" onFinish={handleUpdateStatus}>
-                            <Form.Item name="status" rules={[{ required: true }]}>
-                                <Select style={{ width: 170 }}>
-                                    <Option value="PENDING">Chờ xử lý</Option>
-                                    <Option value="APPROVED">Đã duyệt</Option>
-                                    <Option value="SHIPPING">Đang giao hàng</Option>
-                                    <Option value="DELIVERED">Đã giao hoàn tất</Option>
-                                    <Option value="CANCELLED">Đã hủy</Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit" loading={updating}>
-                                    Cập nhật
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </div>
                 </>
             ) : (
                 <p>Không tìm thấy dữ liệu.</p>
