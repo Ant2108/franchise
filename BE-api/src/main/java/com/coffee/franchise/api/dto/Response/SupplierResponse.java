@@ -1,4 +1,4 @@
-package com.coffee.franchise.api.dto;
+package com.coffee.franchise.api.dto.Response;
 
 import com.coffee.franchise.api.enums.SupplierStatus;
 import lombok.Builder;
