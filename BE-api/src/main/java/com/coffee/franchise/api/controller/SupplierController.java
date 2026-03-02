@@ -1,8 +1,7 @@
 package com.coffee.franchise.api.controller;
 
-
-import com.coffee.franchise.api.dto.request.SupplierRequest;
-import com.coffee.franchise.api.dto.SupplierResponse;
+import com.coffee.franchise.api.dto.Request.SupplierRequest;
+import com.coffee.franchise.api.dto.Response.SupplierResponse;
 import com.coffee.franchise.api.service.SupplierService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
