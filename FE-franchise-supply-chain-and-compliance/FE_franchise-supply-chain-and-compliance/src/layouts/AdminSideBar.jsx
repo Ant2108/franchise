@@ -42,10 +42,10 @@ const AdminSidebar = () => {
     },
     {
       type: "folder",
-      name: "Báo cáo & Đánh giá",
+      name: "Quản lý Warehouse",
       icon: <BarChart3 size={20} />,
       items: [
-        { name: "Quản lý báo cáo", path: "###", icon: <BarChart3 size={18} /> },
+        { name: "Quản lý Warehouse", path: "/admin/warehouse", icon: <BarChart3 size={18} /> },
         { name: "Đánh giá người dùng", path: "###", icon: <FileText size={18} /> },
       ]
     },
