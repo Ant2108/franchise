@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Tag, Space, Select, Input, message } from "antd";
-import { PlusOutlined, EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 import outboundApi from "./OutboundAPI/outboundApi";
-import OutboundCreate from "./OutboundCreate";
 import OutboundDetail from "./OutboundDetail";
 
 const { Option } = Select;
@@ -12,7 +11,6 @@ const OutboundList = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filterStatus, setFilterStatus] = useState("ALL");
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [detailOrderId, setDetailOrderId] = useState(null);
 
     const fetchOrders = async () => {
@@ -112,13 +110,6 @@ const OutboundList = () => {
                     </Select>
                     <Search placeholder="Tìm theo mã đơn..." style={{ width: 250 }} />
                 </Space>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    Tạo đơn xuất
-                </Button>
             </div>
 
             <Table
@@ -127,15 +118,6 @@ const OutboundList = () => {
                 dataSource={orders}
                 loading={loading}
                 pagination={{ pageSize: 10 }}
-            />
-
-            <OutboundCreate
-                open={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={() => {
-                    setIsCreateModalOpen(false);
-                    fetchOrders();
-                }}
             />
 
             {detailOrderId && (

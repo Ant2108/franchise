@@ -1,6 +1,6 @@
-package com.coffee.franchise.api.dto;
+package com.coffee.franchise.api.dto.Response;
 
-import com.coffee.franchise.api.enums.InboundOrderStatus;
+import com.coffee.franchise.api.enums.OutboundOrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,29 +15,26 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InboundOrderResponse {
+public class OutboundOrderResponse {
     private UUID id;
     private UUID warehouseId;
     private String warehouseName;
-    private UUID supplierId;
-    private String supplierName;
-    private InboundOrderStatus status;
-    private BigDecimal totalAmount;
-    private LocalDateTime expectedDate;
-    private LocalDateTime actualDate;
-    private List<InboundOrderItemResponse> items;
+    private UUID destinationFranchiseId;
+    private String destinationFranchiseName;
+    private OutboundOrderStatus status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private List<OutboundOrderItemResponse> items;
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class InboundOrderItemResponse {
+    public static class OutboundOrderItemResponse {
         private UUID id;
         private UUID ingredientId;
         private String ingredientName;
         private String unit;
         private BigDecimal quantity;
-        private BigDecimal receivedQuantity;
-        private BigDecimal unitPrice;
     }
 }

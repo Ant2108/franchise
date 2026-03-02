@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Tag, Space, Select, Input, DatePicker, message } from "antd";
-import { PlusOutlined, EyeOutlined } from "@ant-design/icons";
+import { Table, Button, Tag, Space, Select, Input, message } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import inboundApi from "./InboundAPI/inboundApi";
-import InboundCreate from "./InboundCreate";
 import InboundDetail from "./InboundDetail";
 
 const { Option } = Select;
@@ -12,7 +11,6 @@ const InboundList = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filterStatus, setFilterStatus] = useState("ALL");
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [detailOrderId, setDetailOrderId] = useState(null);
 
     const fetchOrders = async () => {
@@ -112,13 +110,6 @@ const InboundList = () => {
                     </Select>
                     <Search placeholder="Tìm theo mã đơn..." style={{ width: 250 }} />
                 </Space>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    Tạo đơn nhập
-                </Button>
             </div>
 
             <Table
@@ -127,15 +118,6 @@ const InboundList = () => {
                 dataSource={orders}
                 loading={loading}
                 pagination={{ pageSize: 10 }}
-            />
-
-            <InboundCreate
-                open={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={() => {
-                    setIsCreateModalOpen(false);
-                    fetchOrders();
-                }}
             />
 
             {detailOrderId && (

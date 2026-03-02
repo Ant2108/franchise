@@ -16,11 +16,12 @@ const inboundApi = {
     },
 
     /**
-     * Tạo đơn nhập hàng mới.
+     * Tạo mới đơn nhập hàng.
      */
     createOrder: (data) => {
         return apiClient.post('/inbounds', data);
     },
+
 
     /**
      * Cập nhật trạng thái đơn nhập hàng.
