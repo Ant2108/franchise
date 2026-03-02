@@ -17,6 +17,7 @@ public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,7 +1,10 @@
 package com.coffee.franchise.api.service;
 
+import com.coffee.franchise.api.dto.Request.InventoryQuantityRequestDTO;
 import com.coffee.franchise.api.dto.Request.InventoryRequest;
+import com.coffee.franchise.api.dto.Request.ReservationSyncRequestDTO;
 import com.coffee.franchise.api.dto.Response.InventoryResponse;
+import com.coffee.franchise.api.dto.Response.InventoryResponseDTO;
 import com.coffee.franchise.api.dto.Response.LowStockAlertResponse;
 import com.coffee.franchise.api.entity.Ingredient;
 import com.coffee.franchise.api.entity.Inventory;
@@ -202,6 +205,178 @@ public class InventoryService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public InventoryResponseDTO track(UUID warehouseId, UUID ingredientId) {
+
+        Inventory inventory = inventoryRepository
+                .findByWarehouseIdAndIngredientId(warehouseId, ingredientId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+
+        return InventoryResponseDTO.builder()
+                .inventoryId(inventory.getId())
+                .warehouseId(inventory.getWarehouse().getId())
+                .ingredientId(inventory.getIngredient().getId())
+                .quantityAvailable(inventory.getQuantityAvailable())
+                .quantityReserved(inventory.getQuantityReserved())
+                .lastUpdated(inventory.getLastUpdated())
+                .build();
+    }
+
+    // ================= INCREASE =================
+    @Transactional
+    public InventoryResponseDTO increase(InventoryQuantityRequestDTO request) {
+
+        Inventory inventory = inventoryRepository
+                .findByWarehouseIdAndIngredientId(
+                        request.getWarehouseId(),
+                        request.getIngredientId()
+                )
+                .orElseGet(() -> {
+
+                    Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
+                            .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+
+                    Ingredient ingredient = ingredientRepository.findById(request.getIngredientId())
+                            .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+
+                    return Inventory.builder()
+                            .warehouse(warehouse)
+                            .ingredient(ingredient)
+                            .quantityAvailable(BigDecimal.ZERO)
+                            .quantityReserved(BigDecimal.ZERO)
+                            .lastUpdated(LocalDateTime.now())
+                            .build();
+                });
+
+        inventory.setQuantityAvailable(
+                inventory.getQuantityAvailable().add(request.getQuantity())
+        );
+        inventory.setLastUpdated(LocalDateTime.now());
+
+        inventoryRepository.save(inventory);
+
+        return InventoryResponseDTO.builder()
+                .inventoryId(inventory.getId())
+                .warehouseId(inventory.getWarehouse().getId())
+                .ingredientId(inventory.getIngredient().getId())
+                .quantityAvailable(inventory.getQuantityAvailable())
+                .quantityReserved(inventory.getQuantityReserved())
+                .lastUpdated(inventory.getLastUpdated())
+                .build();
+    }
+
+    // ================= DECREASE =================
+    @Transactional
+    public InventoryResponseDTO decrease(InventoryQuantityRequestDTO request) {
+
+        Inventory inventory = inventoryRepository
+                .findByWarehouseIdAndIngredientId(
+                        request.getWarehouseId(),
+                        request.getIngredientId()
+                )
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+
+        if (inventory.getQuantityAvailable().compareTo(request.getQuantity()) < 0) {
+            throw new RuntimeException("Not enough stock");
+        }
+
+        inventory.setQuantityAvailable(
+                inventory.getQuantityAvailable().subtract(request.getQuantity())
+        );
+        inventory.setLastUpdated(LocalDateTime.now());
+
+        inventoryRepository.save(inventory);
+
+        return InventoryResponseDTO.builder()
+                .inventoryId(inventory.getId())
+                .warehouseId(inventory.getWarehouse().getId())
+                .ingredientId(inventory.getIngredient().getId())
+                .quantityAvailable(inventory.getQuantityAvailable())
+                .quantityReserved(inventory.getQuantityReserved())
+                .lastUpdated(inventory.getLastUpdated())
+                .build();
+    }
+
+    // ================= ADJUST =================
+    @Transactional
+    public InventoryResponseDTO adjust(InventoryQuantityRequestDTO request) {
+
+        Inventory inventory = inventoryRepository
+                .findByWarehouseIdAndIngredientId(
+                        request.getWarehouseId(),
+                        request.getIngredientId()
+                )
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+
+        inventory.setQuantityAvailable(request.getQuantity());
+        inventory.setLastUpdated(LocalDateTime.now());
+
+        inventoryRepository.save(inventory);
+
+        return InventoryResponseDTO.builder()
+                .inventoryId(inventory.getId())
+                .warehouseId(inventory.getWarehouse().getId())
+                .ingredientId(inventory.getIngredient().getId())
+                .quantityAvailable(inventory.getQuantityAvailable())
+                .quantityReserved(inventory.getQuantityReserved())
+                .lastUpdated(inventory.getLastUpdated())
+                .build();
+    }
+
+    // ================= RESERVATION =================
+    @Transactional
+    public InventoryResponseDTO syncReservation(ReservationSyncRequestDTO request) {
+
+        Inventory inventory = inventoryRepository
+                .findByWarehouseIdAndIngredientId(
+                        request.getWarehouseId(),
+                        request.getIngredientId()
+                )
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+
+        BigDecimal quantity = request.getQuantity();
+
+        switch (request.getAction()) {
+
+            case RESERVE -> {
+                if (inventory.getQuantityAvailable().compareTo(quantity) < 0) {
+                    throw new RuntimeException("Not enough stock to reserve");
+                }
+
+                inventory.setQuantityAvailable(
+                        inventory.getQuantityAvailable().subtract(quantity)
+                );
+                inventory.setQuantityReserved(
+                        inventory.getQuantityReserved().add(quantity)
+                );
+            }
+
+            case RELEASE -> {
+                if (inventory.getQuantityReserved().compareTo(quantity) < 0) {
+                    throw new RuntimeException("Reserved not enough to release");
+                }
+
+                inventory.setQuantityReserved(
+                        inventory.getQuantityReserved().subtract(quantity)
+                );
+                inventory.setQuantityAvailable(
+                        inventory.getQuantityAvailable().add(quantity)
+                );
+            }
+        }
+
+        inventory.setLastUpdated(LocalDateTime.now());
+        inventoryRepository.save(inventory);
+
+        return InventoryResponseDTO.builder()
+                .inventoryId(inventory.getId())
+                .warehouseId(inventory.getWarehouse().getId())
+                .ingredientId(inventory.getIngredient().getId())
+                .quantityAvailable(inventory.getQuantityAvailable())
+                .quantityReserved(inventory.getQuantityReserved())
+                .lastUpdated(inventory.getLastUpdated())
+                .build();
+    }
     private LowStockAlertResponse mapToLowStockAlert(Inventory inventory) {
         Ingredient ingredient = inventory.getIngredient();
         return LowStockAlertResponse.builder()
@@ -215,6 +390,7 @@ public class InventoryService {
                 .deficit(ingredient.getAlertThreshold().subtract(inventory.getQuantityAvailable()))
                 .build();
     }
+
 
 
 }
