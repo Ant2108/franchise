@@ -15,5 +15,6 @@ public interface WarehouseService {
     WarehouseResponse updateWarehouse(WarehouseRequest warehouse,UUID id);
     WarehouseResponse updateStatus(UUID id, WarehouseStatus status);
     List<WarehouseResponse> getAllWarehouses();
+    void deleteWarehouse(UUID id);
 
 }

@@ -20,85 +20,107 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
 
+    // ================= GET BY ID =================
     @Override
     public WarehouseResponse getWarehouse(UUID id) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Warehouse not found with id " + id
-                        ));
-
+        Warehouse warehouse = findActiveWarehouseOrThrow(id);
         return mapToResponse(warehouse);
     }
 
+    // ================= CREATE =================
     @Override
     public WarehouseResponse createWarehouse(WarehouseRequest request) {
-        Warehouse newWarehouse = Warehouse.builder()
+
+        if (warehouseRepository.existsByCode(request.getCode())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Warehouse code already exists"
+            );
+        }
+
+        Warehouse warehouse = Warehouse.builder()
+                .code(request.getCode())
                 .name(request.getName())
                 .location(request.getLocation())
+                .description(request.getDescription())
+                .status(request.getStatus() != null
+                        ? request.getStatus()
+                        : WarehouseStatus.ACTIVE)
                 .managerId(UUID.randomUUID())
-                .status(WarehouseStatus.ACTIVE)
+                .deleted(false)
                 .build();
 
-        Warehouse savedWarehouse = warehouseRepository.save(newWarehouse);
-
-        return mapToResponse(savedWarehouse);
+        return mapToResponse(warehouseRepository.save(warehouse));
     }
 
+    // ================= UPDATE FULL =================
     @Override
-    public WarehouseResponse updateWarehouse(WarehouseRequest warehouse, UUID id) {
+    public WarehouseResponse updateWarehouse(WarehouseRequest request, UUID id) {
 
-        Warehouse existingWarehouse = warehouseRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Warehouse not found with id " + id
-                        ));
+        Warehouse warehouse = findActiveWarehouseOrThrow(id);
 
-        existingWarehouse.setName(warehouse.getName());
-        existingWarehouse.setLocation(warehouse.getLocation());
-        Warehouse updatedWarehouse = warehouseRepository.save(existingWarehouse);
+        warehouse.setCode(request.getCode());
+        warehouse.setName(request.getName());
+        warehouse.setLocation(request.getLocation());
+        warehouse.setDescription(request.getDescription());
+        warehouse.setStatus(request.getStatus());
 
-        return mapToResponse(updatedWarehouse);
+        return mapToResponse(warehouseRepository.save(warehouse));
     }
 
+    // ================= UPDATE STATUS =================
     @Override
     public WarehouseResponse updateStatus(UUID id, WarehouseStatus status) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Warehouse not found with id " + id
-                        ));
+
+        Warehouse warehouse = findActiveWarehouseOrThrow(id);
 
         warehouse.setStatus(status);
 
         return mapToResponse(warehouseRepository.save(warehouse));
     }
 
+    // ================= GET ALL =================
     @Override
     public List<WarehouseResponse> getAllWarehouses() {
-        return warehouseRepository.findAll()
+        return warehouseRepository.findByDeletedFalse()
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
+    // ================= SOFT DELETE =================
+    @Override
+    public void deleteWarehouse(UUID id) {
+        Warehouse warehouse = findActiveWarehouseOrThrow(id);
+        warehouse.setDeleted(true);
+        warehouseRepository.save(warehouse);
+    }
 
-    // ===== Mapper =====
+    // ================= COMMON METHOD =================
+    private Warehouse findActiveWarehouseOrThrow(UUID id) {
+        return warehouseRepository.findById(id)
+                .filter(w -> !Boolean.TRUE.equals(w.getDeleted()))
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Warehouse not found with id " + id
+                        ));
+    }
+
+    // ================= MAPPER =================
     private WarehouseResponse mapToResponse(Warehouse warehouse) {
+
         return WarehouseResponse.builder()
                 .id(warehouse.getId())
+                .code(warehouse.getCode())
                 .name(warehouse.getName())
                 .location(warehouse.getLocation())
+                .description(warehouse.getDescription())
+                .status(warehouse.getStatus())
+
                 .managerId(warehouse.getManagerId())
-                .status(String.valueOf(warehouse.getStatus()))
+                .createdAt(warehouse.getCreatedAt())
+                .updatedAt(warehouse.getUpdatedAt())
                 .build();
     }
-    private UUID generateRandomUUID() {
-        return UUID.randomUUID();
-    }
-
-
 }
