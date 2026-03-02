@@ -25,11 +25,8 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
 @Override
 public InventoryResponse addInventory(InventoryRequest request) {
 
-    Inventory exist = inventoryRepository.findByWarehouseIdAndIngredientId(request.getWarehouseId(),
-                    request.getIngredientId())
-
+    Inventory exist = inventoryRepository.findByWarehouseIdAndIngredientId(request.getWarehouseId(), request.getIngredientId())
             .orElseGet(() -> {
-
                 Inventory newInventory = new Inventory();
 
                 Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
@@ -42,6 +39,7 @@ public InventoryResponse addInventory(InventoryRequest request) {
                 newInventory.setIngredient(ingredient);
                 newInventory.setQuantityAvailable(request.getQuantityAvailable());
                 newInventory.setQuantityReserved(request.getQuantityReserved());
+                newInventory.setLastUpdated(LocalDateTime.now());
                 return newInventory;
             });
 
@@ -67,11 +65,7 @@ public InventoryResponse addInventory(InventoryRequest request) {
     public InventoryResponse updateItem(UUID id, InventoryRequest request) {
         Inventory exist = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Inventory not found for ingredient " + id + " in inventory"));
-
-        if (request.getIngredientId() != null) {
-            exist.getIngredient().setId(request.getIngredientId());
-        }
+                        "Item don't exist in Inventory"));
 
         if (request.getQuantityAvailable() != null) {
             exist.setQuantityAvailable(request.getQuantityAvailable());
