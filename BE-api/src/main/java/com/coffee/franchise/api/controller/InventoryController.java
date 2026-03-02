@@ -43,10 +43,4 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.searchItem(name));
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<InventoryResponse> createNewInventory(@Valid @ModelAttribute InventoryRequest request)
-        throws IOException{
-        return ResponseEntity.ok(inventoryService.addInventory(request));
-    }
-
 }

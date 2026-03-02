@@ -22,29 +22,7 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
     private final InventoryRepository inventoryRepository;
     private final WarehouseRepository warehouseRepository;
     private final IngredientRepository ingredientRepository;
-@Override
-public InventoryResponse addInventory(InventoryRequest request) {
 
-    Inventory exist = inventoryRepository.findByWarehouseIdAndIngredientId(request.getWarehouseId(), request.getIngredientId())
-            .orElseGet(() -> {
-                Inventory newInventory = new Inventory();
-
-                Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
-                        .orElseThrow(() -> new IllegalArgumentException("Warehouse not found"));
-
-                Ingredient ingredient = ingredientRepository.findById(request.getIngredientId())
-                        .orElseThrow(() -> new IllegalArgumentException("Ingredient not found"));
-
-                newInventory.setWarehouse(warehouse);
-                newInventory.setIngredient(ingredient);
-                newInventory.setQuantityAvailable(request.getQuantityAvailable());
-                newInventory.setQuantityReserved(request.getQuantityReserved());
-                newInventory.setLastUpdated(LocalDateTime.now());
-                return newInventory;
-            });
-
-    return InventoryResponse.fromEntity(inventoryRepository.save(exist));
-}
 
     @Override
     public List<InventoryResponse> getItemList() {
