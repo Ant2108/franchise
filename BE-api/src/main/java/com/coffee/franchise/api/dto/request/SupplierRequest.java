@@ -1,4 +1,4 @@
-package com.coffee.franchise.api.dto.request;
+package com.coffee.franchise.api.dto.Request;
 
 import com.coffee.franchise.api.enums.SupplierStatus;
 import jakarta.validation.constraints.Email;
