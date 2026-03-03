@@ -4,10 +4,11 @@ import "./AdminWareHousePage.css";
 import { Row, Col, Card, Statistic } from "antd";
 import {HomeOutlined,CheckCircleOutlined} from "@ant-design/icons";
 import {FaWarehouse,FaSearch,FaPlus,FaEdit} from "react-icons/fa";
-
+import { getStatusLabel, getStatusClass } from "../../../utils/statusUtils";
 import {MapContainer,TileLayer,Marker,Popup,useMap,} from "react-leaflet";
 import L from "leaflet";
 import WareHouseAdminAPI from "./AdminWareHousePageAPI/AdminWareHousePageAPI";
+
 //fly to map
 function FlyToHandler({ position }) {
   const map = useMap();
@@ -25,6 +26,7 @@ export default function AdminWareHousePage() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPosition, setSelectedPosition] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const navigate = useNavigate();
 
   const fetchWarehouses = async () => {
@@ -45,12 +47,22 @@ export default function AdminWareHousePage() {
     fetchWarehouses();
   }, []);
 
-  const filteredWarehouses = warehouses.filter((wh) =>
+
+  const filteredWarehouses = warehouses
+  .filter((wh) =>
     wh.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     wh.code?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  )
+  .filter((wh) => {
+    if (filterStatus === "ALL") {
+      return wh.status !== "CLOSE";
+    }
+    return wh.status === filterStatus;
+  });
 
-  const totalWarehouses = warehouses.length;
+  const totalWarehouses = warehouses.filter(
+    (wh) => wh.status !== "CLOSE"
+  ).length;
   const activeWarehouses = warehouses.filter(
     (wh) => wh.status === "ACTIVE"
   ).length;
@@ -133,9 +145,9 @@ const createIcon = (status) => {
     <div className="warehouse-page">
       <div className="warehouse-header">
         <h1>
-          <FaWarehouse /> Warehouse Management
+          <FaWarehouse /> Quản lý Kho Hàng
         </h1>
-        <p>Manage and monitor all warehouse facilities</p>
+        <p>Quản lý và giám sát tất cả các kho hàng</p>
       </div>
 
       {loading && <p>Loading...</p>}
@@ -146,7 +158,7 @@ const createIcon = (status) => {
         <Col xs={24} sm={12} md={6}>
           <Card className="dashboard-card">
             <Statistic
-              title="Total Warehouses"
+              title="Tổng Kho Hàng"
               value={totalWarehouses}
               prefix={<HomeOutlined />}
             />
@@ -156,7 +168,7 @@ const createIcon = (status) => {
         <Col xs={24} sm={12} md={6}>
           <Card className="dashboard-card">
             <Statistic
-              title="Active Facilities"
+              title="Cơ sở hoạt động"
               value={activeWarehouses}
               prefix={<CheckCircleOutlined />}
             />
@@ -168,35 +180,49 @@ const createIcon = (status) => {
         {/* ================= TABLE ================= */}
         <div className="table-section">
           <div className="table-header">
-            <div className="search-box">
-              <FaSearch />
-              <input
-                placeholder="Search by name or code..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <div className="filter-bar">
+              <select
+                className="status-filter"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+              <option value="ALL">Tất cả</option>
+              <option value="ACTIVE">Hoạt động</option>
+              <option value="INACTIVE">Ngừng hoạt động</option>
+              <option value="MAINTAIN">Bảo trì</option>
+              <option value="CLOSE">Đóng cửa</option>
+              </select>
 
-            <button
-              className="add-btn"
-              onClick={() =>
-                navigate("/admin/warehouse/create")
-              }
-            >
-              <FaPlus /> Add Warehouse
-            </button>
+              <div className="search-box">
+                <FaSearch />
+                <input
+                  placeholder="Tìm kiếm theo tên hoặc mã kho..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
+
+          <button
+            className="add-btn"
+            onClick={() => navigate("/admin/warehouse/create")}
+          >
+            <FaPlus /> Thêm Kho
+          </button>
+        </div>
 
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Code</th>
-                  <th>Name</th>
-                  <th>Location</th>
-                  <th>Description</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>Tên Kho</th>
+                  <th>Vị Trí</th>
+                  <th>Mô Tả</th>
+                  <th>Trạng Thái</th>
+                  <th>Hành Động</th>
                 </tr>
               </thead>
 
@@ -204,7 +230,7 @@ const createIcon = (status) => {
                 {filteredWarehouses.length === 0 && !loading && (
                   <tr>
                     <td colSpan="6" style={{ textAlign: "center" }}>
-                      No warehouses found
+                      Không tìm thấy kho hàng nào
                     </td>
                   </tr>
                 )}
@@ -219,13 +245,11 @@ const createIcon = (status) => {
                     <td>{wh.name}</td>
                     <td>{wh.location}</td>
                     <td>{wh.description}</td>
-                    <td>
-                      <span
-                        className={`status ${wh.status.toLowerCase()}`}
-                      >
-                        {wh.status}
-                      </span>
-                    </td>
+                      <td>
+                        <span className={`status ${getStatusClass(wh.status)}`}>
+                          {getStatusLabel(wh.status)}
+                        </span>
+                      </td>
                     <td>
                       <button
                         className="action-btn edit-btn"
@@ -235,7 +259,7 @@ const createIcon = (status) => {
                         }}
                       >
                         <FaEdit />
-                        <span>Edit</span>
+                        <span>Chỉnh Sửa</span>
                       </button>
                     </td>
                   </tr>
@@ -245,13 +269,13 @@ const createIcon = (status) => {
           </div>
 
           <div className="pagination">
-            Total {warehouses.length} warehouses
+            Tổng {warehouses.length} kho hàng
           </div>
         </div>
 
         {/* ================= MAP ================= */}
         <div className="map-section">
-          <h3>Warehouse Locations</h3>
+          <h3>Vị Trí Kho Hàng</h3>
 
           <MapContainer
             center={[10.7769, 106.7009]}
@@ -266,8 +290,10 @@ const createIcon = (status) => {
 
             {warehouses
               .filter(
-                (wh) => wh.latitude != null && wh.longitude != null
-              )
+                (wh) => wh.latitude != null && wh.longitude != null && (filterStatus === "ALL"
+                        ? wh.status !== "CLOSE"
+                        : wh.status === filterStatus)
+                  )
               .map((wh) => (
                 <Marker
                   key={wh.id}
@@ -282,16 +308,16 @@ const createIcon = (status) => {
                     <br />
                     {wh.location}
                     <br />
-                    Status: {wh.status}
+                    Trạng Thái: {getStatusLabel(wh.status)}
                   </Popup>
                 </Marker>
               ))}
           </MapContainer>
 
           <div className="legend">
-            <span><span className="dot green"></span> Active</span>
-            <span><span className="dot red"></span> Inactive</span>
-            <span><span className="dot orange"></span> Maintain</span>
+            <span><span className="dot green"></span> Hoạt Động</span>
+            <span><span className="dot red"></span> Không Hoạt Động</span>
+            <span><span className="dot orange"></span> Bảo Trì</span>
           </div>
         </div>
       </div>
