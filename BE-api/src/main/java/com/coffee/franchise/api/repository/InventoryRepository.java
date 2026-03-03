@@ -23,4 +23,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
     @Query("SELECT i FROM Inventory i JOIN FETCH i.ingredient ing JOIN FETCH i.warehouse w " +
            "WHERE w.id = :warehouseId AND i.quantityAvailable <= ing.alertThreshold AND ing.alertThreshold IS NOT NULL")
     List<Inventory> findLowStockByWarehouseId(@Param("warehouseId") UUID warehouseId);
+
+
+
 }
