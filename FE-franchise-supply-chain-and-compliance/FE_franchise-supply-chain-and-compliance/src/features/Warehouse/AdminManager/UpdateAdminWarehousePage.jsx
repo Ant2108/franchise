@@ -9,7 +9,7 @@ import {
   CheckCircleOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
-
+import {getStatusLabel, getStatusClass} from "../../../utils/statusUtils";
 export default function UpdateAdminWarehousePage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export default function UpdateAdminWarehousePage() {
           latitude: res?.latitude || "",
         });
       } catch (err) {
-        setError("Failed to load warehouse detail",err);
+        setError("Lỗi khi tải chi tiết kho hàng",err);
       } finally {
         setLoading(false);
       }
@@ -70,7 +70,7 @@ export default function UpdateAdminWarehousePage() {
       await WareHouseAdminAPI.updateWarehouse(id, formData);
       navigate("/admin/warehouse");
     } catch (err) {
-      alert("Update failed!",err);
+      alert("Cập nhật thất bại!",err);
     } finally {
       setSaving(false);
     }
@@ -93,16 +93,15 @@ export default function UpdateAdminWarehousePage() {
             className="back-button"
             onClick={() => navigate("/admin/warehouse")}
           >
-            Back to Warehouses
+            Trở Về Danh Sách
           </Button>
         </div>
 
         <h1>
-          Edit Warehouse
-          <span className="code-pill">{formData.code}</span>
+          Cập Nhật Thông Tin Kho Hàng <span className="code-pill">{formData.code}</span>
+          
         </h1>
-
-        <p>Update warehouse information and settings</p>
+        <p>Cập nhật thông tin và cài đặt kho hàng</p>
 
       </div>
     </div>
@@ -115,12 +114,20 @@ export default function UpdateAdminWarehousePage() {
             <div className="summary-icon purple">
               <DashboardOutlined />
             </div>
+            <div>
+              <p>Mã Kho</p>
+              <h2>{formData.code}</h2>
+            </div>   
           </div>
 
           <div className="summary-item">
             <div className="summary-icon blue">
               <DatabaseOutlined />
             </div>
+            <div>
+              <p>Tên Kho</p>
+              <h2>{formData.name}</h2>
+            </div>  
           </div>
 
           <div className="summary-item">
@@ -128,62 +135,59 @@ export default function UpdateAdminWarehousePage() {
               <CheckCircleOutlined />
             </div>
             <div>
-              <p>Status</p>
-              <h2>{formData.status}</h2>
+              <p>Trạng Thái</p>
+              <h2><span className={`status ${getStatusClass(formData.status)}`}>
+                {getStatusLabel(formData.status)}
+              </span></h2>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="section-card">
-            <div className="section-header">Basic Information</div>
+            <div className="section-header">Thông Tin Cơ Bản</div>
             <div className="section-body grid-2">
               <div>
-                <label>* Warehouse Code</label>
-                <input name="code" value={formData.code} onChange={handleChange} required />
-              </div>
-
-              <div>
-                <label>* Warehouse Name</label>
+                <label>* Tên Kho</label>
                 <input name="name" value={formData.name} onChange={handleChange} required />
               </div>
 
               <div className="full-width">
-                <label>Description</label>
+                <label>* Mô Tả</label>
                 <textarea name="description" value={formData.description} onChange={handleChange} />
               </div>
             </div>
           </div>
 
           <div className="section-card">
-            <div className="section-header">Location</div>
+            <div className="section-header">Thông Tin Vị Trí</div>
             <div className="section-body">
-              <label>* Location</label>
+              <label>* Địa Chỉ</label>
               <input name="location" value={formData.location} onChange={handleChange} required />
               </div>
               <div className="section-body grid-2">
               <div>
-                <label>* Latitude</label>
+                <label>* Kinh Độ</label>
                 <input name="latitude" value={formData.latitude} onChange={handleChange} required />
               </div>
               <div>
-                <label>* Longitude</label>
+                <label>* Vĩ Độ</label>
                 <input name="longitude" value={formData.longitude} onChange={handleChange} required />
               </div>
             </div>
           </div>
 
           <div className="section-card">
-            <div className="section-header">System Information</div>
+            <div className="section-header">Trạng Thái</div>
             <div className="section-body grid-2">
 
               <div>
-                <label>* Status</label>
+                <label>* Trạng Thái</label>
                 <select name="status" value={formData.status} onChange={handleChange}>
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="INACTIVE">INACTIVE</option>
-                  <option value="MAINTAIN">MAINTAIN</option>
-                  <option value="CLOSE">CLOSE</option>
+                  <option value="ACTIVE">Hoạt Động</option>
+                  <option value="INACTIVE">Không Hoạt Động</option>
+                  <option value="MAINTAIN">Bảo Trì</option>
+                  <option value="CLOSE">Đóng</option>
                 </select>
               </div>
 
@@ -193,11 +197,11 @@ export default function UpdateAdminWarehousePage() {
 
           <div className="action-area">
             <button type="button" className="btn-cancel" onClick={() => navigate("/admin/warehouse")}>
-              Cancel
+              Hủy Bỏ
             </button>
 
             <button type="submit" className="btn-save" disabled={saving}>
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Đang Lưu..." : "Lưu Thay Đổi"}
             </button>
           </div>
         </form>

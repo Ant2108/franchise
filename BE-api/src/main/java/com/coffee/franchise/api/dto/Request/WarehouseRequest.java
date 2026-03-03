@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class WarehouseRequest {
 
-    private String code;
     private String name;
     private String location;
     private String description;
