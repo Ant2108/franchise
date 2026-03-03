@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Modal, Form, Select, DatePicker, Button, InputNumber, Space, message, Table } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import inboundApi from "./InboundAPI/inboundApi";
-import supplierApi from "../Supplier/SupplierApi/supplierApi";
+import { getSuppliers, getSupplierDetail } 
+  from "../Supplier/SupplierAPI/supplierApi";
 
 const { Option } = Select;
 
@@ -22,21 +23,21 @@ const CreateInboundModal = ({ open, onClose, onSuccess }) => {
         }
     }, [open, form]);
 
-    const fetchSuppliers = async () => {
-        try {
-            const data = await supplierApi.getSuppliers();
-            setSuppliers(data);
-        } catch (error) {
-            message.error("Không tải được danh sách nhà cung cấp");
-        }
-    };
+   const fetchSuppliers = async () => {
+    try {
+        const data = await getSuppliers();  // gọi trực tiếp
+        setSuppliers(data);
+    } catch (error) {
+        message.error("Không tải được danh sách nhà cung cấp", error);
+    }
+};
 
     const fetchSupplierIngredients = async (supplierId) => {
         try {
-            const data = await supplierApi.getSupplierIngredients(supplierId);
+            const data = await getSupplierDetail.getSupplierIngredients(supplierId);
             setIngredients(data || []);
         } catch (error) {
-            message.error("Không tải được danh sách nguyên liệu của nhà cung cấp này");
+            message.error("Không tải được danh sách nguyên liệu của nhà cung cấp này", error);
             setIngredients([]);
         }
     };
