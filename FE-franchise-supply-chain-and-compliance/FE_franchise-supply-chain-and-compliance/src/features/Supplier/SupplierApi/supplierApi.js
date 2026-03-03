@@ -1,19 +1,25 @@
-import apiClient from '../../../services/axiosClient';
+import axiosClient from "../../../services/axiosClient";
 
-const supplierApi = {
-    /**
-     * Lấy danh sách tất cả nhà cung cấp
-     */
-    getSuppliers: (params = {}) => {
-        return apiClient.get('/suppliers', params);
-    },
+const BASE = "/suppliers";
 
-    /**
-     * Lấy danh sách nguyên liệu của một nhà cung cấp cụ thể
-     */
-    getSupplierIngredients: (supplierId) => {
-        return apiClient.get(`/suppliers/${supplierId}/ingredients`); 
-    }
+export const getSuppliers = async (keyword = "") => {
+  return await axiosClient.get(`${BASE}/search`, {
+    keyword
+  });
 };
 
-export default supplierApi;
+export const getSupplierDetail = async (id) => {
+  return await axiosClient.get(`${BASE}/${id}`);
+};
+
+export const createSupplier = async (data) => {
+  return await axiosClient.post(BASE, data);
+};
+
+export const updateSupplier = async (id, data) => {
+  return await axiosClient.put(`/suppliers/${id}`, data);
+};
+
+export const deleteSupplier = async (id) => {
+  return await axiosClient.delete(`/suppliers/${id}`);
+};

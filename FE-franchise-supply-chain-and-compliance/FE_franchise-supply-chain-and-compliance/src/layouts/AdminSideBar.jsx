@@ -16,10 +16,10 @@ const AdminSidebar = () => {
   const menuStructure = [
     {
       type: "folder",
-      name: "Quản lý Suppiler",
+      name: "Suppiler",
       icon: <Zap size={20} />,
       items: [
-        { name: "Sản Phẩm", path: "##", icon: <MapPin size={18} /> },
+        { name: "Quản Lý", path: "/admin/supplier", icon: <MapPin size={18} /> },
         { name: "Danh Mục", path: "/admin/WarehouseCategory", icon: <Zap size={18} /> },
       ]
     },
