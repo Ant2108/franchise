@@ -88,4 +88,16 @@ public class SupplierService {
                 .updatedAt(supplier.getUpdatedAt())
                 .build();
     }
+    public List<SupplierResponse> getAllSuppliers() {
+        return supplierRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+    public void deleteSupplier(UUID id) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+
+        supplierRepository.delete(supplier);
+    }
 }
