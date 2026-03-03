@@ -21,10 +21,11 @@ const CreateAdminWarehouse = () => {
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  
 
   const stepFields = {
     1: ["name", "code", "description"],
-    2: ["location"],
+    2: ["location","latitude","longitude"],
     3: ["status"],
   };
 
@@ -138,6 +139,20 @@ const CreateAdminWarehouse = () => {
               rules={[{ required: true, message: "Required" }]}
             >
               <Input />
+            </Form.Item>
+            <Form.Item
+              name="latitude"
+              label="Latitude"
+              rules={[{ required: true, message: "Required" }]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              name="longitude"
+              label="Longitude"
+              rules={[{ required: true, message: "Required" }]}
+            >
+              <InputNumber style={{ width: "100%" }} />
             </Form.Item>
           </div>
 

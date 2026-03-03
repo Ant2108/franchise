@@ -14,7 +14,7 @@ import WareHouseReceiving from "./features/Warehouse/WareHouseReceiving";
 import WareHouseReports from "./features/Warehouse/WareHouseReports";
 import UpdateAdminWarehousePage from "./features/Warehouse/AdminManager/UpdateAdminWarehousePage";
 import CreateAdminWarehouse from "./features/Warehouse/AdminManager/CreateAdminWarehouse";
-
+import "leaflet/dist/leaflet.css";
 import "./index.css";
 
 function App() {

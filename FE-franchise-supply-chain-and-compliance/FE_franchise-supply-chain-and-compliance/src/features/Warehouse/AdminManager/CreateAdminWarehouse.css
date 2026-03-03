@@ -98,10 +98,22 @@
 .ant-input-number {
   border-radius: 10px !important;
   height: 42px !important;
+  
 }
 
 .ant-input-number-input {
   height: 40px !important;
+}
+
+.ant-input-number:focus,
+.ant-input-number-focused {
+  border-color: #6a85f1 !important;
+  box-shadow: 0 0 0 2px rgba(106, 133, 241, 0.15) !important;
+}
+
+.ant-input-number input:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* BUTTONS */

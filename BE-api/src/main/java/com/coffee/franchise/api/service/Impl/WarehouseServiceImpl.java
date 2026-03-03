@@ -42,6 +42,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .code(request.getCode())
                 .name(request.getName())
                 .location(request.getLocation())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
                 .description(request.getDescription())
                 .status(request.getStatus() != null
                         ? request.getStatus()
@@ -62,6 +64,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setCode(request.getCode());
         warehouse.setName(request.getName());
         warehouse.setLocation(request.getLocation());
+        warehouse.setLatitude(request.getLatitude());
+        warehouse.setLongitude(request.getLongitude());
         warehouse.setDescription(request.getDescription());
         warehouse.setStatus(request.getStatus());
 
@@ -117,7 +121,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .location(warehouse.getLocation())
                 .description(warehouse.getDescription())
                 .status(warehouse.getStatus())
-
+                .longitude(warehouse.getLongitude())
+                .latitude(warehouse.getLatitude())
                 .managerId(warehouse.getManagerId())
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())
