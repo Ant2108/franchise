@@ -3,6 +3,8 @@ package com.coffee.franchise.api.dto.Request;
 import com.coffee.franchise.api.enums.WarehouseStatus;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Builder
 @Getter
 @Setter
@@ -15,4 +17,6 @@ public class WarehouseRequest {
     private String location;
     private String description;
     private WarehouseStatus status;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 }

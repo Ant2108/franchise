@@ -20,6 +20,8 @@ export default function UpdateAdminWarehousePage() {
     location: "",
     description: "",
     status: "ACTIVE",
+    longitude: "",
+    latitude: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,6 +40,8 @@ export default function UpdateAdminWarehousePage() {
           location: res?.location || "",
           description: res?.description || "",
           status: res?.status || "ACTIVE",
+          longitude: res?.longitude || "",
+          latitude: res?.latitude || "",
         });
       } catch (err) {
         setError("Failed to load warehouse detail",err);
@@ -156,6 +160,16 @@ export default function UpdateAdminWarehousePage() {
             <div className="section-body">
               <label>* Location</label>
               <input name="location" value={formData.location} onChange={handleChange} required />
+              </div>
+              <div className="section-body grid-2">
+              <div>
+                <label>* Latitude</label>
+                <input name="latitude" value={formData.latitude} onChange={handleChange} required />
+              </div>
+              <div>
+                <label>* Longitude</label>
+                <input name="longitude" value={formData.longitude} onChange={handleChange} required />
+              </div>
             </div>
           </div>
 
