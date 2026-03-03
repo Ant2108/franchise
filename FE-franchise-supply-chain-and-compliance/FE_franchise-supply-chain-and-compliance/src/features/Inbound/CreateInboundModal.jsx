@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Form, Select, DatePicker, Button, InputNumber, Space, message, Table } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import inboundApi from "./InboundAPI/inboundApi";
@@ -12,6 +12,15 @@ const CreateInboundModal = ({ open, onClose, onSuccess }) => {
     const [suppliers, setSuppliers] = useState([]);
     const [ingredients, setIngredients] = useState([]);
     const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+
+    const ingredientMap = useMemo(() => {
+        return new Map(
+            ingredients.map((ingredient) => [
+                ingredient.ingredientId || ingredient.id,
+                ingredient,
+            ])
+        );
+    }, [ingredients]);
 
     useEffect(() => {
         if (open) {
@@ -151,6 +160,22 @@ const CreateInboundModal = ({ open, onClose, onSuccess }) => {
                                             style={{ margin: 0 }}
                                         >
                                             <InputNumber placeholder="Số lượng" min={1} style={{ width: 150 }} />
+                                        </Form.Item>
+                                        <Form.Item
+                                            noStyle
+                                            shouldUpdate={(prevValues, currentValues) =>
+                                                prevValues?.items?.[name]?.ingredientId !== currentValues?.items?.[name]?.ingredientId
+                                            }
+                                        >
+                                            {({ getFieldValue }) => {
+                                                const selectedIngredientId = getFieldValue(['items', name, 'ingredientId']);
+                                                const selectedIngredient = ingredientMap.get(selectedIngredientId);
+                                                return (
+                                                    <span style={{ minWidth: 45, color: '#666' }}>
+                                                        {selectedIngredient?.unit || ''}
+                                                    </span>
+                                                );
+                                            }}
                                         </Form.Item>
                                         <Button
                                             type="text"

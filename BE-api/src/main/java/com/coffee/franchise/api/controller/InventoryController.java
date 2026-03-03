@@ -2,6 +2,7 @@ package com.coffee.franchise.api.controller;
 
 import com.coffee.franchise.api.dto.Request.InventoryRequest;
 import com.coffee.franchise.api.dto.Response.InventoryResponse;
+import com.coffee.franchise.api.dto.Response.InventoryListItemResponse;
 import com.coffee.franchise.api.dto.Response.LowStockAlertResponse;
 import com.coffee.franchise.api.dto.Request.InventoryQuantityRequestDTO;
 import com.coffee.franchise.api.dto.Request.ReservationSyncRequestDTO;
@@ -22,6 +23,13 @@ import java.util.UUID;
 public class InventoryController {
 
     private final InventoryService inventoryService;
+
+    @GetMapping
+    public ResponseEntity<List<InventoryListItemResponse>> getInventoryList(
+            @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId
+    ) {
+        return ResponseEntity.ok(inventoryService.getInventoryList(warehouseId));
+    }
 
     @PostMapping("/add")
     public ResponseEntity<InventoryResponse> addInventory(@Valid @RequestBody InventoryRequest request) {

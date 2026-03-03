@@ -1,8 +1,12 @@
 package com.coffee.franchise.api.service;
 
 import com.coffee.franchise.api.dto.Request.SupplierRequest;
+import com.coffee.franchise.api.dto.Response.SupplierIngredientOptionResponse;
 import com.coffee.franchise.api.dto.Response.SupplierResponse;
 import com.coffee.franchise.api.entity.Supplier;
+import com.coffee.franchise.api.entity.SupplierIngredient;
+import com.coffee.franchise.api.enums.SupplierIngredientStatus;
+import com.coffee.franchise.api.repository.SupplierIngredientRepository;
 import com.coffee.franchise.api.repository.SupplierRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +21,11 @@ import java.util.stream.Collectors;
 public class SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final SupplierIngredientRepository supplierIngredientRepository;
 
-    public SupplierService(SupplierRepository supplierRepository) {
+    public SupplierService(SupplierRepository supplierRepository, SupplierIngredientRepository supplierIngredientRepository) {
         this.supplierRepository = supplierRepository;
+        this.supplierIngredientRepository = supplierIngredientRepository;
     }
 
     // S18 - Create Supplier
@@ -72,6 +78,34 @@ public class SupplierService {
 
         return suppliers.stream()
                 .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SupplierResponse> getAllSuppliers() {
+        return supplierRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SupplierIngredientOptionResponse> getSupplierIngredients(UUID supplierId) {
+        if (!supplierRepository.existsById(supplierId)) {
+            throw new RuntimeException("Supplier not found with id: " + supplierId);
+        }
+
+        List<SupplierIngredient> supplierIngredients =
+                supplierIngredientRepository.findAllBySupplierIdAndStatusWithIngredient(
+                        supplierId,
+                        SupplierIngredientStatus.ACTIVE
+                );
+
+        return supplierIngredients.stream()
+                .map(si -> SupplierIngredientOptionResponse.builder()
+                        .ingredientId(si.getIngredient().getId())
+                        .ingredientName(si.getIngredient().getName())
+                        .unit(si.getIngredient().getUnit())
+                        .build())
                 .collect(Collectors.toList());
     }
 

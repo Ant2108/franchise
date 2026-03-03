@@ -1,6 +1,7 @@
 package com.coffee.franchise.api.controller;
 
 import com.coffee.franchise.api.dto.Request.SupplierRequest;
+import com.coffee.franchise.api.dto.Response.SupplierIngredientOptionResponse;
 import com.coffee.franchise.api.dto.Response.SupplierResponse;
 import com.coffee.franchise.api.service.SupplierService;
 import jakarta.validation.Valid;
@@ -28,6 +29,11 @@ public class SupplierController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping
+    public ResponseEntity<List<SupplierResponse>> getAllSuppliers() {
+        return ResponseEntity.ok(supplierService.getAllSuppliers());
+    }
+
     // S20 - Update
     @PutMapping("/{id}")
     public ResponseEntity<SupplierResponse> updateSupplier(
@@ -47,5 +53,10 @@ public class SupplierController {
     public ResponseEntity<List<SupplierResponse>> searchSupplier(
             @RequestParam(required = false, defaultValue = "") String keyword) {
         return ResponseEntity.ok(supplierService.searchSupplier(keyword));
+    }
+
+    @GetMapping("/{id}/ingredients")
+    public ResponseEntity<List<SupplierIngredientOptionResponse>> getSupplierIngredients(@PathVariable UUID id) {
+        return ResponseEntity.ok(supplierService.getSupplierIngredients(id));
     }
 }

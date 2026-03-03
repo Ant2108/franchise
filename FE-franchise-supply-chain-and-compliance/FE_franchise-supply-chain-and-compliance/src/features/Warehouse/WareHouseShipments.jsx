@@ -4,6 +4,7 @@ import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import outboundApi from "../Outbound/OutboundAPI/outboundApi";
 import OutboundDetail from "../Outbound/OutboundDetail";
 import CreateOutboundModal from "../Outbound/CreateOutboundModal";
+import { OUTBOUND_FILTER_STATUS_OPTIONS, getOutboundStatusMeta } from "../../utils/orderStatus";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -36,20 +37,9 @@ function WareHouseShipments() {
   }, [filterStatus]);
 
   const getStatusTag = (status) => {
-    switch (status) {
-      case "PENDING":
-        return <Tag color="orange">Chờ xử lý</Tag>;
-      case "APPROVED":
-        return <Tag color="blue">Đã duyệt</Tag>;
-      case "SHIPPING":
-        return <Tag color="cyan">Đang giao hàng</Tag>;
-      case "DELIVERED":
-        return <Tag color="green">Đã giao</Tag>;
-      case "CANCELLED":
-        return <Tag color="red">Đã hủy</Tag>;
-      default:
-        return <Tag>{status}</Tag>;
-    }
+    const statusMeta = getOutboundStatusMeta(status);
+    if (!statusMeta) return <Tag>{status}</Tag>;
+    return <Tag color={statusMeta.color}>{statusMeta.label}</Tag>;
   };
 
   const columns = [
@@ -66,7 +56,7 @@ function WareHouseShipments() {
       render: (status) => getStatusTag(status),
     },
     {
-      title: "Ngày xuất",
+      title: "Ngày tạo đơn",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => (date ? new Date(date).toLocaleString() : ""),
@@ -111,11 +101,11 @@ function WareHouseShipments() {
               style={{ width: 170 }}
             >
               <Option value="ALL">Tất cả trạng thái</Option>
-              <Option value="PENDING">Chờ xử lý</Option>
-              <Option value="APPROVED">Đã duyệt</Option>
-              <Option value="SHIPPING">Đang giao hàng</Option>
-              <Option value="DELIVERED">Đã giao</Option>
-              <Option value="CANCELLED">Đã hủy</Option>
+              {OUTBOUND_FILTER_STATUS_OPTIONS.map((statusOption) => (
+                <Option key={statusOption.value} value={statusOption.value}>
+                  {statusOption.label}
+                </Option>
+              ))}
             </Select>
             <Search placeholder="Tìm theo mã đơn..." style={{ width: 250 }} />
           </Space>

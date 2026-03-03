@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Form, Select, Button, InputNumber, Space, message, Input } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import outboundApi from "./OutboundAPI/outboundApi";
@@ -10,6 +10,10 @@ const CreateOutboundModal = ({ open, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [ingredients, setIngredients] = useState([]);
+
+    const ingredientMap = useMemo(() => {
+        return new Map(ingredients.map((ingredient) => [ingredient.ingredientId, ingredient]));
+    }, [ingredients]);
 
     useEffect(() => {
         if (open) {
@@ -111,6 +115,22 @@ const CreateOutboundModal = ({ open, onClose, onSuccess }) => {
                                             style={{ margin: 0 }}
                                         >
                                             <InputNumber placeholder="Số lượng" min={1} style={{ width: 150 }} />
+                                        </Form.Item>
+                                        <Form.Item
+                                            noStyle
+                                            shouldUpdate={(prevValues, currentValues) =>
+                                                prevValues?.items?.[name]?.ingredientId !== currentValues?.items?.[name]?.ingredientId
+                                            }
+                                        >
+                                            {({ getFieldValue }) => {
+                                                const selectedIngredientId = getFieldValue(['items', name, 'ingredientId']);
+                                                const selectedIngredient = ingredientMap.get(selectedIngredientId);
+                                                return (
+                                                    <span style={{ minWidth: 45, color: '#666' }}>
+                                                        {selectedIngredient?.unit || ''}
+                                                    </span>
+                                                );
+                                            }}
                                         </Form.Item>
                                         <Button
                                             type="text"
