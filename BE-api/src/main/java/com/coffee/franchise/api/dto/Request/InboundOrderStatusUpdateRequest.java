@@ -6,7 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -15,4 +18,15 @@ import java.time.LocalDateTime;
 public class InboundOrderStatusUpdateRequest {
     private InboundOrderStatus status;
     private LocalDateTime actualDate;
+    private List<ItemReceiptRequest> itemReceipts;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ItemReceiptRequest {
+        private UUID itemId;
+        private Boolean received;
+        private BigDecimal receivedQuantity;
+    }
 }

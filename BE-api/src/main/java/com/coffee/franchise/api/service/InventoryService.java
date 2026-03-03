@@ -4,6 +4,7 @@ import com.coffee.franchise.api.dto.Request.InventoryQuantityRequestDTO;
 import com.coffee.franchise.api.dto.Request.InventoryRequest;
 import com.coffee.franchise.api.dto.Request.ReservationSyncRequestDTO;
 import com.coffee.franchise.api.dto.Response.InventoryResponse;
+import com.coffee.franchise.api.dto.Response.InventoryListItemResponse;
 import com.coffee.franchise.api.dto.Response.InventoryResponseDTO;
 import com.coffee.franchise.api.dto.Response.LowStockAlertResponse;
 import com.coffee.franchise.api.entity.Ingredient;
@@ -34,6 +35,17 @@ public class InventoryService {
     private final WarehouseRepository warehouseRepository;
     private final IngredientRepository ingredientRepository;
     private final InventoryLogService inventoryLogService;
+
+    @Transactional(readOnly = true)
+    public List<InventoryListItemResponse> getInventoryList(UUID warehouseId) {
+        List<Inventory> inventories = warehouseId != null
+                ? inventoryRepository.findAllByWarehouseIdWithDetails(warehouseId)
+                : inventoryRepository.findAllWithDetails();
+
+        return inventories.stream()
+                .map(this::mapToInventoryListItem)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public InventoryResponse getInventory(UUID warehouseId, UUID ingredientId) {
@@ -388,6 +400,19 @@ public class InventoryService {
                 .quantityAvailable(inventory.getQuantityAvailable())
                 .alertThreshold(ingredient.getAlertThreshold())
                 .deficit(ingredient.getAlertThreshold().subtract(inventory.getQuantityAvailable()))
+                .build();
+    }
+
+    private InventoryListItemResponse mapToInventoryListItem(Inventory inventory) {
+        return InventoryListItemResponse.builder()
+                .inventoryId(inventory.getId())
+                .warehouseId(inventory.getWarehouse().getId())
+                .ingredientId(inventory.getIngredient().getId())
+                .ingredientName(inventory.getIngredient().getName())
+                .unit(inventory.getIngredient().getUnit())
+                .quantityAvailable(inventory.getQuantityAvailable())
+                .quantityReserved(inventory.getQuantityReserved())
+                .lastUpdated(inventory.getLastUpdated())
                 .build();
     }
 
