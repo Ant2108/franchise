@@ -16,11 +16,12 @@ const outboundApi = {
     },
 
     /**
-     * Tạo đơn xuất hàng mới.
+     * Tạo mới đơn xuất hàng.
      */
     createOrder: (data) => {
         return apiClient.post('/outbounds', data);
     },
+
 
     /**
      * Cập nhật trạng thái đơn xuất hàng.
