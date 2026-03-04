@@ -1,3 +1,5 @@
+import InventoryTrack from "../Inventory/InventoryTrack";
+import InventoryList from "../Inventory/InventoryList";
 import { useState, useMemo } from "react";
 import {
   DatabaseOutlined,
@@ -20,7 +22,7 @@ function WareHouseInventory() {
       { code: "WH-005", name: "Headphone", stock: 18, price: 150 },
       { code: "WH-006", name: "USB Cable", stock: 200, price: 10 },
     ],
-    []
+    [],
   );
 
   const getStatus = (stock) => {
@@ -33,14 +35,11 @@ function WareHouseInventory() {
     return inventoryData.filter(
       (item) =>
         item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.code.toLowerCase().includes(search.toLowerCase())
+        item.code.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search, inventoryData]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredData.length / itemsPerPage)
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -55,24 +54,20 @@ function WareHouseInventory() {
   const totalItems = inventoryData.length;
 
   const lowStock = inventoryData.filter(
-    (item) => item.stock > 0 && item.stock < 20
+    (item) => item.stock > 0 && item.stock < 20,
   ).length;
 
-  const outStock = inventoryData.filter(
-    (item) => item.stock === 0
-  ).length;
+  const outStock = inventoryData.filter((item) => item.stock === 0).length;
 
   const totalValue = inventoryData.reduce(
     (acc, item) => acc + item.stock * item.price,
-    0
+    0,
   );
 
   return (
     <div className="warehouse-content">
       <h1 className="warehouse-title">Inventory Management</h1>
-      <p className="warehouse-sub">
-        Manage and track your warehouse inventory
-      </p>
+      <p className="warehouse-sub">Manage and track your warehouse inventory</p>
 
       <div className="warehouse-stats">
         <StatCard
@@ -100,7 +95,9 @@ function WareHouseInventory() {
           iconClass="icon-green"
         />
       </div>
-
+      <div>
+        <InventoryTrack />
+      </div>
       <div className="warehouse-search">
         <input
           type="text"
@@ -168,6 +165,7 @@ function WareHouseInventory() {
           </button>
         </div>
       </div>
+      <InventoryList />
     </div>
   );
 }
