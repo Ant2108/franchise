@@ -31,9 +31,15 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseResponse createWarehouse(WarehouseRequest request) {
 
+        if (warehouseRepository.existsByCode(request.getCode())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Warehouse code already exists"
+            );
+        }
 
         Warehouse warehouse = Warehouse.builder()
-                .code(generateWarehouseCode())
+                .code(request.getCode())
                 .name(request.getName())
                 .location(request.getLocation())
                 .latitude(request.getLatitude())
@@ -48,27 +54,6 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         return mapToResponse(warehouseRepository.save(warehouse));
     }
-    private String generateWarehouseCode() {
-
-        List<Warehouse> warehouses = warehouseRepository.findByDeletedFalse();
-
-        int maxNumber = 0;
-
-        for (Warehouse w : warehouses) {
-            String code = w.getCode();
-
-            if (code != null && code.startsWith("WH-")) {
-                try {
-                    int number = Integer.parseInt(code.substring(3));
-                    if (number > maxNumber) {
-                        maxNumber = number;
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-
-        return "WH-" + (maxNumber + 1);
-    }
 
     // ================= UPDATE FULL =================
     @Override
@@ -76,7 +61,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Warehouse warehouse = findActiveWarehouseOrThrow(id);
 
-
+        warehouse.setCode(request.getCode());
         warehouse.setName(request.getName());
         warehouse.setLocation(request.getLocation());
         warehouse.setLatitude(request.getLatitude());
