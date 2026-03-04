@@ -2,19 +2,27 @@ package com.coffee.franchise.api.service;
 
 import com.coffee.franchise.api.dto.Request.SupplierRequest;
 import com.coffee.franchise.api.dto.Response.SupplierIngredientOptionResponse;
+import com.coffee.franchise.api.dto.Response.SupplierMarketplaceItemResponse;
 import com.coffee.franchise.api.dto.Response.SupplierResponse;
 import com.coffee.franchise.api.entity.Supplier;
 import com.coffee.franchise.api.entity.SupplierIngredient;
+import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.SupplierIngredientStatus;
+import com.coffee.franchise.api.enums.SupplierStatus;
 import com.coffee.franchise.api.repository.SupplierIngredientRepository;
 import com.coffee.franchise.api.repository.SupplierRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
+import com.coffee.franchise.api.utility.DistanceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -112,6 +120,76 @@ public class SupplierService {
                         .unit(si.getIngredient().getUnit())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SupplierMarketplaceItemResponse> getMarketplaceItems(UUID warehouseId, String keyword) {
+        List<SupplierIngredient> marketplaceItems = supplierIngredientRepository.findAllMarketplaceItems(
+                SupplierIngredientStatus.ACTIVE,
+                SupplierStatus.ACTIVE
+        );
+
+        if (keyword != null && !keyword.isBlank()) {
+            String normalizedKeyword = keyword.trim().toLowerCase(Locale.ROOT);
+            marketplaceItems = marketplaceItems.stream()
+                    .filter(item ->
+                            item.getIngredient().getName().toLowerCase(Locale.ROOT).contains(normalizedKeyword)
+                                    || item.getSupplier().getName().toLowerCase(Locale.ROOT).contains(normalizedKeyword))
+                    .collect(Collectors.toList());
+        }
+
+        Map<UUID, Double> supplierDistanceMap = buildSupplierDistanceMap(warehouseId, marketplaceItems);
+
+        return marketplaceItems.stream()
+                .map(item -> SupplierMarketplaceItemResponse.builder()
+                        .supplierIngredientId(item.getId())
+                        .supplierId(item.getSupplier().getId())
+                        .supplierName(item.getSupplier().getName())
+                        .ingredientId(item.getIngredient().getId())
+                        .ingredientName(item.getIngredient().getName())
+                        .unit(item.getIngredient().getUnit())
+                        .unitPrice(item.getUnitPrice())
+                        .minimumOrderQuantity(item.getMinimumOrderQuantity())
+                        .leadTimeDays(item.getLeadTimeDays())
+                        .distanceKm(supplierDistanceMap.get(item.getSupplier().getId()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private Map<UUID, Double> buildSupplierDistanceMap(UUID warehouseId, List<SupplierIngredient> marketplaceItems) {
+        Map<UUID, Double> distanceMap = new HashMap<>();
+        if (warehouseId == null) {
+            return distanceMap;
+        }
+
+        Warehouse warehouse = warehouseRepository.findById(warehouseId).orElse(null);
+        if (warehouse == null || warehouse.getLatitude() == null || warehouse.getLongitude() == null) {
+            return distanceMap;
+        }
+
+        for (SupplierIngredient item : marketplaceItems) {
+            UUID supplierId = item.getSupplier().getId();
+            if (distanceMap.containsKey(supplierId)) {
+                continue;
+            }
+
+            BigDecimal supplierLat = item.getSupplier().getLatitude();
+            BigDecimal supplierLon = item.getSupplier().getLongitude();
+            if (supplierLat == null || supplierLon == null) {
+                distanceMap.put(supplierId, null);
+                continue;
+            }
+
+            double distance = DistanceUtil.calculateDistance(
+                    supplierLat.doubleValue(),
+                    supplierLon.doubleValue(),
+                    warehouse.getLatitude().doubleValue(),
+                    warehouse.getLongitude().doubleValue()
+            );
+            distanceMap.put(supplierId, Math.round(distance * 100.0) / 100.0);
+        }
+
+        return distanceMap;
     }
 
     private SupplierResponse mapToResponse(Supplier supplier) {

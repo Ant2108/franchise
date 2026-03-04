@@ -2,6 +2,7 @@ package com.coffee.franchise.api.controller;
 
 import com.coffee.franchise.api.dto.Request.SupplierRequest;
 import com.coffee.franchise.api.dto.Response.SupplierIngredientOptionResponse;
+import com.coffee.franchise.api.dto.Response.SupplierMarketplaceItemResponse;
 import com.coffee.franchise.api.dto.Response.SupplierResponse;
 import com.coffee.franchise.api.service.SupplierService;
 import jakarta.validation.Valid;
@@ -75,6 +76,15 @@ public class SupplierController {
         return ResponseEntity.ok(
                 supplierService.getAllSuppliers()
         );
+    }
+
+    @GetMapping("/marketplace")
+    public ResponseEntity<List<SupplierMarketplaceItemResponse>> getMarketplaceItems(
+            @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseHeaderId,
+            @RequestParam(required = false) UUID warehouseId,
+            @RequestParam(required = false, defaultValue = "") String keyword) {
+        UUID resolvedWarehouseId = warehouseId != null ? warehouseId : warehouseHeaderId;
+        return ResponseEntity.ok(supplierService.getMarketplaceItems(resolvedWarehouseId, keyword));
     }
 
     @GetMapping("/{id}/ingredients")
