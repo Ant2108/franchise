@@ -23,12 +23,6 @@ const getDefaultHeaders = () => {
         'Content-Type': 'application/json',
     };
 
-    // TẠM THỜI: Lấy warehouse_id từ localStorage hoặc dùng ID mặc định để test
-    const warehouseId = localStorage.getItem('warehouse_id') || '11111111-1111-1111-1111-111111111111';
-    if (warehouseId) {
-        headers['X-Warehouse-Id'] = warehouseId;
-    }
-
     // TODO: Thêm token nếu có xác thực
     // const token = localStorage.getItem('token');
     // if (token) {

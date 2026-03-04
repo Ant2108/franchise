@@ -16,18 +16,17 @@ const inboundApi = {
     },
 
     /**
-     * Tạo mới đơn nhập hàng.
+     * Tạo đơn nhập hàng mới.
      */
     createOrder: (data) => {
         return apiClient.post('/inbounds', data);
     },
 
-
     /**
      * Cập nhật trạng thái đơn nhập hàng.
      */
-    updateOrderStatus: (id, status, notes = '', itemReceipts = [], actualDate = null) => {
-        return apiClient.put(`/inbounds/${id}/status`, { status, notes, itemReceipts, actualDate });
+    updateOrderStatus: (id, status, notes = '') => {
+        return apiClient.put(`/inbounds/${id}/status`, { status, notes });
     },
 };
 
