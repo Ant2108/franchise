@@ -17,6 +17,7 @@ import UpdateAdminWarehousePage from "./features/Warehouse/AdminManager/UpdateAd
 import CreateAdminWarehouse from "./features/Warehouse/AdminManager/CreateAdminWarehouse";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
+import InboundPage from "./features/Inbound/components/InboundPage";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="shipments" element={<WareHouseShipments />} />
           <Route path="receiving" element={<WareHouseReceiving />} />
           <Route path="reports" element={<WareHouseReports />} />
+          <Route path="inbound" element={<InboundPage/>} />
         </Route>
 
         {/* Global 404 */}

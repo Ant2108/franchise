@@ -1,8 +1,8 @@
 package com.coffee.franchise.api.controller;
 
-import com.coffee.franchise.api.dto.request.IngredientRequest;
-import com.coffee.franchise.api.dto.request.UpdateIngredientRequest;
-import com.coffee.franchise.api.dto.response.IngredientResponse;
+import com.coffee.franchise.api.dto.Request.IngredientRequest;
+import com.coffee.franchise.api.dto.Request.UpdateIngredientRequest;
+import com.coffee.franchise.api.dto.Response.IngredientResponse;
 import com.coffee.franchise.api.service.IngredientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

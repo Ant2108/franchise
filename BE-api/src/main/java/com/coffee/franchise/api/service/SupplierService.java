@@ -8,6 +8,8 @@ import com.coffee.franchise.api.entity.SupplierIngredient;
 import com.coffee.franchise.api.enums.SupplierIngredientStatus;
 import com.coffee.franchise.api.repository.SupplierIngredientRepository;
 import com.coffee.franchise.api.repository.SupplierRepository;
+import com.coffee.franchise.api.repository.WarehouseRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class SupplierService {
+    @Autowired
+    WarehouseRepository warehouseRepository;
 
     private final SupplierRepository supplierRepository;
     private final SupplierIngredientRepository supplierIngredientRepository;
@@ -36,6 +40,8 @@ public class SupplierService {
                 .email(dto.getEmail())
                 .phone(dto.getPhone())
                 .address(dto.getAddress())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
                 .status(dto.getStatus())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -116,6 +122,8 @@ public class SupplierService {
                 .email(supplier.getEmail())
                 .phone(supplier.getPhone())
                 .address(supplier.getAddress())
+                .longitude(supplier.getLongitude())
+                .latitude(supplier.getLatitude())
                 .status(supplier.getStatus())
                 .createdAt(supplier.getCreatedAt())
                 .updatedAt(supplier.getUpdatedAt())
@@ -127,4 +135,6 @@ public class SupplierService {
 
         supplierRepository.delete(supplier);
     }
+
+
 }

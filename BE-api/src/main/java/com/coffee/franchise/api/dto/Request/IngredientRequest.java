@@ -1,4 +1,4 @@
-package com.coffee.franchise.api.dto.request;
+package com.coffee.franchise.api.dto.Request;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
