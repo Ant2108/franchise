@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -127,21 +129,74 @@ public class InboundOrderServiceImpl implements InboundOrderService {
         InboundOrder order = inboundOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("InboundOrder not found"));
 
+        List<InboundOrderItem> orderItems = inboundOrderItemRepository.findByInboundOrderId(order.getId());
+
+        if (request.getItemReceipts() != null && !request.getItemReceipts().isEmpty()) {
+            Set<UUID> validItemIds = orderItems.stream()
+                    .map(InboundOrderItem::getId)
+                    .collect(Collectors.toSet());
+
+            for (InboundOrderStatusUpdateRequest.ItemReceiptRequest receipt : request.getItemReceipts()) {
+                if (receipt.getItemId() == null || !validItemIds.contains(receipt.getItemId())) {
+                    throw new IllegalArgumentException("Invalid item id in itemReceipts: " + receipt.getItemId());
+                }
+            }
+
+            Map<UUID, InboundOrderStatusUpdateRequest.ItemReceiptRequest> receiptByItemId = request.getItemReceipts()
+                    .stream()
+                    .collect(Collectors.toMap(
+                            InboundOrderStatusUpdateRequest.ItemReceiptRequest::getItemId,
+                            r -> r,
+                            (r1, r2) -> r2));
+
+            for (InboundOrderItem item : orderItems) {
+                InboundOrderStatusUpdateRequest.ItemReceiptRequest receipt = receiptByItemId.get(item.getId());
+                if (receipt == null) {
+                    continue;
+                }
+
+                BigDecimal receivedQuantity = Boolean.TRUE.equals(receipt.getReceived())
+                        ? receipt.getReceivedQuantity()
+                        : BigDecimal.ZERO;
+
+                if (Boolean.TRUE.equals(receipt.getReceived()) && receivedQuantity == null) {
+                    throw new IllegalArgumentException("receivedQuantity is required when item is marked as received");
+                }
+
+                if (receivedQuantity == null) {
+                    receivedQuantity = BigDecimal.ZERO;
+                }
+
+                if (receivedQuantity.compareTo(BigDecimal.ZERO) < 0) {
+                    throw new IllegalArgumentException("receivedQuantity cannot be negative");
+                }
+
+                if (item.getQuantity() != null && receivedQuantity.compareTo(item.getQuantity()) > 0) {
+                    throw new IllegalArgumentException("receivedQuantity cannot be greater than requested quantity");
+                }
+
+                item.setReceivedQuantity(receivedQuantity);
+            }
+
+            inboundOrderItemRepository.saveAll(orderItems);
+        }
+
         // Nếu trạng thái mới là COMPLETED và trạng thái cũ không phải COMPLETED, thì
         // cập nhật Inventory
         if (request.getStatus() == InboundOrderStatus.COMPLETED
                 && order.getStatus() != InboundOrderStatus.COMPLETED) {
-            List<InboundOrderItem> items = inboundOrderItemRepository.findAll(); // Cần query theo order id
-
-            // Query các items thuộc order này
-            List<InboundOrderItem> orderItems = items.stream()
-                    .filter(item -> item.getInboundOrder().getId().equals(order.getId()))
-                    .collect(Collectors.toList());
-
             for (InboundOrderItem item : orderItems) {
+                BigDecimal quantityToAdd = item.getReceivedQuantity() != null
+                        ? item.getReceivedQuantity()
+                        : item.getQuantity();
+
+                if (quantityToAdd == null || quantityToAdd.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+
                 inventoryService.addInventory(order.getWarehouse().getId(),
                         item.getIngredient().getId(),
-                        item.getQuantity());
+                        quantityToAdd);
             }
         }
 
@@ -157,9 +212,7 @@ public class InboundOrderServiceImpl implements InboundOrderService {
     }
 
     private InboundOrderResponse mapToResponse(InboundOrder order) {
-        List<InboundOrderItem> items = inboundOrderItemRepository.findAll().stream()
-                .filter(item -> item.getInboundOrder().getId().equals(order.getId()))
-                .collect(Collectors.toList());
+        List<InboundOrderItem> items = inboundOrderItemRepository.findByInboundOrderId(order.getId());
 
         List<InboundOrderResponse.InboundOrderItemResponse> itemResponses = items.stream()
                 .map(item -> InboundOrderResponse.InboundOrderItemResponse.builder()

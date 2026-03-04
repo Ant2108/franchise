@@ -26,8 +26,8 @@ const inboundApi = {
     /**
      * Cập nhật trạng thái đơn nhập hàng.
      */
-    updateOrderStatus: (id, status, notes = '') => {
-        return apiClient.put(`/inbounds/${id}/status`, { status, notes });
+    updateOrderStatus: (id, status, notes = '', itemReceipts = [], actualDate = null) => {
+        return apiClient.put(`/inbounds/${id}/status`, { status, notes, itemReceipts, actualDate });
     },
 };
 
