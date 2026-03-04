@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Tag, Space, Select, Input, DatePicker, message } from "antd";
-import { PlusOutlined, EyeOutlined } from "@ant-design/icons";
+import { Table, Button, Tag, Space, Select, Input, message } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import inboundApi from "./InboundAPI/inboundApi";
-import InboundCreate from "./InboundCreate";
 import InboundDetail from "./InboundDetail";
+import { INBOUND_FILTER_STATUS_OPTIONS, getInboundStatusMeta } from "../../utils/orderStatus";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -12,7 +12,6 @@ const InboundList = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filterStatus, setFilterStatus] = useState("ALL");
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [detailOrderId, setDetailOrderId] = useState(null);
 
     const fetchOrders = async () => {
@@ -36,20 +35,9 @@ const InboundList = () => {
     }, [filterStatus]);
 
     const getStatusTag = (status) => {
-        switch (status) {
-            case "PENDING":
-                return <Tag color="orange">Chờ xử lý</Tag>;
-            case "APPROVED":
-                return <Tag color="blue">Đã duyệt</Tag>;
-            case "DELIVERING":
-                return <Tag color="cyan">Đang giao</Tag>;
-            case "COMPLETED":
-                return <Tag color="green">Hoàn tất</Tag>;
-            case "CANCELLED":
-                return <Tag color="red">Đã hủy</Tag>;
-            default:
-                return <Tag>{status}</Tag>;
-        }
+        const statusMeta = getInboundStatusMeta(status);
+        if (!statusMeta) return <Tag>{status}</Tag>;
+        return <Tag color={statusMeta.color}>{statusMeta.label}</Tag>;
     };
 
     const columns = [
@@ -104,21 +92,14 @@ const InboundList = () => {
                         style={{ width: 150 }}
                     >
                         <Option value="ALL">Tất cả trạng thái</Option>
-                        <Option value="PENDING">Chờ xử lý</Option>
-                        <Option value="APPROVED">Đã duyệt</Option>
-                        <Option value="DELIVERING">Đang giao</Option>
-                        <Option value="COMPLETED">Hoàn tất</Option>
-                        <Option value="CANCELLED">Đã hủy</Option>
+                        {INBOUND_FILTER_STATUS_OPTIONS.map((statusOption) => (
+                            <Option key={statusOption.value} value={statusOption.value}>
+                                {statusOption.label}
+                            </Option>
+                        ))}
                     </Select>
                     <Search placeholder="Tìm theo mã đơn..." style={{ width: 250 }} />
                 </Space>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    Tạo đơn nhập
-                </Button>
             </div>
 
             <Table
@@ -127,15 +108,6 @@ const InboundList = () => {
                 dataSource={orders}
                 loading={loading}
                 pagination={{ pageSize: 10 }}
-            />
-
-            <InboundCreate
-                open={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={() => {
-                    setIsCreateModalOpen(false);
-                    fetchOrders();
-                }}
             />
 
             {detailOrderId && (

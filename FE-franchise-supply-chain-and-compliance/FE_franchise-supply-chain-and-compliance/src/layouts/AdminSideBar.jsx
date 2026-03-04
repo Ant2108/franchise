@@ -16,10 +16,10 @@ const AdminSidebar = () => {
   const menuStructure = [
     {
       type: "folder",
-      name: "Quản lý Suppiler",
+      name: "Suppiler",
       icon: <Zap size={20} />,
       items: [
-        { name: "Sản Phẩm", path: "##", icon: <MapPin size={18} /> },
+        { name: "Quản Lý", path: "/admin/supplier", icon: <MapPin size={18} /> },
         { name: "Danh Mục", path: "/admin/WarehouseCategory", icon: <Zap size={18} /> },
       ]
     },
@@ -42,10 +42,10 @@ const AdminSidebar = () => {
     },
     {
       type: "folder",
-      name: "Báo cáo & Đánh giá",
+      name: "Quản lý Warehouse",
       icon: <BarChart3 size={20} />,
       items: [
-        { name: "Quản lý báo cáo", path: "###", icon: <BarChart3 size={18} /> },
+        { name: "Quản lý Warehouse", path: "/admin/warehouse", icon: <BarChart3 size={18} /> },
         { name: "Đánh giá người dùng", path: "###", icon: <FileText size={18} /> },
       ]
     },
