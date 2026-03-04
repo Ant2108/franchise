@@ -1,28 +1,16 @@
 package com.coffee.franchise.api.dto.Response;
 
-import com.coffee.franchise.api.enums.WarehouseStatus;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
+ @Builder
 public class WarehouseResponse {
-
     private UUID id;
-    private String code;
     private String name;
     private String location;
-    private String description;
-    private WarehouseStatus status;
+    private String status;
     private UUID managerId;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

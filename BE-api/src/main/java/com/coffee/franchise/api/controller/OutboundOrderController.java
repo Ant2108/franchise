@@ -1,8 +1,8 @@
 package com.coffee.franchise.api.controller;
 
-import com.coffee.franchise.api.dto.Request.OutboundOrderRequest;
-import com.coffee.franchise.api.dto.Response.OutboundOrderResponse;
-import com.coffee.franchise.api.dto.Request.OutboundOrderStatusUpdateRequest;
+import com.coffee.franchise.api.dto.OutboundOrderRequest;
+import com.coffee.franchise.api.dto.OutboundOrderResponse;
+import com.coffee.franchise.api.dto.OutboundOrderStatusUpdateRequest;
 import com.coffee.franchise.api.service.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,21 +22,12 @@ public class OutboundOrderController {
     private final OutboundOrderService outboundOrderService;
 
     @PostMapping
-    public ResponseEntity<OutboundOrderResponse> createOutboundOrder(
-            @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId,
-            @Valid @RequestBody OutboundOrderRequest request) {
-        if (warehouseId != null) {
-            request.setWarehouseId(warehouseId);
-        }
+    public ResponseEntity<OutboundOrderResponse> createOutboundOrder(@Valid @RequestBody OutboundOrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(outboundOrderService.createOutboundOrder(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<OutboundOrderResponse>> getAllOutboundOrders(
-            @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId) {
-        if (warehouseId != null) {
-            return ResponseEntity.ok(outboundOrderService.getAllOutboundOrdersByWarehouseId(warehouseId));
-        }
+    public ResponseEntity<List<OutboundOrderResponse>> getAllOutboundOrders() {
         return ResponseEntity.ok(outboundOrderService.getAllOutboundOrders());
     }
 

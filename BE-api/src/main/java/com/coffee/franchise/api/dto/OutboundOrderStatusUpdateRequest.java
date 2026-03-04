@@ -1,4 +1,4 @@
-package com.coffee.franchise.api.dto.Request;
+package com.coffee.franchise.api.dto;
 
 import com.coffee.franchise.api.enums.OutboundOrderStatus;
 import lombok.AllArgsConstructor;

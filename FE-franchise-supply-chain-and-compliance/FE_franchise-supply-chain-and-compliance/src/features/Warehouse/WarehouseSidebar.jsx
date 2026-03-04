@@ -35,12 +35,12 @@ const WarehouseSidebar = () => {
 
         <NavLink to="/warehouse/shipments">
           <Truck size={18} />
-          <span>Xuất Kho</span>
+          <span>Shipments</span>
         </NavLink>
 
         <NavLink to="/warehouse/receiving">
           <Package size={18} />
-          <span>Nhập Kho</span>
+          <span>Receiving</span>
         </NavLink>
 
         <NavLink to="/warehouse/reports">

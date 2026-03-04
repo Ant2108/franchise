@@ -1,21 +1,15 @@
 package com.coffee.franchise.api.dto.Request;
 
 import com.coffee.franchise.api.enums.WarehouseStatus;
-import lombok.*;
+import lombok.Data;
 
-import java.math.BigDecimal;
+import java.util.UUID;
 
-@Builder
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class WarehouseRequest {
-
     private String name;
     private String location;
-    private String description;
+    private UUID managerId;
     private WarehouseStatus status;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
 }
+
