@@ -5,7 +5,7 @@
 }
 
 .warehouse-header {
-  background: linear-gradient(90deg, #5b6cff, #8e44ff);
+background: linear-gradient(90deg, #D98324, #D98324, #E8C595);
   color: white;
   padding: 30px;
   border-radius: 15px;
@@ -121,7 +121,8 @@
 }
 
 .add-btn {
-  background: #2563eb;
+  background: #D98324, #D98324, #E8C595;
+   background: linear-gradient(135deg, #D98324, #D98324, #E8C595);
   color: white;
   border: none;
   padding: 8px 14px;
@@ -232,7 +233,7 @@ tbody tr:hover {
 
 /* EDIT BUTTON STYLE */
 .edit-btn {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #D98324, #D98324, #E8C595);
   color: white;
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
 }
