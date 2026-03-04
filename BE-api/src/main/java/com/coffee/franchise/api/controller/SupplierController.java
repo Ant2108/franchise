@@ -81,4 +81,7 @@ public class SupplierController {
     public ResponseEntity<List<SupplierIngredientOptionResponse>> getSupplierIngredients(@PathVariable UUID id) {
         return ResponseEntity.ok(supplierService.getSupplierIngredients(id));
     }
+
+
+
 }
