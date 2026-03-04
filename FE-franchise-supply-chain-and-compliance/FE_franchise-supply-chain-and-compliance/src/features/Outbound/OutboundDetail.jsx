@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Modal, Descriptions, Table, Tag, Form, Select, Input, Button, message } from "antd";
+import { Modal, Descriptions, Table, Tag, Form, Select, Button, message, Popconfirm } from "antd";
 import outboundApi from "./OutboundAPI/outboundApi";
-
-const { Option } = Select;
+import { getOutboundStatusMeta } from "../../utils/orderStatus";
 
 const OutboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
     const [order, setOrder] = useState(null);
@@ -53,6 +52,21 @@ const OutboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
         { title: "Số lượng xuất", dataIndex: "quantity", key: "quantity" },
     ];
 
+    const renderStatusTag = (status) => {
+        const statusMeta = getOutboundStatusMeta(status);
+        if (!statusMeta) return <Tag>{status}</Tag>;
+        return <Tag color={statusMeta.color}>{statusMeta.label}</Tag>;
+    };
+
+    const isCompleted = String(order?.status || "").toUpperCase() === "SHIPPED";
+
+    const statusOptions = [
+        { value: "PENDING", label: "Chờ xử lý" },
+        { value: "PACKING", label: "Đang chuẩn bị hàng" },
+        { value: "SHIPPED", label: "Hoàn thành" },
+        { value: "DELIVERED", label: "Đang vận chuyển" },
+    ];
+
     return (
         <Modal
             title={`Chi tiết đơn xuất kho #${orderId}`}
@@ -68,7 +82,7 @@ const OutboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
                     <Descriptions bordered size="small" column={2} style={{ marginBottom: 20 }}>
                         <Descriptions.Item label="Mã Đơn">{order.id}</Descriptions.Item>
                         <Descriptions.Item label="Trạng thái">
-                            <Tag color="cyan">{order.status}</Tag>
+                            {renderStatusTag(order.status)}
                         </Descriptions.Item>
                         <Descriptions.Item label="Kho xuất">{order.warehouseName}</Descriptions.Item>
                         <Descriptions.Item label="CH nhận">{order.destinationFranchiseName}</Descriptions.Item>
@@ -86,25 +100,30 @@ const OutboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
                         style={{ marginBottom: 20 }}
                     />
 
-                    <div style={{ background: "#f5f5f5", padding: 16, borderRadius: 8 }}>
-                        <h4>Cập nhật trạng thái</h4>
-                        <Form form={form} layout="inline" onFinish={handleUpdateStatus}>
-                            <Form.Item name="status" rules={[{ required: true }]}>
-                                <Select style={{ width: 170 }}>
-                                    <Option value="PENDING">Chờ xử lý</Option>
-                                    <Option value="APPROVED">Đã duyệt</Option>
-                                    <Option value="SHIPPING">Đang giao hàng</Option>
-                                    <Option value="DELIVERED">Đã giao hoàn tất</Option>
-                                    <Option value="CANCELLED">Đã hủy</Option>
-                                </Select>
+                    {!isCompleted && (
+                        <Form form={form} layout="vertical" onFinish={handleUpdateStatus}>
+                            <Form.Item
+                                name="status"
+                                label="Cập nhật trạng thái"
+                                rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+                            >
+                                <Select options={statusOptions} placeholder="Chọn trạng thái" />
                             </Form.Item>
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit" loading={updating}>
-                                    Cập nhật
-                                </Button>
-                            </Form.Item>
+                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                <Popconfirm
+                                    title="Xác nhận cập nhật"
+                                    description="Bạn có chắc muốn đổi trạng thái đơn xuất kho không?"
+                                    okText="Chắc chắn"
+                                    cancelText="Hủy"
+                                    onConfirm={() => form.submit()}
+                                >
+                                    <Button type="primary" loading={updating}>
+                                        Lưu trạng thái
+                                    </Button>
+                                </Popconfirm>
+                            </div>
                         </Form>
-                    </div>
+                    )}
                 </>
             ) : (
                 <p>Không tìm thấy dữ liệu.</p>
