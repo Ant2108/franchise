@@ -21,6 +21,7 @@ import apiClient from "../../services/axiosClient";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+
 function WareHouseReports() {
   const [inventoryLogs, setInventoryLogs] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -29,10 +30,6 @@ function WareHouseReports() {
   const [inboundOrders, setInboundOrders] = useState([]);
   const [outboundOrders, setOutboundOrders] = useState([]);
 
-  // Filter options
-  const [warehouseOptions, setWarehouseOptions] = useState([]);
-  const [supplierOptions, setSupplierOptions] = useState([]);
-  const [filterValue, setFilterValue] = useState("");
 
   // Low stock alert
   const [lowStockAlerts, setLowStockAlerts] = useState([]);
@@ -40,19 +37,6 @@ function WareHouseReports() {
   const [lowStockSearch, setLowStockSearch] = useState("");
 
   useEffect(() => {
-    // Fetch filter options
-    const fetchFilterOptions = async () => {
-      try {
-        const [whData, supData] = await Promise.all([
-          metadataApi.getWarehouses(),
-          apiClient.get("/suppliers/search", { keyword: "" }),
-        ]);
-        setWarehouseOptions(Array.isArray(whData) ? whData : whData?.data ?? []);
-        setSupplierOptions(Array.isArray(supData) ? supData : supData?.data ?? []);
-      } catch (err) {
-        console.error("Failed to load filter options:", err);
-      }
-    };
 
     const fetchLogs = async () => {
       try {
@@ -147,7 +131,6 @@ function WareHouseReports() {
       }
     };
 
-    fetchFilterOptions();
     fetchLogs();
     fetchInboundOutbound();
     fetchInventories();
@@ -165,67 +148,26 @@ function WareHouseReports() {
     fetchLowStockAlerts();
   }, []);
 
-  // Parse the combined filter value: "warehouse:<id>" or "supplier:<id>"
-  const selectedWarehouse = filterValue.startsWith("warehouse:") ? filterValue.replace("warehouse:", "") : "";
-  const selectedSupplier = filterValue.startsWith("supplier:") ? filterValue.replace("supplier:", "") : "";
-
-  // ---- Filtering ----
-  const filteredInventoryLogs = useMemo(() => {
-    return inventoryLogs.filter((log) => {
-      if (selectedWarehouse && log.warehouseId !== selectedWarehouse && log.warehouseName !== selectedWarehouse) return false;
-      return true;
-    });
-  }, [inventoryLogs, selectedWarehouse]);
-
-  const filteredInventoryItems = useMemo(() => {
-    return inventoryItems.filter((item) => {
-      if (selectedWarehouse && item.warehouseId !== selectedWarehouse) return false;
-      return true;
-    });
-  }, [inventoryItems, selectedWarehouse]);
-
-  const filteredSuppliers = useMemo(() => {
-    return suppliers.filter((s) => {
-      if (selectedSupplier && s.id !== selectedSupplier) return false;
-      return true;
-    });
-  }, [suppliers, selectedSupplier]);
-
-  const filteredInboundOrders = useMemo(() => {
-    return inboundOrders.filter((order) => {
-      if (selectedWarehouse && order.warehouseId !== selectedWarehouse) return false;
-      if (selectedSupplier && order.supplierId !== selectedSupplier) return false;
-      return true;
-    });
-  }, [inboundOrders, selectedWarehouse, selectedSupplier]);
-
-  const filteredOutboundOrders = useMemo(() => {
-    return outboundOrders.filter((order) => {
-      if (selectedWarehouse && order.warehouseId !== selectedWarehouse) return false;
-      return true;
-    });
-  }, [outboundOrders, selectedWarehouse]);
-
-  // Stats from filtered data
-  const filteredInboundTotal = useMemo(() => {
-    return filteredInboundOrders
+  // ---- Stats computed from data (backend already filters by warehouse via X-Warehouse-Id header) ----
+  const inboundTotal = useMemo(() => {
+    return inboundOrders
       .filter((o) => o.status === "COMPLETED")
       .reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0);
-  }, [filteredInboundOrders]);
+  }, [inboundOrders]);
 
-  const filteredOutboundTotal = useMemo(() => {
-    return filteredOutboundOrders.reduce((sum, order) => {
+  const outboundTotal = useMemo(() => {
+    return outboundOrders.reduce((sum, order) => {
       return sum + (order.items || []).reduce((s, item) => s + (parseFloat(item.quantity) || 0), 0);
     }, 0);
-  }, [filteredOutboundOrders]);
+  }, [outboundOrders]);
 
-  const filteredAvailable = useMemo(() => {
-    return filteredInventoryItems.reduce((sum, inv) => sum + (parseFloat(inv.quantityAvailable) || 0), 0);
-  }, [filteredInventoryItems]);
+  const totalAvailable = useMemo(() => {
+    return inventoryItems.reduce((sum, inv) => sum + (parseFloat(inv.quantityAvailable) || 0), 0);
+  }, [inventoryItems]);
 
-  const filteredReserved = useMemo(() => {
-    return filteredInventoryItems.reduce((sum, inv) => sum + (parseFloat(inv.quantityReserved) || 0), 0);
-  }, [filteredInventoryItems]);
+  const totalReserved = useMemo(() => {
+    return inventoryItems.reduce((sum, inv) => sum + (parseFloat(inv.quantityReserved) || 0), 0);
+  }, [inventoryItems]);
 
   const filteredLowStock = useMemo(() => {
     const q = lowStockSearch.toLowerCase();
@@ -244,49 +186,32 @@ function WareHouseReports() {
             Comprehensive insights into warehouse operations
           </p>
         </div>
-        <select
-          className="wh-filter-select"
-          value={filterValue}
-          onChange={(e) => setFilterValue(e.target.value)}
-        >
-          <option value="">All</option>
-          <optgroup label="Warehouse">
-            {warehouseOptions.map((w) => (
-              <option key={w.id} value={`warehouse:${w.id}`}>{w.name}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Supplier">
-            {supplierOptions.map((s) => (
-              <option key={s.id} value={`supplier:${s.id}`}>{s.name}</option>
-            ))}
-          </optgroup>
-        </select>
       </div>
 
       <div className="wh-stats">
         <Stat
-          value={new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(filteredInboundTotal)}
+          value={new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(inboundTotal)}
           title="Inbound Total Amount"
           percent=""
           icon={<ImportOutlined />}
           iconClass="icon-blue"
         />
         <Stat
-          value={filteredOutboundTotal.toLocaleString()}
+          value={outboundTotal.toLocaleString()}
           title="Outbound Total Quantity"
           percent=""
           icon={<ExportOutlined />}
           iconClass="icon-green"
         />
         <Stat
-          value={filteredAvailable.toLocaleString()}
+          value={totalAvailable.toLocaleString()}
           title="Total Quantity Available"
           percent=""
           icon={<InboxOutlined />}
           iconClass="icon-purple"
         />
         <Stat
-          value={filteredReserved.toLocaleString()}
+          value={totalReserved.toLocaleString()}
           title="Total Quantity Reserved"
           percent=""
           icon={<UserOutlined />}
@@ -309,7 +234,7 @@ function WareHouseReports() {
               </tr>
             </thead>
             <tbody>
-              {filteredSuppliers.map((s, index) => (
+              {suppliers.map((s, index) => (
                 <tr key={s.id || index}>
                   <td>{s.name}</td>
                   <td>{s.contactName}</td>
@@ -381,7 +306,7 @@ function WareHouseReports() {
               </tr>
             </thead>
             <tbody>
-              {filteredInventoryItems.map((item, index) => (
+              {inventoryItems.map((item, index) => (
                 <tr key={item.inventoryId || index}>
                   <td>{item.ingredientName}</td>
                   <td>{item.warehouseName}</td>
@@ -409,7 +334,7 @@ function WareHouseReports() {
               </tr>
             </thead>
             <tbody>
-              {filteredInventoryLogs.map((log, index) => (
+              {inventoryLogs.map((log, index) => (
                 <tr key={log.id || index}>
                   <td>{log.ingredientName}</td>
                   <td>{log.warehouseName}</td>
