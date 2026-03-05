@@ -17,6 +17,7 @@ import UpdateAdminWarehousePage from "./features/Warehouse/AdminManager/UpdateAd
 import CreateAdminWarehouse from "./features/Warehouse/AdminManager/CreateAdminWarehouse";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
+import IngredientManage from "./features/Ingredient/IngredientManage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="warehouse" element={<AdminWareHousePage />} />
           <Route path="warehouse/update/:id" element={<UpdateAdminWarehousePage />} />
           <Route path="warehouse/create" element={<CreateAdminWarehouse />} />
+          <Route path="ingredient" element={< IngredientManage />} />
         </Route>
 
         {/* ================= WAREHOUSE ================= */}
