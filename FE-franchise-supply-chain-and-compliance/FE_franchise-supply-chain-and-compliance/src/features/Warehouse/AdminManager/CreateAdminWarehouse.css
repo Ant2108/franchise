@@ -93,25 +93,25 @@
 }
 
 /* INPUT */
-.ant-input,
-.ant-select-selector,
-.ant-input-number {
+.create-page .ant-input,
+.create-page .ant-select-selector,
+.create-page .ant-input-number {
   border-radius: 10px !important;
   height: 42px !important;
-  
+
 }
 
-.ant-input-number-input {
+.create-page .ant-input-number-input {
   height: 40px !important;
 }
 
-.ant-input-number:focus,
-.ant-input-number-focused {
+.create-page .ant-input-number:focus,
+.create-page .ant-input-number-focused {
   border-color: #6a85f1 !important;
   box-shadow: 0 0 0 2px rgba(106, 133, 241, 0.15) !important;
 }
 
-.ant-input-number input:focus {
+.create-page .ant-input-number input:focus {
   outline: none !important;
   box-shadow: none !important;
 }
