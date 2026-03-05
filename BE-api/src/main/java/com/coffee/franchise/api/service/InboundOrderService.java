@@ -18,4 +18,6 @@ public interface InboundOrderService {
         InboundOrderResponse getInboundOrderById(UUID id);
 
         InboundOrderResponse updateInboundOrderStatus(UUID id, InboundOrderStatusUpdateRequest request);
+
+        List<InboundOrderResponse> checkoutCart(UUID warehouseId);
 }
