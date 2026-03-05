@@ -10,7 +10,7 @@
 /* ================= HEADER ================= */
 .page-header {
   width: 100%;
-  background: linear-gradient(135deg, #6a85f1, #8e5bd9);
+  background: linear-gradient(90deg, #D98324, #D98324, #E8C595);
   padding: 70px 0 120px;
   color: white;
 }
@@ -146,7 +146,7 @@
   padding: 20px 30px;
   font-weight: 600;
   font-size: 15px;
-  color: #6a5acd;
+  color: #D98324;
   border-bottom: 1px solid #ececff;
 }
 
@@ -194,10 +194,10 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #6a5acd;
+  border-color: #D98324;
   outline: none;
   background: white;
-  box-shadow: 0 0 0 3px rgba(106,90,205,0.15);
+  box-shadow: 0 0 0 3px rgba(217,131,36,0.15);
 }
 
 /* ================= ACTION ================= */
@@ -216,7 +216,7 @@ textarea:focus {
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #6a5acd, #7b68ee);
+  background: linear-gradient(135deg, #D98324, #D98324, #E8C595);
   color: white;
   border: none;
   padding: 13px 32px;

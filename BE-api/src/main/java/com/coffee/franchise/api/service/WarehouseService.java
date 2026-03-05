@@ -17,4 +17,6 @@ public interface WarehouseService {
     List<WarehouseResponse> getAllWarehouses();
     void deleteWarehouse(UUID id);
 
+
+
 }
