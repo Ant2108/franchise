@@ -29,6 +29,14 @@ const inboundApi = {
     updateOrderStatus: (id, status, notes = '', itemReceipts = [], actualDate = null) => {
         return apiClient.put(`/inbounds/${id}/status`, { status, notes, itemReceipts, actualDate });
     },
+
+    /**
+     * Lấy danh sách marketplace item cho màn hình Inbound Suppliers.
+     * Trả về ingredient + supplier + giá + khoảng cách (nếu có warehouseId/header).
+     */
+    getMarketplaceItems: (params = {}) => {
+        return apiClient.get('/suppliers/marketplace', params);
+    },
 };
 
 export default inboundApi;

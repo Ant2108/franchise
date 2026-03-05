@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class SupplierRequest {
@@ -24,6 +26,10 @@ public class SupplierRequest {
     private String phone;
 
     private String address;
+
+    private BigDecimal latitude;
+
+    private BigDecimal longitude;
 
     @NotNull(message = "Trạng thái không được để trống")
     private SupplierStatus status;

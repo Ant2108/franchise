@@ -1,8 +1,9 @@
 package com.coffee.franchise.api.service.Impl;
 
-import com.coffee.franchise.api.dto.request.IngredientRequest;
-import com.coffee.franchise.api.dto.request.UpdateIngredientRequest;
-import com.coffee.franchise.api.dto.response.IngredientResponse;
+
+import com.coffee.franchise.api.dto.Request.IngredientRequest;
+import com.coffee.franchise.api.dto.Response.IngredientResponse;
+import com.coffee.franchise.api.dto.Request.UpdateIngredientRequest;
 import com.coffee.franchise.api.entity.Ingredient;
 import com.coffee.franchise.api.exception.AppException;
 import com.coffee.franchise.api.repository.IngredientRepository;
@@ -46,10 +47,8 @@ public class IngredientServiceImpl implements IngredientService {
                 .toList();
     }
 
-
     @Override
-    public IngredientResponse updateIngredient(UUID id , UpdateIngredientRequest updateIngredientRequest) {
-
+    public IngredientResponse updateIngredient(UUID id, UpdateIngredientRequest updateIngredientRequest) {
         Ingredient existing = ingredientRepo.findById(id).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Ingredient not found"));
 
         existing.setName(updateIngredientRequest.getIngredientName());
@@ -59,6 +58,9 @@ public class IngredientServiceImpl implements IngredientService {
 
         return IngredientResponse.fromEntity(ingredientRepo.save(existing));
     }
+
+
+
 
     @Override
     public IngredientResponse deleteIngredientById(UUID id) {

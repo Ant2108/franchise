@@ -1,4 +1,5 @@
-package com.coffee.franchise.api.dto.response;
+package com.coffee.franchise.api.dto.Response;
+
 
 
 import com.coffee.franchise.api.entity.Ingredient;
@@ -22,12 +23,14 @@ public class IngredientResponse {
     public BigDecimal alertThreshold;
     public String description;
 
+
     public static IngredientResponse fromEntity(Ingredient ingredient) {
         return IngredientResponse.builder()
                 .id(ingredient.getId())
                 .ingredientName(ingredient.getName())
                 .unit(ingredient.getUnit())
                 .alertThreshold(ingredient.getAlertThreshold())
+
                 .description(ingredient.getDescription())
                 .build();
     }

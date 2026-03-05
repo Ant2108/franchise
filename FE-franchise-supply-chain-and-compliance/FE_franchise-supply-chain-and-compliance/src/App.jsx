@@ -25,8 +25,9 @@ function App() {
       <Routes>
 
         {/* ================= ADMIN ================= */}
+
         <Route path="/admin" element={<AdminPage />}>
-          <Route path="supplier" element={ <SupplierAdminManage />}/>
+          <Route path="supplier" element={<SupplierAdminManage />} />
           <Route path="supplier-category" element={<SupplierAdminCategory />} />
           <Route path="inbound" element={<InboundList />} />
           <Route path="outbound" element={<OutboundList />} />
@@ -44,6 +45,8 @@ function App() {
           <Route path="shipments" element={<WareHouseShipments />} />
           <Route path="receiving" element={<WareHouseReceiving />} />
           <Route path="reports" element={<WareHouseReports />} />
+          <Route path="inbound" element={<InboundPage />} />
+          <Route path="cart" element={<CartPage />} />
         </Route>
 
         {/* Global 404 */}
