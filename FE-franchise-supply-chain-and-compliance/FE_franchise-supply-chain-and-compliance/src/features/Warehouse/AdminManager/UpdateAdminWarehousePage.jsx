@@ -68,7 +68,9 @@ export default function UpdateAdminWarehousePage() {
     try {
       setSaving(true);
       await WareHouseAdminAPI.updateWarehouse(id, formData);
-      navigate("/admin/warehouse");
+      navigate("/admin/warehouse", {
+        state: { internalNavigation: true },
+      });
     } catch (err) {
       alert("Cập nhật thất bại!",err);
     } finally {
@@ -91,7 +93,9 @@ export default function UpdateAdminWarehousePage() {
           <Button
             icon={<ArrowLeftOutlined />}
             className="back-button"
-            onClick={() => navigate("/admin/warehouse")}
+            onClick={() => navigate("/admin/warehouse", {
+              state: { internalNavigation: true },
+            })}
           >
             Trở Về Danh Sách
           </Button>
@@ -196,7 +200,9 @@ export default function UpdateAdminWarehousePage() {
           </div>
 
           <div className="action-area">
-            <button type="button" className="btn-cancel" onClick={() => navigate("/admin/warehouse")}>
+            <button type="button" className="btn-cancel" onClick={() => navigate("/admin/warehouse", {
+              state: { internalNavigation: true },
+            })}>
               Hủy Bỏ
             </button>
 

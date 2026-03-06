@@ -82,14 +82,6 @@ function WareHouseShipments() {
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h1 className="warehouse-title" style={{ margin: 0 }}>Xuất Kho</h1>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
-          onClick={() => setIsCreateModalOpen(true)}
-          size="large"
-        >
-          Tạo đơn xuất
-        </Button>
       </div>
 
       <div style={{ background: "#fff", padding: 24, borderRadius: 8 }}>
@@ -129,7 +121,7 @@ function WareHouseShipments() {
         />
       )}
 
-      <CreateOutboundModal 
+      <CreateOutboundModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => fetchOrders()}

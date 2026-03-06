@@ -16,7 +16,7 @@ public interface InventoryLogService {
                                             TransactionType transactionType,
                                             BigDecimal quantityChanged,
                                             UUID referenceId);
-
+    List<InventoryLogResponse> getAllInventoryLogs();
     /**
      * Get all logs for a specific warehouse and ingredient.
      */

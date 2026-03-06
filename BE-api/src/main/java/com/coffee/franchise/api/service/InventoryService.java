@@ -234,6 +234,20 @@ public class InventoryService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<InventoryResponseDTO> getAllInventories() {
+        return inventoryRepository.findAll().stream()
+                .map(inventory -> InventoryResponseDTO.builder()
+                        .inventoryId(inventory.getId())
+                        .warehouseId(inventory.getWarehouse().getId())
+                        .ingredientId(inventory.getIngredient().getId())
+                        .quantityAvailable(inventory.getQuantityAvailable())
+                        .quantityReserved(inventory.getQuantityReserved())
+                        .lastUpdated(inventory.getLastUpdated())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     // ================= INCREASE =================
     @Transactional
     public InventoryResponseDTO increase(InventoryQuantityRequestDTO request) {

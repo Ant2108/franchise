@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import WarehouseAdminSideBar from "./AdminSideBar";
 import "./AdminPage.css";
+import AIChatbox from "../features/AIchat/AIChatbox";
 
 const AdminLayout = () => {
   return (
@@ -13,7 +14,9 @@ const AdminLayout = () => {
       {/* --- CONTENT CHÍNH --- */}
       <main className="admin-content">
         <Outlet />
+        
       </main>
+      <AIChatbox />
     </div>
   );
 };
