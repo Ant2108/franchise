@@ -120,9 +120,8 @@ const CreateAdminWarehouse = () => {
 
       message.success("Đã tìm thấy vị trí");
 
-    } catch (err) {
-      console.error(err);
-      message.error("Không thể lấy tọa độ");
+    } catch (err) { 
+      message.error("Không thể lấy tọa độ",err);
     }
   };
   const searchAddress = (value) => {
