@@ -10,7 +10,7 @@
   border-radius: 50%;
   border: none;
 
-  background: linear-gradient(135deg,#7c3aed,#9333ea);
+  background: linear-gradient(135deg,#D98324);
 
   color: white;
   font-size: 22px;
@@ -21,6 +21,33 @@
 
   z-index: 9999;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* hiệu ứng lơ lửng */
+  animation: floatAI 3s ease-in-out infinite;
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* hover cho nút */
+.chat-button:hover{
+  transform: scale(1.08);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+/* animation lơ lửng */
+@keyframes floatAI {
+  0%{
+    transform: translateY(0px);
+  }
+  50%{
+    transform: translateY(-8px);
+  }
+  100%{
+    transform: translateY(0px);
+  }
 }
 
 

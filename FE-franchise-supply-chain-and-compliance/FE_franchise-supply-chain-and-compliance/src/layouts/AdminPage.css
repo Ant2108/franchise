@@ -1,282 +1,287 @@
-/* Admin Layout Styles */
-.admin-sidebar-fixed {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-.admin-sidebar {
-    width: 280px;           /* Fix width */
-    min-height: 100vh;      /* Chiếm toàn chiều cao */
-    position: fixed;        /* Cố định */
-    top: 0;
-    left: 0;
-    z-index: 100;
-    overflow-y: auto;       /* Scroll riêng nếu sidebar dài */
-}
+/* =========================
+   ADMIN LAYOUT
+========================= */
 .admin-layout {
-    display: flex;
-    min-height: 100vh;
-    background: #f5f5f5;
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-main);
 }
+
+/* =========================
+   SIDEBAR
+========================= */
+.admin-sidebar {
+  width: 260px;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--sidebar-bg);
+  color: #fff;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
+  transition: var(--transition);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================
+   HEADER (Glassmorphism)
+========================= */
 .admin-header {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 100;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 90;
 }
 
+/* =========================
+   CONTENT
+========================= */
 .admin-content {
-    margin-left: 280px;     /* Bằng width sidebar */
-    flex: 1;
-    min-height: 100vh;
-    padding: 20px;
-    overflow-x: hidden;     /* Tránh tràn ngang */
-    background: transparent; /* CSS blur + card bạn đã thêm */
-    transition: margin-left 0.3s ease;
+  margin-left: 260px;
+  flex: 1;
+  padding: 0; /* XÓA BỎ padding cũ vì pageContainer bên trong đã tự lo padding rồi */
+  min-height: 100vh;
+  background: var(--bg-main);
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box; /* BẮT BUỘC CÓ DÒNG NÀY */
+  display: flex; /* Cho phép nội dung bên trong bung full */
+  flex-direction: column; 
+}
+.admin-content.expanded {
+  margin-left: 80px !important; 
 }
 
-/* Sidebar Menu Items */
-.admin-menu-item {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: #667eea;
-}
-
-.admin-menu-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.admin-menu-item:hover::before {
-    left: 100%;
-}
-
-.admin-menu-item.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    transform: translateX(5px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-/* Cards */
+/* =========================
+   CARDS
+========================= */
 .admin-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
 }
 
 .admin-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-/* Stats Cards */
+/* =========================
+   STATS CARD
+========================= */
 .stats-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    padding: 24px;
-    text-align: center;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 1.8rem;
+  text-align: left;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
 .stats-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary);
+  transform: scaleY(0);
+  transition: var(--transition);
+  transform-origin: bottom;
 }
 
 .stats-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.stats-card:hover::before {
+  transform: scaleY(1);
 }
 
 .stats-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+  letter-spacing: -0.5px;
 }
 
 .stats-label {
-    color: #6b7280;
-    font-size: 0.875rem;
-    font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-/* Buttons */
+/* =========================
+   BUTTONS
+========================= */
 .admin-btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 12px;
-    padding: 12px 24px;
-    color: white;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  padding: 0.8rem 2rem;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(217, 131, 36, 0.2);
 }
 
 .admin-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 131, 36, 0.35);
 }
 
 .admin-btn-secondary {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    border-radius: 12px;
-    padding: 12px 24px;
-    color: #667eea;
-    font-weight: 600;
-    transition: all 0.3s ease;
+  padding: 0.8rem 2rem;
+  background: transparent;
+  border: 2px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
 }
 
 .admin-btn-secondary:hover {
-    background: rgba(102, 126, 234, 0.1);
-    transform: translateY(-2px);
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(217, 131, 36, 0.05);
 }
 
-/* Tables */
+/* =========================
+   TABLES
+========================= */
 .admin-table {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  background: var(--bg-card);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .admin-table th {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-weight: 600;
-    padding: 16px;
-    border: none;
+  background: #f1f3f5;
+  color: var(--text-muted);
+  padding: 1.2rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .admin-table td {
-    padding: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    transition: background-color 0.2s ease;
+  padding: 1.2rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: var(--transition);
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
 }
 
 .admin-table tr:hover td {
-    background-color: rgba(102, 126, 234, 0.05);
+  background: #fafafb;
 }
 
-/* Modals */
+/* =========================
+   INPUTS / SEARCH
+========================= */
+.admin-search,
+.admin-input {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: var(--transition);
+}
+
+.admin-search:focus,
+.admin-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(217, 131, 36, 0.15);
+}
+
+/* =========================
+   MODAL
+========================= */
 .admin-modal {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  background: var(--bg-card);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1);
 }
 
-/* Search Bar */
-.admin-search {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    border-radius: 12px;
-    padding: 12px 16px;
-    transition: all 0.3s ease;
-}
-
-.admin-search:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background: rgba(255, 255, 255, 1);
-}
-
-/* Notifications */
+/* =========================
+   BADGE
+========================= */
 .notification-badge {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    animation: pulse 2s infinite;
+  background: #ef4444;
+  color: #ffffff;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Loading States */
-.admin-loading {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-/* Responsive */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
-    .admin-content {
-        margin: 10px;
-        border-radius: 16px;
-    }
+  .admin-content {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
 
-    .stats-card {
-        padding: 16px;
-    }
+  /* Trên điện thoại, dù sidebar có expand hay không thì nội dung vẫn full màn hình */
+  .admin-content.expanded {
+    margin-left: 0 !important;
+  }
 
-    .stats-number {
-        font-size: 2rem;
-    }
-}
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .admin-sidebar {
-        background: rgba(30, 30, 30, 0.95);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .admin-header {
-        background: rgba(30, 30, 30, 0.95);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .admin-content {
-        background: rgba(30, 30, 30, 0.9);
-    }
+  /* Class này dùng khi bạn click nút Menu trên điện thoại để mở Sidebar ra */
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
 }

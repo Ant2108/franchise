@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Zap, Users, Car, LogOut, BarChart3, Settings, FileText, MessageSquare, MapPin, Ticket } from "lucide-react";
+import { Zap, Users, LogOut, BarChart3, Settings, FileText, MapPin, Ticket,Car, ChevronLeft, ChevronRight,Coins, Clock } from "lucide-react";
 import "./AdminSideBar.css";
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const [openFolders, setOpenFolders] = useState({});
 
   const toggleFolder = (folderName) => {
-    setOpenFolders(prev => ({
+    if (isCollapsed) setIsCollapsed(false);
+
+    setOpenFolders((prev) => ({
       ...prev,
-      [folderName]: !prev[folderName]
+      [folderName]: !prev[folderName],
     }));
   };
 
-  const menuStructure = [
+    const menuStructure = [
     {
       type: "folder",
       name: "Suppiler",
@@ -46,7 +48,6 @@ const AdminSidebar = () => {
       icon: <BarChart3 size={20} />,
       items: [
         { name: "Quản lý Warehouse", path: "/admin/warehouse", icon: <BarChart3 size={18} /> },
-        { name: "Đánh giá người dùng", path: "###", icon: <FileText size={18} /> },
       ]
     },
     {
@@ -62,18 +63,30 @@ const AdminSidebar = () => {
     {
       type: "item",
       name: "Cấu hình hệ thống",
-      path: "/admin/system-configuration",
+      path: "###",
       icon: <Settings size={20} />
     },
   ];
 
   return (
-    <aside className="admin-sidebar">
+    <aside className={`admin-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      {/* NÚT MŨI TÊN TRÔI NỔI NẰM Ở MÉP PHẢI (Chuyển ra đây) */}
+      <button
+        className="toggle-menu-btn"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        {isCollapsed ? (
+          <ChevronRight size={18} strokeWidth={3} />
+        ) : (
+          <ChevronLeft size={18} strokeWidth={3} />
+        )}
+      </button>
+
       {/* Logo Section */}
       <div className="logo-section">
         <div className="logo-container">
           <div className="logo-icon">S</div>
-          <div className="logo-text">
+          <div className="logo-text menu-text">
             <h1>Admin</h1>
             <p>Quản trị hệ thống</p>
           </div>
@@ -88,23 +101,32 @@ const AdminSidebar = () => {
               const isOpen = openFolders[item.name];
               return (
                 <div key={index} className="nav-folder">
-                  <div className="nav-folder-header" onClick={() => toggleFolder(item.name)}>
+                  <div
+                    className="nav-folder-header"
+                    onClick={() => toggleFolder(item.name)}
+                  >
                     <div className="folder-left">
                       <div className="icon">{item.icon}</div>
-                      <span>{item.name}</span>
+                      <span className="menu-text">{item.name}</span>
                     </div>
-                    <div className="folder-arrow">{isOpen ? "▼" : "▶"}</div>
+                    <div className="folder-arrow menu-text">
+                      {isOpen ? "▼" : "▶"}
+                    </div>
                   </div>
                   {isOpen && (
-                    <div className="nav-folder-items">
-                      {item.items.map(subItem => (
+                    <div
+                      className={`nav-folder-items ${isCollapsed ? "hide-folder" : ""}`}
+                    >
+                      {item.items.map((subItem) => (
                         <NavLink
                           key={subItem.path}
                           to={subItem.path}
-                          className={({ isActive }) => `nav-item nav-subitem ${isActive ? "item" : ""}`}
+                          className={({ isActive }) =>
+                            `nav-item nav-subitem ${isActive ? "active" : ""}`
+                          }
                         >
                           <div className="icon">{subItem.icon}</div>
-                          <span>{subItem.name}</span>
+                          <span className="menu-text">{subItem.name}</span>
                         </NavLink>
                       ))}
                     </div>
@@ -116,10 +138,12 @@ const AdminSidebar = () => {
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                  className={({ isActive }) =>
+                    `nav-item ${isActive ? "active" : ""}`
+                  }
                 >
                   <div className="icon">{item.icon}</div>
-                  <span>{item.name}</span>
+                  <span className="menu-text">{item.name}</span>
                 </NavLink>
               );
             }
@@ -127,14 +151,11 @@ const AdminSidebar = () => {
         </div>
       </nav>
 
-      {/* Dashboard Static Section */}
-
-
       {/* User Section */}
       <div className="user-section">
         <div className="user-info">
           <div className="user-avatar">A</div>
-          <div className="user-details">
+          <div className="user-details menu-text">
             <div className="user-name">Quản trị viên</div>
           </div>
         </div>
@@ -143,13 +164,12 @@ const AdminSidebar = () => {
           onClick={() => {
             if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
               localStorage.removeItem("token");
-              localStorage.removeItem("user_role");
               window.location.href = "/login";
             }
           }}
         >
           <LogOut size={18} />
-          <span>Đăng xuất</span>
+          <span className="menu-text">Đăng xuất</span>
         </button>
       </div>
     </aside>
