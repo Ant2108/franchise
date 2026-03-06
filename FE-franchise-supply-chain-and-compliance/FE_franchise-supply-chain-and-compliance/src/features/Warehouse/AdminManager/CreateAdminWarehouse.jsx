@@ -61,12 +61,9 @@ const CreateAdminWarehouse = () => {
     iconAnchor: [18, 48],
   });
   };
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-
-        // remove code nếu có
         const payload = {
           name: values.name,
           description: values.description,
@@ -75,13 +72,9 @@ const CreateAdminWarehouse = () => {
           longitude: values.longitude,
           status: values.status
         };
-
         console.log("Payload gửi lên BE:", payload);
-
         setLoading(true);
-
         await WareHouseAdminAPI.createWarehouse(payload);
-
         message.success("Tạo kho hàng thành công!");
 
         navigate("/admin/warehouse", {
@@ -94,96 +87,95 @@ const CreateAdminWarehouse = () => {
       } finally {
         setLoading(false);
       }
-    };
-
-const fetchCoordinates = async (address) => {
-  if (!address) {
-    message.warning("Vui lòng nhập địa chỉ");
-    return;
-  }
-
-  try {
-    const query = address + ", Vietnam";
-
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=1`
-    );
-
-    const data = await res.json();
-
-    if (!data || data.length === 0) {
-      message.error("Không tìm thấy địa chỉ");
+  };
+  const fetchCoordinates = async (address) => {
+    if (!address) {
+      message.warning("Vui lòng nhập địa chỉ");
       return;
     }
 
-    const lat = parseFloat(data[0].lat);
-    const lon = parseFloat(data[0].lon);
+    try {
+      const query = address + ", Vietnam";
+
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=1`
+      );
+
+      const data = await res.json();
+
+      if (!data || data.length === 0) {
+        message.error("Không tìm thấy địa chỉ");
+        return;
+      }
+
+      const lat = parseFloat(data[0].lat);
+      const lon = parseFloat(data[0].lon);
+
+      setPosition([lat, lon]);
+
+      form.setFieldsValue({
+        latitude: lat,
+        longitude: lon,
+      });
+
+      message.success("Đã tìm thấy vị trí");
+
+    } catch (err) {
+      console.error(err);
+      message.error("Không thể lấy tọa độ");
+    }
+  };
+  const searchAddress = (value) => {
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(async () => {
+
+      if (!value || value.length < 3) {
+        setAddressOptions([]);
+        return;
+      }
+
+      try {
+
+        const query = value + ", Vietnam";
+
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=5`
+        );
+
+        const data = await res.json();
+
+        const options = data.map((item) => ({
+          value: item.display_name,
+          label: item.display_name,
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+        }));
+
+        setAddressOptions(options);
+
+      } catch (err) {
+        console.error(err);
+      }
+
+    }, 500);
+
+  };
+  const onSelectAddress = (value, option) => {
+    const lat = option.lat;
+    const lon = option.lon;
 
     setPosition([lat, lon]);
 
     form.setFieldsValue({
       latitude: lat,
       longitude: lon,
+      location: value
     });
-
-    message.success("Đã tìm thấy vị trí");
-
-  } catch (err) {
-    console.error(err);
-    message.error("Không thể lấy tọa độ");
-  }
-};
-const searchAddress = (value) => {
-
-  if (debounceTimer.current) {
-    clearTimeout(debounceTimer.current);
-  }
-
-  debounceTimer.current = setTimeout(async () => {
-
-    if (!value || value.length < 3) {
-      setAddressOptions([]);
-      return;
-    }
-
-    try {
-
-      const query = value + ", Vietnam";
-
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=5`
-      );
-
-      const data = await res.json();
-
-      const options = data.map((item) => ({
-        value: item.display_name,
-        label: item.display_name,
-        lat: parseFloat(item.lat),
-        lon: parseFloat(item.lon),
-      }));
-
-      setAddressOptions(options);
-
-    } catch (err) {
-      console.error(err);
-    }
-
-  }, 500);
-
-};
-const onSelectAddress = (value, option) => {
-  const lat = option.lat;
-  const lon = option.lon;
-
-  setPosition([lat, lon]);
-
-  form.setFieldsValue({
-    latitude: lat,
-    longitude: lon,
-    location: value
-  });
-};
+  };
 
 return (
   <div className="create-page">
@@ -206,7 +198,6 @@ return (
 
         <h1>Tạo Kho Hàng Mới</h1>
         <p>Điền thông tin để tạo kho hàng mới</p>
-
       </div>
     </div>
 

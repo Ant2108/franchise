@@ -66,7 +66,6 @@ export default function AdminWareHousePage() {
     fetchWarehouses();
   }, []);
 
-
   const filteredWarehouses = warehouses
   .filter((wh) =>
     wh.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
