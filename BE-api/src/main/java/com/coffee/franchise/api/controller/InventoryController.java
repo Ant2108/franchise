@@ -31,9 +31,9 @@ public class InventoryController {
         return ResponseEntity.ok(invento.updateItem(ID,request));
     }
 
-    @GetMapping("/detailed")
-    public ResponseEntity<InventoryResponse> getItemDetails(UUID id){
-        return ResponseEntity.ok(invento.getItemDetails(id));
+    @GetMapping("/detailed/{ID}")
+    public ResponseEntity<InventoryResponse> getItemDetails(@PathVariable UUID ID){
+        return ResponseEntity.ok(invento.getItemDetails(ID));
     }
 
     @GetMapping("/search")

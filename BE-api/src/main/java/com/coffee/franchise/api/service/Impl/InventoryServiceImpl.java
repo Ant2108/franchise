@@ -25,8 +25,8 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
 
 
     @Override
-    public InventoryResponse getItemDetails(UUID item_ID) {
-        return null;
+    public InventoryResponse getItemDetails(UUID itemId) {
+        return InventoryResponse.fromEntity(inventoryRepository.getById(itemId));
     }
 
     @Override

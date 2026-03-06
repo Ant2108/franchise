@@ -93,7 +93,7 @@ function InventoryItemForm({ ID, open, onClose, onSuccess }) {
           >
             {(ingredients || []).map((inv) => (
               <Option key={inv.ingredientId} value={inv.ingredientId}>
-                {inv.ingredientName} (Tồn: {inv.quantityAvailable})
+                {inv.ingredientName}
               </Option>
             ))}
           </Select>

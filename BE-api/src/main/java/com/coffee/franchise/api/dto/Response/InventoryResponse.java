@@ -17,7 +17,9 @@ import java.util.UUID;
 public class InventoryResponse {
 
         private UUID warehouseId;
+        private String warehouseName;
         private UUID ingredientId;
+        private String ingredientName;
         private BigDecimal quantityAvailable;
         private BigDecimal quantityReserved;
         private LocalDateTime lastUpdated;
@@ -25,7 +27,9 @@ public class InventoryResponse {
     public static InventoryResponse fromEntity(Inventory item){
         return InventoryResponse.builder()
                 .warehouseId(item.getWarehouse().getId())
+                .warehouseName(item.getWarehouse().getName())
                 .ingredientId(item.getIngredient().getId())
+                .ingredientName(item.getIngredient().getName())
                 .quantityAvailable(item.getQuantityAvailable())
                 .quantityReserved(item.getQuantityReserved())
                 .build();
