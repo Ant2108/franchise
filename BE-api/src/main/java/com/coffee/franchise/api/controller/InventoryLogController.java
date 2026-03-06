@@ -28,6 +28,12 @@ public class InventoryLogController {
         return ResponseEntity.ok(logs);
     }
 
+    @GetMapping("/warehouse/get-all")
+    public ResponseEntity<List<InventoryLogResponse>> getAllInventoryLogs() {
+        List<InventoryLogResponse> logs = inventoryLogService.getAllInventoryLogs();
+        return ResponseEntity.ok(logs);
+    }
+
     @GetMapping("/reference/{referenceId}")
     public ResponseEntity<List<InventoryLogResponse>> getLogsByReferenceId(@PathVariable UUID referenceId) {
         List<InventoryLogResponse> logs = inventoryLogService.getLogsByReferenceId(referenceId);

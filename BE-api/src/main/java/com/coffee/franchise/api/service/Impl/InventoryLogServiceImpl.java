@@ -72,6 +72,13 @@ public class InventoryLogServiceImpl implements InventoryLogService {
         return logs.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<InventoryLogResponse> getAllInventoryLogs() {
+        List<InventoryLog> logs = inventoryLogRepository.findAll();
+        return logs.stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
+
     private InventoryLogResponse mapToResponse(InventoryLog log) {
         return InventoryLogResponse.builder()
                 .id(log.getId())

@@ -43,6 +43,11 @@ public class InventoryController {
         return ResponseEntity.ok(alerts);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<InventoryResponseDTO>> getAllInventories() {
+        return ResponseEntity.ok(inventoryService.getAllInventories());
+    }
+
     @GetMapping("/low-stock/warehouse/{warehouseId}")
     public ResponseEntity<List<LowStockAlertResponse>> getLowStockAlertsByWarehouse(@PathVariable UUID warehouseId) {
         List<LowStockAlertResponse> alerts = inventoryService.getLowStockAlertsByWarehouse(warehouseId);
