@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect, useRef  } from "react";
 import {
   Card,
   Form,
@@ -8,10 +8,14 @@ import {
   Progress,
   message,
   InputNumber,
+  AutoComplete
+  
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import {ArrowLeftOutlined} from "@ant-design/icons";
 import "./CreateAdminWarehouse.css";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import L from "leaflet";
 import WareHouseAdminAPI from "./AdminWareHousePageAPI/AdminWareHousePageAPI";
 
 const { Option } = Select;
@@ -19,184 +23,399 @@ const { Option } = Select;
 const CreateAdminWarehouse = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  
+  const [position, setPosition] = useState([10.8231, 106.6297]);
+  const [addressOptions, setAddressOptions] = useState([]);
+  const debounceTimer = useRef(null);
 
-  const stepFields = {
-    1: ["name", "description"],
-    2: ["location","latitude","longitude"],
-    3: ["status"],
-  };
+  function ChangeMapView({ coords }) {
+  const map = useMap();
 
-  const next = async () => {
-    try {
-      await form.validateFields(stepFields[currentStep]);
-      setCurrentStep(currentStep + 1);
-    } catch (err) {
-      message.error("Vui lòng hoàn thành bước hiện tại trước khi tiếp tục.",err);
-    }
-  };
+    useEffect(() => {
+      map.setView(coords, 15);
+    }, [coords]);
 
-  const prev = () => {
-    setCurrentStep(currentStep - 1);
+    return null;
+  }
+  const createIcon = () => {
+  const html = `
+    <div class="marker-wrapper">
+      <div class="radar-ring radar-active"></div>
+      <div class="bounce">
+        <svg width="36" height="48" viewBox="0 0 36 48">
+          <path
+            d="M18 0C8 0 0 8 0 18c0 13 18 30 18 30s18-17 18-30C36 8 28 0 18 0z"
+            fill="#22c55e"
+          />
+          <circle cx="18" cy="18" r="7" fill="white"/>
+          <circle cx="18" cy="18" r="4" fill="#22c55e"/>
+        </svg>
+      </div>
+    </div>
+  `;
+
+  return L.divIcon({
+    className: "",
+    html,
+    iconSize: [36, 48],
+    iconAnchor: [18, 48],
+  });
   };
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
 
-      console.log("==== FULL FORM VALUES ====");
-      console.log(values);
+        // remove code nếu có
+        const payload = {
+          name: values.name,
+          description: values.description,
+          location: values.location,
+          latitude: values.latitude,
+          longitude: values.longitude,
+          status: values.status
+        };
 
-      setLoading(true);
+        console.log("Payload gửi lên BE:", payload);
 
-      await WareHouseAdminAPI.createWarehouse(values);
+        setLoading(true);
 
-      message.success("Tạo kho hàng thành công!");
-      navigate("/admin/warehouse");
-    } catch (err) {
-      console.error(err?.response?.data);
-      message.error("Tạo kho hàng thất bại!",err);
-    } finally {
-      setLoading(false);
+        await WareHouseAdminAPI.createWarehouse(payload);
+
+        message.success("Tạo kho hàng thành công!");
+
+        navigate("/admin/warehouse", {
+          state: { internalNavigation: true }
+        });
+
+      } catch (err) {
+        console.error(err?.response?.data);
+        message.error("Tạo kho hàng thất bại!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+const fetchCoordinates = async (address) => {
+  if (!address) {
+    message.warning("Vui lòng nhập địa chỉ");
+    return;
+  }
+
+  try {
+    const query = address + ", Vietnam";
+
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=1`
+    );
+
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+      message.error("Không tìm thấy địa chỉ");
+      return;
     }
-  };
 
- return (
+    const lat = parseFloat(data[0].lat);
+    const lon = parseFloat(data[0].lon);
+
+    setPosition([lat, lon]);
+
+    form.setFieldsValue({
+      latitude: lat,
+      longitude: lon,
+    });
+
+    message.success("Đã tìm thấy vị trí");
+
+  } catch (err) {
+    console.error(err);
+    message.error("Không thể lấy tọa độ");
+  }
+};
+const searchAddress = (value) => {
+
+  if (debounceTimer.current) {
+    clearTimeout(debounceTimer.current);
+  }
+
+  debounceTimer.current = setTimeout(async () => {
+
+    if (!value || value.length < 3) {
+      setAddressOptions([]);
+      return;
+    }
+
+    try {
+
+      const query = value + ", Vietnam";
+
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=5`
+      );
+
+      const data = await res.json();
+
+      const options = data.map((item) => ({
+        value: item.display_name,
+        label: item.display_name,
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon),
+      }));
+
+      setAddressOptions(options);
+
+    } catch (err) {
+      console.error(err);
+    }
+
+  }, 500);
+
+};
+const onSelectAddress = (value, option) => {
+  const lat = option.lat;
+  const lon = option.lon;
+
+  setPosition([lat, lon]);
+
+  form.setFieldsValue({
+    latitude: lat,
+    longitude: lon,
+    location: value
+  });
+};
+
+return (
   <div className="create-page">
 
-    {/* HERO HEADER */}
+    {/* HEADER */}
     <div className="create-hero">
       <div className="hero-content">
-        <div className="header-top">
-          <Button
-            icon={<ArrowLeftOutlined />}
-            className="back-button"
-            onClick={() => navigate("/admin/warehouse")}
-          >
-            Trở Về Danh Sách
-          </Button>
-        </div>
+
+        <Button
+          icon={<ArrowLeftOutlined />}
+          className="back-button"
+          onClick={() =>
+            navigate("/admin/warehouse", {
+              state: { internalNavigation: true },
+            })
+          }
+        >
+          Trở Về Danh Sách
+        </Button>
 
         <h1>Tạo Kho Hàng Mới</h1>
         <p>Điền thông tin để tạo kho hàng mới</p>
+
       </div>
     </div>
 
+
     <div className="create-container">
 
-      {/* PROGRESS CARD */}
-      <Card className="progress-card">
-        <Progress percent={(currentStep / 4) * 100} showInfo={false} />
-        <div className="step-text">Bước {currentStep} của 4</div>
-      </Card>
-
-      {/* FORM CARD */}
       <Card className="form-card">
+
         <Form form={form} layout="vertical">
 
-          {/* STEP 1 */}
-          <div style={{ display: currentStep === 1 ? "block" : "none" }}>
-            <div className="section-header">
-              <div className="icon-box">🏬</div>
-              <h2>Thông Tin Cơ Bản</h2>
-              <p>Hãy bắt đầu với các thông tin cơ bản của kho hàng</p>
+          {/* GRID TOP */}
+          <div className="form-grid">
+
+            {/* LEFT */}
+            <div className="form-left">
+
+              <div className="section-title">
+                Thông Tin Cơ Bản
+              </div>
+
+              <Form.Item
+                name="name"
+                label="Tên Kho Hàng"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Input placeholder="Nhập tên kho hàng" />
+              </Form.Item>
+
+              <Form.Item
+                name="description"
+                label="Mô Tả"
+              >
+                <Input.TextArea rows={3} />
+              </Form.Item>
+
+              <Form.Item
+                name="status"
+                label="Trạng Thái"
+                rules={[{ required: true, message: "Required" }]}
+              >
+                <Select placeholder="Chọn trạng thái">
+                  <Option value="ACTIVE">Active</Option>
+                  <Option value="INACTIVE">Inactive</Option>
+                  <Option value="MAINTAIN">Maintain</Option>
+                  <Option value="CLOSE">Close</Option>
+                </Select>
+              </Form.Item>
+
             </div>
 
-            <Form.Item
-              name="name"
-              label="Tên Kho Hàng"
-              rules={[{ required: true, message: "Required" }]}
-            >
-              <Input />
-            </Form.Item>
 
+            {/* RIGHT MAP */}
+            <div className="form-right">
 
-            <Form.Item name="description" label="Mô Tả">
-              <Input.TextArea rows={3} />
-            </Form.Item>
+              <div className="section-title">
+                Bản Đồ Vị Trí
+              </div>
+
+              <div className="map-card">
+
+                <MapContainer
+                  center={[16.047079, 108.20623]}
+                  zoom={15}
+                
+                  style={{ height: "360px", width: "100%" }}
+                  whenCreated={(map) => {
+                    map.on("click", (e) => {
+                      const { lat, lng } = e.latlng;
+
+                      setPosition([lat, lng]);
+
+                      form.setFieldsValue({
+                        latitude: lat,
+                        longitude: lng,
+                      });
+                    });
+                  }}
+                >
+
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap"
+                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  />
+
+                  <ChangeMapView coords={position} />
+
+                  <Marker
+                    position={position}
+                    draggable={true}
+                    icon={createIcon()}
+                    eventHandlers={{
+                      dragend: (e) => {
+
+                        const latlng = e.target.getLatLng();
+
+                        setPosition([
+                          latlng.lat,
+                          latlng.lng
+                        ]);
+
+                        form.setFieldsValue({
+                          latitude: latlng.lat,
+                          longitude: latlng.lng,
+                        });
+
+                      },
+                    }}
+                  />
+
+                </MapContainer>
+
+              </div>
+
+            </div>
+
           </div>
 
-          {/* STEP 2 */}
-          <div style={{ display: currentStep === 2 ? "block" : "none" }}>
-            <div className="section-header">
-              <div className="icon-box">📍</div>
-              <h2>Vị Trí</h2>
-              <p>Cung cấp thông tin địa chỉ của kho hàng</p>
-            </div>
 
-            <Form.Item
-              name="location"
-              label="Địa Chỉ Kho Hàng"
-              rules={[{ required: true, message: "Required" }]}
+          {/* DIVIDER */}
+          <div className="section-divider" />
+
+
+          {/* LOCATION */}
+          <div className="section-title">
+            Vị Trí Kho Hàng
+          </div>
+
+
+          <Form.Item
+            name="location"
+            label="Địa Chỉ"
+            rules={[{ required: true, message: "Required" }]}
+          >
+            <AutoComplete
+              options={addressOptions}
+              onSearch={searchAddress}
+              onSelect={onSelectAddress}
+              style={{ width: "100%" }}
             >
-              <Input />
-            </Form.Item>
+              <Input
+                placeholder="Nhập địa chỉ"
+                addonAfter={
+                  <Button
+                    onClick={() =>
+                      fetchCoordinates(form.getFieldValue("location"))
+                    }
+                  >
+                    Tìm Tọa Độ
+                  </Button>
+                }
+              />
+            </AutoComplete>
+          </Form.Item>
+
+
+          <div className="coordinate-grid">
+
             <Form.Item
               name="latitude"
               label="Vĩ Độ"
-              rules={[{ required: true, message: "Required" }]}
             >
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+              />
             </Form.Item>
+
             <Form.Item
               name="longitude"
               label="Kinh Độ"
-              rules={[{ required: true, message: "Required" }]}
             >
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+              />
             </Form.Item>
+
           </div>
 
 
-          {/* STEP 3 */}
-          <div style={{ display: currentStep === 3 ? "block" : "none" }}>
-            <div className="section-header">
-              <div className="icon-box">⚙️</div>
-              <h2>Trạng Thái Hoạt Động</h2>
-              <p>Đặt trạng thái hoạt động hiện tại</p>
-            </div>
-
-            <Form.Item
-              name="status"
-              label="Trạng Thái Kho Hàng"
-              rules={[{ required: true, message: "Required" }]}
-            >
-              <Select placeholder="Chọn trạng thái">
-                <Option value="ACTIVE">Hoạt động</Option>
-                <Option value="INACTIVE">Ngừng hoạt động</Option>
-                <Option value="MAINTAIN">Bảo trì</Option>
-                <Option value="CLOSE">Đóng cửa</Option>
-              </Select>
-            </Form.Item>
-          </div>
-
+          {/* ACTIONS */}
           <div className="form-actions">
-            {currentStep > 1 && (
-              <Button onClick={prev}>Quay lại</Button>
-            )}
 
-            {currentStep < 4 && (
-              <Button type="primary" onClick={next}>
-                Bước Tiếp Theo
-              </Button>
-            )}
+            <Button
+              className="cancel-btn"
+              onClick={() =>
+                navigate("/admin/warehouse", {
+                  state: { internalNavigation: true },
+                })
+              }
+            >
+              Hủy Bỏ
+            </Button>
 
-            {currentStep === 4 && (
-              <Button
-                type="primary"
-                loading={loading}
-                onClick={handleSubmit}
-              >
-                Tao Kho Hàng
-              </Button>
-            )}
+            <Button
+              type="primary"
+              className="create-btn"
+              loading={loading}
+              onClick={handleSubmit}
+            >
+              Tạo Kho Hàng
+            </Button>
+
           </div>
 
         </Form>
+
       </Card>
+
     </div>
+
   </div>
 );
 };

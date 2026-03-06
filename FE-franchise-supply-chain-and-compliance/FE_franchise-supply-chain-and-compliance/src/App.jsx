@@ -17,6 +17,10 @@ import UpdateAdminWarehousePage from "./features/Warehouse/AdminManager/UpdateAd
 import CreateAdminWarehouse from "./features/Warehouse/AdminManager/CreateAdminWarehouse";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
+import IngredientManage from "./features/Ingredient/IngredientManage";
+import InboundPage from "./features/Inbound/components/InboundPage";
+import CartPage from "./features/Inbound/components/CartPage";
+
 
 function App() {
   return (
@@ -24,14 +28,16 @@ function App() {
       <Routes>
 
         {/* ================= ADMIN ================= */}
+
         <Route path="/admin" element={<AdminPage />}>
-          <Route path="supplier" element={ <SupplierAdminManage />}/>
+          <Route path="supplier" element={<SupplierAdminManage />} />
           <Route path="supplier-category" element={<SupplierAdminCategory />} />
           <Route path="inbound" element={<InboundList />} />
           <Route path="outbound" element={<OutboundList />} />
           <Route path="warehouse" element={<AdminWareHousePage />} />
           <Route path="warehouse/update/:id" element={<UpdateAdminWarehousePage />} />
           <Route path="warehouse/create" element={<CreateAdminWarehouse />} />
+          <Route path="ingredient" element={< IngredientManage />} />
         </Route>
 
         {/* ================= WAREHOUSE ================= */}
@@ -42,6 +48,8 @@ function App() {
           <Route path="shipments" element={<WareHouseShipments />} />
           <Route path="receiving" element={<WareHouseReceiving />} />
           <Route path="reports" element={<WareHouseReports />} />
+          <Route path="inbound" element={<InboundPage />} />
+          <Route path="cart" element={<CartPage />} />
         </Route>
 
         {/* Global 404 */}

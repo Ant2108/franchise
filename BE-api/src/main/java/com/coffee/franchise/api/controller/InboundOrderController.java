@@ -50,4 +50,14 @@ public class InboundOrderController {
             @RequestBody InboundOrderStatusUpdateRequest request) {
         return ResponseEntity.ok(inboundOrderService.updateInboundOrderStatus(id, request));
     }
+
+    /**
+     * Checkout toàn bộ giỏ hàng - Tạo nhiều InboundOrder theo từng Supplier
+     */
+    @PostMapping("/checkout-cart")
+    public ResponseEntity<List<InboundOrderResponse>> checkoutCart(
+            @RequestHeader("X-Warehouse-Id") UUID warehouseId) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(inboundOrderService.checkoutCart(warehouseId));
+    }
 }

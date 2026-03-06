@@ -1,0 +1,35 @@
+.ingredient-page {
+  padding: 24px;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+/* HEADER */
+
+.ingredient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.ingredient-title {
+  margin: 0 !important;
+}
+
+/* SEARCH */
+
+.ingredient-search {
+  margin-bottom: 20px;
+}
+
+.ingredient-search .ant-input {
+  border-radius: 8px;
+}
+
+/* TABLE */
+
+.ingredient-table-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}

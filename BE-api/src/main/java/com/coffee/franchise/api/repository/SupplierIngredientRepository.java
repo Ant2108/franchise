@@ -2,6 +2,7 @@ package com.coffee.franchise.api.repository;
 
 import com.coffee.franchise.api.entity.SupplierIngredient;
 import com.coffee.franchise.api.enums.SupplierIngredientStatus;
+import com.coffee.franchise.api.enums.SupplierStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,5 +21,14 @@ public interface SupplierIngredientRepository extends JpaRepository<SupplierIngr
     List<SupplierIngredient> findAllBySupplierIdAndStatusWithIngredient(
             @Param("supplierId") UUID supplierId,
             @Param("status") SupplierIngredientStatus status
+    );
+
+    @Query("SELECT si FROM SupplierIngredient si " +
+            "JOIN FETCH si.supplier s " +
+            "JOIN FETCH si.ingredient ing " +
+            "WHERE si.status = :ingredientStatus AND s.status = :supplierStatus")
+    List<SupplierIngredient> findAllMarketplaceItems(
+            @Param("ingredientStatus") SupplierIngredientStatus ingredientStatus,
+            @Param("supplierStatus") SupplierStatus supplierStatus
     );
 }
