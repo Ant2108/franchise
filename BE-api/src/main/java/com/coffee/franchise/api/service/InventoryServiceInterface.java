@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface InventoryServiceInterface {
-    List<InventoryResponse> getItemList();
     InventoryResponse getItemDetails(UUID item_ID);
     List<InventoryResponse> searchItem(String name);
     InventoryResponse updateItem(UUID id,InventoryRequest request);

@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import inventoryApi from "./InventoryAPI/inventoryApi";
+import InventoryUpdateForm from "./InventoryUpdateForm.jsx";
+import { Button } from "antd";
 
 const InventoryList = () => {
   const [inventories, setInventories] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [UpdateModalID, setIsUpdateModalID] = useState(null)
+  const [isUpdateModalopen, setIsUpdateModalOpen] = useState(false)
+  
   const fetchInventories = async () => {
     try {
       setLoading(true);
@@ -46,6 +50,7 @@ const InventoryList = () => {
                 <th style={styles.th}>Available</th>
                 <th style={styles.th}>Reserved</th>
                 <th style={styles.th}>Last Updated</th>
+                <th style={styles.th}>Update</th>
               </tr>
             </thead>
 
@@ -69,6 +74,10 @@ const InventoryList = () => {
                       {item.quantityReserved}
                     </td>
                     <td style={styles.td}>{item.lastUpdated}</td>
+                    <td><Button 
+                    type="primary"
+                    onClick={()=>setIsUpdateModalID(item.inventoryId)}
+                    size="small">Update</Button></td>
                   </tr>
                 ))
               )}
@@ -76,6 +85,12 @@ const InventoryList = () => {
           </table>
         </div>
       )}
+      
+    <InventoryUpdateForm 
+    ID={UpdateModalID}
+    open={!!UpdateModalID}
+  onClose={() => setIsUpdateModalID(null)}
+  onSuccess={fetchInventories} />
     </div>
   );
 };

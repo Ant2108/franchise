@@ -5,6 +5,9 @@ const inventoryApi = {
 
   track: (params) =>
     axiosClient.get("/inventory/track", { params }),
+update: (id, info) =>
+  axiosClient.post(`/inventory/update/${id}`, info)
 };
+
 
 export default inventoryApi;

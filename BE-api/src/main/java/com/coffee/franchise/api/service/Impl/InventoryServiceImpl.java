@@ -25,13 +25,8 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
 
 
     @Override
-    public List<InventoryResponse> getItemList() {
-        return inventoryRepository.findAllBy().stream().map(InventoryResponse::fromEntity).toList();
-    }
-
-    @Override
     public InventoryResponse getItemDetails(UUID item_ID) {
-        return inventoryRepository.findById(item_ID).map(InventoryResponse::fromEntity).orElse(null);
+        return null;
     }
 
     @Override
@@ -44,7 +39,8 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
         Inventory exist = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Item don't exist in Inventory"));
-
+        Ingredient ingredient = ingredientRepository.findById(request.getIngredientId()).orElseThrow(() -> new IllegalArgumentException(
+                "Ingredient don't exist in Inventory"));
         if (request.getQuantityAvailable() != null) {
             exist.setQuantityAvailable(request.getQuantityAvailable());
         }
@@ -52,6 +48,7 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
         if (request.getQuantityReserved() != null) {
             exist.setQuantityReserved(request.getQuantityReserved());
         }
+        exist.setIngredient(ingredient);
         exist.setLastUpdated(LocalDateTime.now());
         return InventoryResponse.fromEntity(inventoryRepository.save(exist));
     }

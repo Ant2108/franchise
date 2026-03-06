@@ -11,6 +11,8 @@ import {
 function WareHouseInventory() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [openUpdate, setOpenUpdate] = useState(false);
   const itemsPerPage = 5;
 
   const inventoryData = useMemo(
@@ -165,7 +167,8 @@ function WareHouseInventory() {
           </button>
         </div>
       </div>
-      <InventoryList />
+      
+      <InventoryList/>
     </div>
   );
 }
