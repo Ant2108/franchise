@@ -85,7 +85,6 @@ function InventoryItemForm({ ID, open, onClose, onSuccess }) {
         <Form.Item
           label="Ingredient"
           name="ingredientId"
-          rules={[{ required: true, message: "Please select ingredient" }]}
         >
           <Select
             placeholder="Chọn nguyên liệu"

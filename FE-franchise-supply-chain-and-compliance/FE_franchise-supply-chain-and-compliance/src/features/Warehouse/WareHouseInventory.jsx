@@ -1,6 +1,9 @@
 import InventoryTrack from "../Inventory/InventoryTrack";
 import InventoryList from "../Inventory/InventoryList";
-import { useState, useMemo } from "react";
+import inventoryApi from "../Inventory/InventoryAPI/inventoryApi";
+
+import { useState, useMemo, useEffect } from "react";
+
 import {
   DatabaseOutlined,
   WarningOutlined,
@@ -11,65 +14,75 @@ import {
 function WareHouseInventory() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedInventory, setSelectedInventory] = useState(null);
-  const [openUpdate, setOpenUpdate] = useState(false);
+  const [inventories, setInventories] = useState([])
+  const [loading, setLoading] = useState(false);
+
   const itemsPerPage = 5;
 
-  const inventoryData = useMemo(
-    () => [
-      { code: "WH-001", name: "Laptop", stock: 120, price: 1000 },
-      { code: "WH-002", name: "Keyboard", stock: 12, price: 50 },
-      { code: "WH-003", name: "Mouse", stock: 0, price: 25 },
-      { code: "WH-004", name: "Monitor", stock: 45, price: 300 },
-      { code: "WH-005", name: "Headphone", stock: 18, price: 150 },
-      { code: "WH-006", name: "USB Cable", stock: 200, price: 10 },
-    ],
-    [],
-  );
-
-  const getStatus = (stock) => {
-    if (stock === 0) return "out";
-    if (stock < 20) return "low";
-    return "available";
+  const fetchInventory = async () => {
+    try {
+      setLoading(true);
+      const res = await inventoryApi.getAll();
+      setInventories(res || []);
+    } catch (err) {
+      console.error("Fetch inventory error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  const getStatus = (available) => {
+    if (available === 0) return "out";
+    if (available < 20) return "low";
+    return "available";
+  };
   const filteredData = useMemo(() => {
-    return inventoryData.filter(
-      (item) =>
-        item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.code.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [search, inventoryData]);
+  return inventories.filter(
+    (item) =>
+      item.ingredientId?.toString().includes(search) ||
+      item.warehouseId?.toString().includes(search)
+  );
+}, [search, inventories]);
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage, itemsPerPage]);
+  }, [filteredData, currentPage]);
 
   const handleSearch = (value) => {
     setSearch(value);
     setCurrentPage(1);
   };
 
-  const totalItems = inventoryData.length;
+  const totalItems = inventories.length;
 
-  const lowStock = inventoryData.filter(
-    (item) => item.stock > 0 && item.stock < 20,
+  const lowStock = inventories.filter(
+    (item) =>
+      item.quantityAvailable > 0 && item.quantityAvailable < 20
   ).length;
 
-  const outStock = inventoryData.filter((item) => item.stock === 0).length;
+  const outStock = inventories.filter(
+    (item) => item.quantityAvailable === 0
+  ).length;
 
-  const totalValue = inventoryData.reduce(
-    (acc, item) => acc + item.stock * item.price,
-    0,
+  const totalValue = inventories.reduce(
+    (acc, item) =>
+      acc + item.quantityAvailable * (item.price || 0),
+    0
   );
 
   return (
     <div className="warehouse-content">
       <h1 className="warehouse-title">Inventory Management</h1>
-      <p className="warehouse-sub">Manage and track your warehouse inventory</p>
+      <p className="warehouse-sub">
+        Manage and track your warehouse inventory
+      </p>
 
       <div className="warehouse-stats">
         <StatCard
@@ -78,18 +91,21 @@ function WareHouseInventory() {
           icon={<DatabaseOutlined />}
           iconClass="icon-blue"
         />
+
         <StatCard
           title="Low Stock"
           value={lowStock}
           icon={<WarningOutlined />}
           iconClass="icon-yellow"
         />
+
         <StatCard
           title="Out of Stock"
           value={outStock}
           icon={<InboxOutlined />}
           iconClass="icon-red"
         />
+
         <StatCard
           title="Inventory Value"
           value={`$${totalValue.toLocaleString()}`}
@@ -97,9 +113,11 @@ function WareHouseInventory() {
           iconClass="icon-green"
         />
       </div>
+
       <div>
         <InventoryTrack />
       </div>
+
       <div className="warehouse-search">
         <input
           type="text"
@@ -109,66 +127,7 @@ function WareHouseInventory() {
         />
       </div>
 
-      <div className="warehouse-table-wrapper">
-        <table className="warehouse-table">
-          <thead>
-            <tr>
-              <th>Item Code</th>
-              <th>Product Name</th>
-              <th>Stock</th>
-              <th>Price</th>
-              <th>Total</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((item, index) => {
-              const status = getStatus(item.stock);
-              return (
-                <tr key={index}>
-                  <td>{item.code}</td>
-                  <td>{item.name}</td>
-                  <td>{item.stock}</td>
-                  <td>${item.price}</td>
-                  <td>${(item.price * item.stock).toLocaleString()}</td>
-                  <td>
-                    <span className={`status status-${status}`}>
-                      {status === "available" && "Available"}
-                      {status === "low" && "Low Stock"}
-                      {status === "out" && "Out of Stock"}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* FIX CHẮC CHẮN CĂN PHẢI */}
-      <div className="pagination-wrapper">
-        <div className="pagination">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-          >
-            Prev
-          </button>
-
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-          >
-            Next
-          </button>
-        </div>
-      </div>
-      
-      <InventoryList/>
+      <InventoryList />
     </div>
   );
 }

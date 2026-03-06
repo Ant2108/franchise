@@ -39,8 +39,7 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
         Inventory exist = inventoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Item don't exist in Inventory"));
-        Ingredient ingredient = ingredientRepository.findById(request.getIngredientId()).orElseThrow(() -> new IllegalArgumentException(
-                "Ingredient don't exist in Inventory"));
+        Ingredient ingredient = ingredientRepository.findById(request.getIngredientId()).orElse(exist.getIngredient());
         if (request.getQuantityAvailable() != null) {
             exist.setQuantityAvailable(request.getQuantityAvailable());
         }
@@ -48,6 +47,7 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
         if (request.getQuantityReserved() != null) {
             exist.setQuantityReserved(request.getQuantityReserved());
         }
+
         exist.setIngredient(ingredient);
         exist.setLastUpdated(LocalDateTime.now());
         return InventoryResponse.fromEntity(inventoryRepository.save(exist));
