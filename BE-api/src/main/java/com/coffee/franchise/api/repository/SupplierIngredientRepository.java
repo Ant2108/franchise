@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,13 @@ import java.util.UUID;
 @Repository
 public interface SupplierIngredientRepository extends JpaRepository<SupplierIngredient, UUID> {
     Optional<SupplierIngredient> findBySupplierIdAndIngredientId(UUID supplierId, UUID ingredientId);
+
+    @Query("""
+            SELECT SUM(s.unitPrice)
+            FROM SupplierIngredient s
+            WHERE s.ingredient.id = :ingredientId
+            """)
+    BigDecimal getTotalPriceByIngredientId(UUID ingredientId);
 
     @Query("SELECT si FROM SupplierIngredient si JOIN FETCH si.ingredient ing " +
             "WHERE si.supplier.id = :supplierId AND si.status = :status")

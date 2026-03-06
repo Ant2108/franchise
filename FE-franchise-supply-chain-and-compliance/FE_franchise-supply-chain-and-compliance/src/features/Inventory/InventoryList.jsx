@@ -54,7 +54,7 @@ const InventoryList = () => {
                 <th style={styles.th}>Available</th>
                 <th style={styles.th}>Reserved</th>
                 <th style={styles.th}>Last Updated</th>
-                <th style={styles.th}>Actons</th>
+                <th style={styles.th}>Actions</th>
               </tr>
             </thead>
 
