@@ -67,10 +67,19 @@ export default function UpdateAdminWarehousePage() {
 
     try {
       setSaving(true);
-      await WareHouseAdminAPI.updateWarehouse(id, formData);
+
+      const payload = {
+        ...formData,
+        latitude: Number(formData.latitude),
+        longitude: Number(formData.longitude),
+      };
+
+      await WareHouseAdminAPI.updateWarehouse(id, payload);
+
       navigate("/admin/warehouse", {
         state: { internalNavigation: true },
       });
+
     } catch (err) {
       alert("Cập nhật thất bại!",err);
     } finally {
@@ -171,12 +180,13 @@ export default function UpdateAdminWarehousePage() {
               </div>
               <div className="section-body grid-2">
               <div>
-                <label>* Kinh Độ</label>
-                <input name="latitude" value={formData.latitude} onChange={handleChange} required />
-              </div>
-              <div>
                 <label>* Vĩ Độ</label>
-                <input name="longitude" value={formData.longitude} onChange={handleChange} required />
+                <input name="latitude" value={formData.latitude} onChange={handleChange} type="number" step="0.000001" required />
+              </div>
+
+              <div>
+                <label>* Kinh Độ</label>
+                <input name="longitude" value={formData.longitude} onChange={handleChange} type="number" step="0.000001" required />
               </div>
             </div>
           </div>
