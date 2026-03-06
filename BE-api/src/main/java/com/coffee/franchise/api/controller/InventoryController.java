@@ -7,6 +7,7 @@ import com.coffee.franchise.api.dto.Response.LowStockAlertResponse;
 import com.coffee.franchise.api.dto.Request.InventoryQuantityRequestDTO;
 import com.coffee.franchise.api.dto.Request.ReservationSyncRequestDTO;
 import com.coffee.franchise.api.dto.Response.InventoryResponseDTO;
+import com.coffee.franchise.api.service.Impl.InventoryServiceImpl;
 import com.coffee.franchise.api.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,22 @@ import java.util.UUID;
 public class InventoryController {
 
     private final InventoryService inventoryService;
+    private final InventoryServiceImpl invento;
+
+    @PostMapping("/update/{ID}")
+    public ResponseEntity<InventoryResponse> updateInventoryItem(@PathVariable UUID ID, @Valid @RequestBody InventoryRequest request){
+        return ResponseEntity.ok(invento.updateItem(ID,request));
+    }
+
+    @GetMapping("/detailed/{ID}")
+    public ResponseEntity<InventoryResponse> getItemDetails(@PathVariable UUID ID){
+        return ResponseEntity.ok(invento.getItemDetails(ID));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<InventoryResponse>> searchItems(String name){
+        return ResponseEntity.ok(invento.searchItem(name));
+    }
 
     @GetMapping
     public ResponseEntity<List<InventoryListItemResponse>> getInventoryList(

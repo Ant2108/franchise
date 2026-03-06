@@ -14,7 +14,11 @@ import java.util.UUID;
 public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
     Optional<Inventory> findByWarehouseIdAndIngredientId(UUID warehouseId, UUID ingredientId);
 
+    Optional<Inventory> findById(UUID ID);
+
     List<Inventory> findByWarehouseId(UUID warehouseId);
+
+    Optional<Inventory> findByIngredientNameContainingIgnoreCase(String name);
 
     @Query("SELECT i FROM Inventory i JOIN FETCH i.ingredient ing JOIN FETCH i.warehouse w")
     List<Inventory> findAllWithDetails();

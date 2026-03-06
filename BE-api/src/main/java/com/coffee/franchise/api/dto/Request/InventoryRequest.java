@@ -15,7 +15,7 @@ public class InventoryRequest {
     private UUID warrehouseId;
     private UUID ingredientId;
     private BigDecimal quantitytoAdd;
-    private double quantityAvailable;
-    private double quantityReserved;
+    private BigDecimal quantityAvailable;
+    private BigDecimal quantityReserved;
 
 }
