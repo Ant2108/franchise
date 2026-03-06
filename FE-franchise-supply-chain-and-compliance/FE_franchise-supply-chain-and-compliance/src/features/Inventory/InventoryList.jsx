@@ -69,8 +69,8 @@ const InventoryList = () => {
                 inventories.map((item) => (
                   <tr key={item.inventoryId} style={styles.tr}>
                     <td style={styles.mono}>{item.inventoryId}</td>
-                    <td style={styles.td}>{item.warehouseId}</td>
-                    <td style={styles.td}>{item.ingredientId}</td>
+                    <td style={styles.td}>{item.warehouseName}</td>
+                    <td style={styles.td}>{item.ingredientName}</td>
                     <td style={styles.available}>
                       {item.quantityAvailable}
                     </td>
