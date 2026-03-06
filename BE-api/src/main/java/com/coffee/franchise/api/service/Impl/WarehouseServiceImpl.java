@@ -55,7 +55,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     public WarehouseResponse updateWarehouse(WarehouseRequest request, UUID id) {
 
         Warehouse warehouse = findActiveWarehouseOrThrow(id);
-        
+
         warehouse.setName(request.getName());
         warehouse.setLocation(request.getLocation());
         warehouse.setLatitude(request.getLatitude());
