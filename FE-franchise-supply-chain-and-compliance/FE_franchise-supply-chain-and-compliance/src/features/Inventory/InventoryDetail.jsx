@@ -76,6 +76,7 @@ function InventoryItemDetailModal({ ID, open, onClose }) {
             <Descriptions.Item label="Warehouse Name">{details.warehouseName}</Descriptions.Item>
             <Descriptions.Item label="Quantity Available">{details.quantityAvailable}</Descriptions.Item>
             <Descriptions.Item label="Quantity Reserved">{details.quantityReserved}</Descriptions.Item>
+            <Descriptions.Item label="Total Price">${(details.price*details.quantityAvailable).toLocaleString()}</Descriptions.Item>
           </Descriptions>
 
           {/* If you have multiple items in the future, you can use Table */}

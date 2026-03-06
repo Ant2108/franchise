@@ -42,10 +42,10 @@ public class InventoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<InventoryListItemResponse>> getInventoryList(
+    public ResponseEntity<List<InventoryResponse>> getInventoryList(
             @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId
     ) {
-        return ResponseEntity.ok(inventoryService.getInventoryList(warehouseId));
+        return ResponseEntity.ok(invento.getInventoryList(warehouseId));
     }
 
     @PostMapping("/add")

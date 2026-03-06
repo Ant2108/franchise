@@ -1,6 +1,7 @@
 package com.coffee.franchise.api.service;
 
 import com.coffee.franchise.api.dto.Request.InventoryRequest;
+import com.coffee.franchise.api.dto.Response.InventoryListItemResponse;
 import com.coffee.franchise.api.dto.Response.InventoryResponse;
 
 import java.math.BigDecimal;
@@ -11,4 +12,5 @@ public interface InventoryServiceInterface {
     InventoryResponse getItemDetails(UUID item_ID);
     List<InventoryResponse> searchItem(String name);
     InventoryResponse updateItem(UUID id,InventoryRequest request);
+   List<InventoryResponse> getInventoryList(UUID warehouseId);
 }

@@ -15,22 +15,25 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryResponse {
-
+        private UUID inventoryId;
         private UUID warehouseId;
         private String warehouseName;
         private UUID ingredientId;
         private String ingredientName;
         private BigDecimal quantityAvailable;
+        private BigDecimal price;
         private BigDecimal quantityReserved;
         private LocalDateTime lastUpdated;
 
-    public static InventoryResponse fromEntity(Inventory item){
+    public static InventoryResponse fromEntity(Inventory item,BigDecimal price){
         return InventoryResponse.builder()
+                .inventoryId(item.getId())
                 .warehouseId(item.getWarehouse().getId())
                 .warehouseName(item.getWarehouse().getName())
                 .ingredientId(item.getIngredient().getId())
                 .ingredientName(item.getIngredient().getName())
                 .quantityAvailable(item.getQuantityAvailable())
+                .price(price)
                 .quantityReserved(item.getQuantityReserved())
                 .build();
     }
