@@ -18,6 +18,9 @@ import CreateAdminWarehouse from "./features/Warehouse/AdminManager/CreateAdminW
 import "leaflet/dist/leaflet.css";
 import "./index.css";
 import IngredientManage from "./features/Ingredient/IngredientManage";
+import InboundPage from "./features/Inbound/components/InboundPage";
+import CartPage from "./features/Inbound/components/CartPage";
+
 
 function App() {
   return (
