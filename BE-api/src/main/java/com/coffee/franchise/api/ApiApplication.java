@@ -13,7 +13,7 @@ import java.util.TimeZone;
 public class ApiApplication {
 
     public static void main(String[] args) {
-        DotEnvConfig.loadEnv();
+//        DotEnvConfig.loadEnv();
         SpringApplication.run(ApiApplication.class, args);
     }
 
