@@ -1,6 +1,11 @@
+server:
+  port: 8085
+
 spring:
   application:
-    name: api
+    name: warehouse-api
+
+
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:franchise-dtb}?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:root}
@@ -16,3 +21,11 @@ spring:
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
+eureka:
+  client:
+    service-url:
+      defaultZone: https://eureka-server-oonv.onrender.com/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
