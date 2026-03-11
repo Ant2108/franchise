@@ -1,5 +1,6 @@
 package com.coffee.franchise.api.dto.Request;
 
+import com.coffee.franchise.api.entity.SupplierIngredient;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -30,4 +31,6 @@ public class IngredientRequest {
       @Size(min = 5, message = "description must be between 5 and 100 characters")
       @Size(max = 100, message = "description must be between 5 and 100 characters")
       public String description;
+
+
 }

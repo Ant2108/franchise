@@ -8,7 +8,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "supplier_ingredients")
+@Table(
+        name = "supplier_ingredients",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"supplier_id", "ingredient_id"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,6 +39,12 @@ public class SupplierIngredient {
     @Column(name = "minimum_order_quantity")
     private BigDecimal minimumOrderQuantity;
 
+    @Column(name = "stock_quantity")
+    private BigDecimal stockQuantity;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
     @Column(name = "lead_time_days")
     private Integer leadTimeDays;
 
@@ -42,4 +53,16 @@ public class SupplierIngredient {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

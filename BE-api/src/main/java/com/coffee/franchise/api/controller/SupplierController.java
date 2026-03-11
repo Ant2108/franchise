@@ -1,5 +1,6 @@
 package com.coffee.franchise.api.controller;
 
+import com.coffee.franchise.api.dto.Request.SupplierIngredientRequest;
 import com.coffee.franchise.api.dto.Request.SupplierRequest;
 import com.coffee.franchise.api.dto.Response.SupplierIngredientOptionResponse;
 import com.coffee.franchise.api.dto.Response.SupplierMarketplaceItemResponse;
@@ -90,6 +91,15 @@ public class SupplierController {
     @GetMapping("/{id}/ingredients")
     public ResponseEntity<List<SupplierIngredientOptionResponse>> getSupplierIngredients(@PathVariable UUID id) {
         return ResponseEntity.ok(supplierService.getSupplierIngredients(id));
+    }
+
+    @PostMapping("supplier-ingredients")
+    public ResponseEntity<String> addIngredientToSupplier(
+            @Valid @RequestBody SupplierIngredientRequest request) {
+
+        supplierService.addIngredientToSupplier(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Ingredient added to supplier successfully");
     }
 
 

@@ -45,22 +45,32 @@ export default function SupplierAdminManage() {
 
   /* ================= CREATE ================= */
 
-  const handleOpenCreate = () => {
-    createForm.resetFields();
-    setIsCreateOpen(true);
-  };
+const handleOpenCreate = () => {
+  createForm.resetFields();
+  setIsCreateOpen(true);
+};
 
-  const handleCreate = async (values) => {
-    try {
-      await createSupplier(values);
-      message.success("Tạo supplier thành công");
-      setIsCreateOpen(false);
-      fetchSuppliers();
-    } catch (error) {
-      console.error(error);
-      message.error("Tạo supplier thất bại");
-    }
-  };
+const handleCreate = async (values) => {
+  try {
+    await createSupplier(values);
+
+    message.success("Tạo supplier thành công");
+
+    setIsCreateOpen(false);
+    fetchSuppliers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    const msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Tạo supplier thất bại";
+
+    message.error(msg);
+  }
+};
 
   /* ================= EDIT ================= */
 
