@@ -5,15 +5,17 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import java.util.TimeZone;
 
 @SpringBootApplication
+@EnableDiscoveryClient
 public class ApiApplication {
 
-	public static void main(String[] args) {
-        DotEnvConfig.loadEnv();
+    public static void main(String[] args) {
+//        DotEnvConfig.loadEnv();
         SpringApplication.run(ApiApplication.class, args);
-	}
+    }
 
     @PostConstruct
     public void init() {

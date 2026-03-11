@@ -2,6 +2,7 @@ package com.coffee.franchise.api.controller;
 
 import com.coffee.franchise.api.dto.Request.WarehouseRequest;
 import com.coffee.franchise.api.dto.Request.WarehouseUpdateStatusRequest;
+import com.coffee.franchise.api.dto.Response.InventoryListItemResponse;
 import com.coffee.franchise.api.dto.Response.WarehouseResponse;
 import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.WarehouseStatus;
@@ -39,5 +40,9 @@ public class WarehouseController {
     @PatchMapping("/{id}")
     public WarehouseResponse updateStatus(@PathVariable UUID id, @RequestBody WarehouseUpdateStatusRequest request) {
         return warehouseService.updateStatus(id, request.getStatus());
+    }
+    @GetMapping("/{id}/inventory")
+    public List<InventoryListItemResponse>  getInventory(@PathVariable UUID id) {
+        return warehouseService.findInventoryByWarehouseId(id);
     }
 }
