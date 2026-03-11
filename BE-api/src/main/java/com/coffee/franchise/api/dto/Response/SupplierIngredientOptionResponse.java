@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class SupplierIngredientOptionResponse {
+    private String name;
     private UUID ingredientId;
     private String ingredientName;
     private String unit;
