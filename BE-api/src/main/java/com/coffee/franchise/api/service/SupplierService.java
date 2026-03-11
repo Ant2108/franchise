@@ -1,14 +1,17 @@
 package com.coffee.franchise.api.service;
 
+import com.coffee.franchise.api.dto.Request.SupplierIngredientRequest;
 import com.coffee.franchise.api.dto.Request.SupplierRequest;
 import com.coffee.franchise.api.dto.Response.SupplierIngredientOptionResponse;
 import com.coffee.franchise.api.dto.Response.SupplierMarketplaceItemResponse;
 import com.coffee.franchise.api.dto.Response.SupplierResponse;
+import com.coffee.franchise.api.entity.Ingredient;
 import com.coffee.franchise.api.entity.Supplier;
 import com.coffee.franchise.api.entity.SupplierIngredient;
 import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.SupplierIngredientStatus;
 import com.coffee.franchise.api.enums.SupplierStatus;
+import com.coffee.franchise.api.repository.IngredientRepository;
 import com.coffee.franchise.api.repository.SupplierIngredientRepository;
 import com.coffee.franchise.api.repository.SupplierRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
@@ -30,6 +33,9 @@ import java.util.stream.Collectors;
 public class SupplierService {
     @Autowired
     WarehouseRepository warehouseRepository;
+
+    @Autowired
+    IngredientRepository ingredientRepository;
 
     private final SupplierRepository supplierRepository;
     private final SupplierIngredientRepository supplierIngredientRepository;
@@ -212,6 +218,27 @@ public class SupplierService {
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
 
         supplierRepository.delete(supplier);
+    }
+
+    @Transactional
+    public void addIngredientToSupplier(SupplierIngredientRequest request) {
+        Supplier supplier = supplierRepository.findById(request.getSupplierId())
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+
+        Ingredient ingredient = ingredientRepository.findById(request.getIngredientId())
+                .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+
+        SupplierIngredient supplierIngredient = SupplierIngredient.builder()
+                .supplier(supplier)
+                .ingredient(ingredient)
+                .unitPrice(request.getUnitPrice())
+                .minimumOrderQuantity(request.getMinimumOrderQuantity())
+                .stockQuantity(BigDecimal.valueOf(request.getStockQuantity()))
+                .leadTimeDays(request.getLeadTimeDays())
+                .status(request.getStatus())
+                .build();
+
+        supplierIngredientRepository.save(supplierIngredient);
     }
 
 
