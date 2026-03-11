@@ -1,12 +1,14 @@
-
-#root {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100%;
+*{
+  box-sizing:border-box;
 }
-html, body {
-  height: 100%;
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  overflow-x:hidden;
+  scroll-behavior:smooth;
+  font-family:system-ui, -apple-system, sans-serif;
 }
 
 /* @tailwind base;

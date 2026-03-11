@@ -86,5 +86,22 @@ public class InventoryServiceImpl implements InventoryServiceInterface {
     private BigDecimal getTotalPrice(UUID ingID){
         return supplierIngredientRepository.getTotalPriceByIngredientId(ingID);
     }
+    public class InventoryMapper {
+
+        public static InventoryListItemResponse toListItem(Inventory inventory) {
+
+            return InventoryListItemResponse.builder()
+                    .inventoryId(inventory.getId())
+                    .warehouseId(inventory.getWarehouse().getId())
+                    .ingredientId(inventory.getIngredient().getId())
+                    .ingredientName(inventory.getIngredient().getName())
+                    .unit(inventory.getIngredient().getUnit())
+                    .quantityAvailable(inventory.getQuantityAvailable())
+                    .quantityReserved(inventory.getQuantityReserved())
+                    .lastUpdated(inventory.getLastUpdated())
+                    .build();
+        }
+
+    }
 
 }

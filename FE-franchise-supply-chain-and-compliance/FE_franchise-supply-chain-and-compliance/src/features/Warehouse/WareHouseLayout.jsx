@@ -1,33 +1,38 @@
 import "../../styles/warehouse.css";
+import "../../styles/premium-warehouse.css";
 import { Outlet } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import WarehouseSidebar from "./WarehouseSidebar";
 
 const WarehouseLayout = () => {
   return (
-    <div className="wh-layout">
-
+    <div className="pm-layout">
       <WarehouseSidebar />
 
-      <div className="wh-main">
-        <header className="wh-header">
-          <input
-            className="wh-search"
-            placeholder="Search inventory, orders..."
-          />
+      <div className="pm-main">
+        <header className="pm-header">
+          <div className="pm-search-box">
+            <Search size={18} />
+            <input
+              className="pm-search-input"
+              placeholder="Search inventory, orders, products..."
+            />
+          </div>
 
-          <div className="wh-header-right">
-            <Bell size={18} />
-            <div>
-              <strong>Main Warehouse</strong>
-              <p>Los Angeles, CA</p>
+          <div className="pm-header-right">
+            <div className="pm-location-badge">
+              <MapPin size={16} />
+              <div>
+                <strong>Aroma Central Hub</strong>
+                <p>Quận 1, TP. HCM</p>
+              </div>
             </div>
           </div>
         </header>
 
-        <div className="wh-content">
+        <main className="pm-content">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

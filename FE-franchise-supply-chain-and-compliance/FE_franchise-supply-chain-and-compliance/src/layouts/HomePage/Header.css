@@ -1,0 +1,160 @@
+/* ============ HEADER ============ */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(26, 26, 46, 0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.3s;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 80px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* LOGO */
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.logo span {
+  color: #d4a373;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  gap: 32px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: all 0.25s;
+  position: relative;
+}
+
+.nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #d4a373;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.nav a:hover {
+  color: #d4a373;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+/* ACTION BUTTONS */
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.login {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 9px 22px;
+  border-radius: 24px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.login:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.signup {
+  background: linear-gradient(135deg, #d4a373, #c68a53);
+  border: none;
+  padding: 9px 22px;
+  border-radius: 24px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(212,163,115,0.3);
+  transition: all 0.25s;
+}
+
+.signup:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212,163,115,0.4);
+}
+
+/* GLASS EFFECT */
+.glass {
+  position: relative;
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  background: linear-gradient(
+    145deg,
+    rgba(255,255,255,0.15),
+    rgba(255,255,255,0.05)
+  );
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.2),
+    0 16px 48px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  top: -60%; left: -60%;
+  width: 220%; height: 220%;
+  background: linear-gradient(
+    120deg,
+    transparent 35%,
+    rgba(255,255,255,0.15),
+    transparent 65%
+  );
+  transform: rotate(25deg);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* CONTACT INFO (override from homepage) */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .header-container {
+    padding: 14px 24px;
+  }
+  .nav {
+    display: none;
+  }
+}
