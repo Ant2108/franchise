@@ -121,6 +121,7 @@ public class SupplierService {
 
         return supplierIngredients.stream()
                 .map(si -> SupplierIngredientOptionResponse.builder()
+                        .name(si.getSupplier().getName())
                         .ingredientId(si.getIngredient().getId())
                         .ingredientName(si.getIngredient().getName())
                         .unit(si.getIngredient().getUnit())
