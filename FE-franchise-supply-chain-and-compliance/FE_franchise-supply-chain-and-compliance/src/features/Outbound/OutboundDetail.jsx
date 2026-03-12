@@ -58,13 +58,14 @@ const OutboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
         return <Tag color={statusMeta.color}>{statusMeta.label}</Tag>;
     };
 
-    const isCompleted = String(order?.status || "").toUpperCase() === "SHIPPED";
+    const isCompleted = ["DELIVERED", "CANCELED", "CANCELLED"].includes(String(order?.status || "").toUpperCase());
 
     const statusOptions = [
         { value: "PENDING", label: "Chờ xử lý" },
         { value: "PACKING", label: "Đang chuẩn bị hàng" },
-        { value: "SHIPPED", label: "Hoàn thành" },
-        { value: "DELIVERED", label: "Đang vận chuyển" },
+        { value: "SHIPPING", label: "Đang giao hàng" },
+        { value: "DELIVERED", label: "Đã giao hàng" },
+        { value: "CANCELED", label: "Đã hủy" },
     ];
 
     return (

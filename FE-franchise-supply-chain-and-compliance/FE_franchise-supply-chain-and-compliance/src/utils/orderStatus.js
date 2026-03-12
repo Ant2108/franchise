@@ -9,8 +9,9 @@ export const INBOUND_STATUS_CONFIG = {
 export const OUTBOUND_STATUS_CONFIG = {
     PENDING: { label: "Chờ xử lý", color: "orange" },
     PACKING: { label: "Đang chuẩn bị hàng", color: "blue" },
-    DELIVERED: { label: "Đang vận chuyển", color: "cyan" },
-    SHIPPED: { label: "Hoàn thành", color: "green" },
+    SHIPPING: { label: "Đang giao hàng", color: "cyan" },
+    DELIVERED: { label: "Đã giao hàng", color: "green" },
+    CANCELED: { label: "Đã hủy", color: "red" },
     CANCELLED: { label: "Đã hủy", color: "red" },
 };
 
@@ -25,9 +26,9 @@ export const INBOUND_FILTER_STATUS_OPTIONS = [
 export const OUTBOUND_FILTER_STATUS_OPTIONS = [
     { value: "PENDING", label: "Chờ xử lý" },
     { value: "PACKING", label: "Đang chuẩn bị hàng" },
-    { value: "DELIVERED", label: "Đang vận chuyển" },
-    { value: "SHIPPED", label: "Hoàn thành" },
-    { value: "CANCELLED", label: "Đã hủy" },
+    { value: "SHIPPING", label: "Đang giao hàng" },
+    { value: "DELIVERED", label: "Đã giao hàng" },
+    { value: "CANCELED", label: "Đã hủy" },
 ];
 
 const normalizeStatus = (status) => String(status || "").toUpperCase();
