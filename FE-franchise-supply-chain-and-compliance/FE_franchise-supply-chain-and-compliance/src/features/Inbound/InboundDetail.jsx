@@ -91,6 +91,21 @@ const InboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
     };
 
     const isDelivering = String(order?.status || "").toUpperCase() === "DELIVERING";
+    const isPending = String(order?.status || "").toUpperCase() === "PENDING";
+
+    const handleCancelOrder = async () => {
+        setUpdating(true);
+        try {
+            await inboundApi.updateOrderStatus(orderId, "CANCELLED");
+            message.success("Hủy đơn hàng thành công");
+            onStatusUpdated();
+            fetchDetail();
+        } catch (error) {
+            message.error("Lỗi khi hủy đơn hàng: " + (error.response?.data?.message || error.message));
+        } finally {
+            setUpdating(false);
+        }
+    };
 
     const updateItemReceipt = (itemId, partialState) => {
         setItemReceipts((prevState) => ({
@@ -203,19 +218,34 @@ const InboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
                         style={{ marginBottom: 20 }}
                     />
 
-                    {isDelivering && (
-                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                            <Popconfirm
-                                title="Xác nhận cập nhật"
-                                description="Bạn có chắc không?"
-                                okText="Chắc chắn"
-                                cancelText="Hủy"
-                                onConfirm={handleSaveReceipts}
-                            >
-                                <Button type="primary" loading={updating}>
-                                    Lưu số lượng thực nhận
-                                </Button>
-                            </Popconfirm>
+                    {(isDelivering || isPending) && (
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+                            {isPending && (
+                                <Popconfirm
+                                    title="Xác nhận hủy đơn"
+                                    description="Bạn có chắc chắn muốn hủy đơn hàng này không?"
+                                    okText="Có"
+                                    cancelText="Không"
+                                    onConfirm={handleCancelOrder}
+                                >
+                                    <Button danger loading={updating}>
+                                        Hủy đơn
+                                    </Button>
+                                </Popconfirm>
+                            )}
+                            {isDelivering && (
+                                <Popconfirm
+                                    title="Xác nhận cập nhật"
+                                    description="Bạn có chắc không?"
+                                    okText="Chắc chắn"
+                                    cancelText="Hủy"
+                                    onConfirm={handleSaveReceipts}
+                                >
+                                    <Button type="primary" loading={updating}>
+                                        Lưu số lượng thực nhận
+                                    </Button>
+                                </Popconfirm>
+                            )}
                         </div>
                     )}
                 </>

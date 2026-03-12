@@ -1,9 +1,13 @@
 package com.coffee.franchise.api.service.Impl;
 
 import com.coffee.franchise.api.dto.Request.WarehouseRequest;
+import com.coffee.franchise.api.dto.Response.InventoryListItemResponse;
+import com.coffee.franchise.api.dto.Response.InventoryResponse;
 import com.coffee.franchise.api.dto.Response.WarehouseResponse;
+import com.coffee.franchise.api.entity.Inventory;
 import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.WarehouseStatus;
+import com.coffee.franchise.api.repository.InventoryRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
 import com.coffee.franchise.api.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
+    private final InventoryRepository inventoryRepository;
 
     // ================= GET BY ID =================
     @Override
@@ -92,6 +97,16 @@ public class WarehouseServiceImpl implements WarehouseService {
         Warehouse warehouse = findActiveWarehouseOrThrow(id);
         warehouse.setDeleted(true);
         warehouseRepository.save(warehouse);
+    }
+
+    @Override
+    public List<InventoryListItemResponse> findInventoryByWarehouseId(UUID warehouseId) {
+        List<Inventory> inventories = inventoryRepository
+                .findByWarehouseId(warehouseId);
+
+        return inventories.stream()
+                .map(InventoryServiceImpl.InventoryMapper::toListItem)
+                .toList();
     }
 
     // ================= COMMON METHOD =================

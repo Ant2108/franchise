@@ -128,7 +128,9 @@ public class SupplierService {
                         .minimumOrderQuantity(si.getMinimumOrderQuantity())
                         .leadTimeDays(si.getLeadTimeDays())
                         .status(si.getStatus())
-                        .stockQuantity(si.getStockQuantity())
+                        .stockQuantity(si.getStockQuantity() != null ? 
+                                si.getStockQuantity().subtract(si.getReservedQuantity() != null ? si.getReservedQuantity() : BigDecimal.ZERO) 
+                                : null)
                         .build())
                 .collect(Collectors.toList());
     }

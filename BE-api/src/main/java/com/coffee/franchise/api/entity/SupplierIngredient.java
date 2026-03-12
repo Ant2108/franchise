@@ -42,6 +42,10 @@ public class SupplierIngredient {
     @Column(name = "stock_quantity")
     private BigDecimal stockQuantity;
 
+    @Column(name = "reserved_quantity")
+    @Builder.Default
+    private BigDecimal reservedQuantity = BigDecimal.ZERO;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

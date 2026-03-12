@@ -1,7 +1,9 @@
 package com.coffee.franchise.api.service;
 
 import com.coffee.franchise.api.dto.Request.WarehouseRequest;
+import com.coffee.franchise.api.dto.Response.InventoryListItemResponse;
 import com.coffee.franchise.api.dto.Response.WarehouseResponse;
+import com.coffee.franchise.api.entity.Inventory;
 import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.WarehouseStatus;
 
@@ -16,6 +18,7 @@ public interface WarehouseService {
     WarehouseResponse updateStatus(UUID id, WarehouseStatus status);
     List<WarehouseResponse> getAllWarehouses();
     void deleteWarehouse(UUID id);
+    List<InventoryListItemResponse> findInventoryByWarehouseId(UUID warehouseId);
 
 
 
