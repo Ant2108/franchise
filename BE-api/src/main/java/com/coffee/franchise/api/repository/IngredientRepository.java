@@ -3,6 +3,7 @@ package com.coffee.franchise.api.repository;
 import com.coffee.franchise.api.dto.Response.IngredientResponse;
 import com.coffee.franchise.api.entity.Ingredient;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,6 +15,16 @@ public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
     Ingredient findByName(String name);
 
     List<Ingredient> findByNameContainingIgnoreCase(String name);
+
+    @Query("""
+        SELECT i
+        FROM Ingredient i
+        WHERE i.id NOT IN (
+            SELECT si.ingredient.id
+            FROM SupplierIngredient si
+        )
+    """)
+    List<Ingredient> getAvailableIngredients();
 
 
 }

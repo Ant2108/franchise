@@ -39,4 +39,8 @@ public interface SupplierIngredientRepository extends JpaRepository<SupplierIngr
             @Param("ingredientStatus") SupplierIngredientStatus ingredientStatus,
             @Param("supplierStatus") SupplierStatus supplierStatus
     );
+
+    boolean existsBySupplierIdAndIngredientId(UUID supplierId, UUID ingredientId);
+
+    boolean existsByIngredientIdAndSupplierIdNot(UUID ingredientId, UUID supplierId);
 }

@@ -18,4 +18,6 @@ public interface IngredientService {
 
     List<IngredientResponse> getAllIngredients();
 
+    List<IngredientResponse> getAvailableIngredients();
+
 }

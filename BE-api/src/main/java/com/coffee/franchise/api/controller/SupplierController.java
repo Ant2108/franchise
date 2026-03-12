@@ -93,13 +93,16 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.getSupplierIngredients(id));
     }
 
-    @PostMapping("supplier-ingredients")
+    @PostMapping("/supplier-ingredients")
     public ResponseEntity<String> addIngredientToSupplier(
             @Valid @RequestBody SupplierIngredientRequest request) {
-
-        supplierService.addIngredientToSupplier(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Ingredient added to supplier successfully");
+        try {
+            supplierService.addIngredientToSupplier(request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Add ingredient successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 
