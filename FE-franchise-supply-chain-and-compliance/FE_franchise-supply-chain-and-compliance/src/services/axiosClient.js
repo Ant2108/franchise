@@ -1,17 +1,30 @@
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL ;
 
 /**
  * Xử lý response từ fetch, tự động parse JSON và bắt lỗi.
  */
 const handleResponse = async (response) => {
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const message = errorData.message || errorData.error || `Request failed with status ${response.status}`;
-        throw new Error(message);
-    }
-    // Trả về null nếu response rỗng (204 No Content)
-    const text = await response.text();
-    return text ? JSON.parse(text) : null;
+  const text = await response.text();
+
+  // Thử parse JSON nếu có thể
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text || null;
+  }
+
+  if (!response.ok) {
+    const message =
+      data?.message ||
+      data?.error ||
+      (typeof data === "string" ? data : null) ||
+      `Request failed with status ${response.status}`;
+
+    throw new Error(message);
+  }
+
+  return data;
 };
 
 /**
