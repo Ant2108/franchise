@@ -235,6 +235,20 @@ public class SupplierService {
         Ingredient ingredient = ingredientRepository.findById(request.getIngredientId())
                 .orElseThrow(() -> new RuntimeException("Ingredient not found"));
 
+        boolean existedInSameSupplier = supplierIngredientRepository
+                .existsBySupplierIdAndIngredientId(request.getSupplierId(), request.getIngredientId());
+
+        if (existedInSameSupplier) {
+            throw new RuntimeException("Ingredient already exists in this supplier");
+        }
+
+        boolean existedInAnotherSupplier = supplierIngredientRepository
+                .existsByIngredientIdAndSupplierIdNot(request.getIngredientId(), request.getSupplierId());
+
+        if (existedInAnotherSupplier) {
+            throw new RuntimeException("Ingredient already belongs to another supplier");
+        }
+
         SupplierIngredient supplierIngredient = SupplierIngredient.builder()
                 .supplier(supplier)
                 .ingredient(ingredient)

@@ -74,4 +74,12 @@ public class IngredientServiceImpl implements IngredientService {
                 .map(IngredientResponse :: fromEntity)
                 .toList();
     }
+
+    @Override
+    public List<IngredientResponse> getAvailableIngredients() {
+        return ingredientRepo.getAvailableIngredients()
+                .stream()
+                .map(IngredientResponse::fromEntity)
+                .toList();
+    }
 }

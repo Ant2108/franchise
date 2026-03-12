@@ -43,4 +43,8 @@ public class IngredientController {
     ){
         return ResponseEntity.ok(ingredientService.updateIngredient(id,updateIngredientRequest));
     }
+    @GetMapping("/available")
+    public ResponseEntity<List<IngredientResponse>> getAvailableIngredients() {
+        return ResponseEntity.ok(ingredientService.getAvailableIngredients());
+    }
 }
