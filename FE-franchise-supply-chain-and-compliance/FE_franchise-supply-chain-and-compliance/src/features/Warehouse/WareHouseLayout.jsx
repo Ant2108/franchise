@@ -3,12 +3,28 @@ import "../../styles/premium-warehouse.css";
 import { Outlet } from "react-router-dom";
 import { Search, MapPin } from "lucide-react";
 import WarehouseSidebar from "./WarehouseSidebar";
+import { useState, useEffect } from "react";
+import WareHouseAdminAPI from "./AdminManager/AdminWareHousePageAPI/AdminWareHousePageAPI"
 
-const WarehouseLayout = () => {
+
+
+export default function WarehouseLayout() {
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  const id = "11111111-1111-1111-1111-111111111111";
+  useEffect(() => {
+    const fetchWarehouse = async () => {
+      try {
+        const res = await WareHouseAdminAPI.getWarehouseDetail(id);
+        setSelectedWarehouse(res);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchWarehouse();
+  }, [id]);
   return (
     <div className="pm-layout">
       <WarehouseSidebar />
-
       <div className="pm-main">
         <header className="pm-header">
           <div className="pm-search-box">
@@ -23,8 +39,8 @@ const WarehouseLayout = () => {
             <div className="pm-location-badge">
               <MapPin size={16} />
               <div>
-                <strong>Aroma Central Hub</strong>
-                <p>Quận 1, TP. HCM</p>
+                <strong>{selectedWarehouse?.name || "Loading..."}</strong>
+                <p>{selectedWarehouse?.address || "Loading..."}</p>
               </div>
             </div>
           </div>
@@ -38,4 +54,3 @@ const WarehouseLayout = () => {
   );
 };
 
-export default WarehouseLayout;
