@@ -30,7 +30,6 @@ public class IngredientResponse {
                 .ingredientName(ingredient.getName())
                 .unit(ingredient.getUnit())
                 .alertThreshold(ingredient.getAlertThreshold())
-
                 .description(ingredient.getDescription())
                 .build();
     }

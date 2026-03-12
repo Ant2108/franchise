@@ -124,7 +124,11 @@ public class SupplierService {
                         .name(si.getSupplier().getName())
                         .ingredientId(si.getIngredient().getId())
                         .ingredientName(si.getIngredient().getName())
-                        .unit(si.getIngredient().getUnit())
+                        .unitPrice(String.valueOf(si.getUnitPrice()))
+                        .minimumOrderQuantity(si.getMinimumOrderQuantity())
+                        .leadTimeDays(si.getLeadTimeDays())
+                        .status(si.getStatus())
+                        .stockQuantity(si.getStockQuantity())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -234,7 +238,7 @@ public class SupplierService {
                 .ingredient(ingredient)
                 .unitPrice(request.getUnitPrice())
                 .minimumOrderQuantity(request.getMinimumOrderQuantity())
-                .stockQuantity(BigDecimal.valueOf(request.getStockQuantity()))
+                .stockQuantity(request.getStockQuantity())
                 .leadTimeDays(request.getLeadTimeDays())
                 .status(request.getStatus())
                 .build();

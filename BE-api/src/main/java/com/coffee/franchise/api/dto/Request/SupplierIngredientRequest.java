@@ -34,7 +34,7 @@ public class SupplierIngredientRequest {
 
     @NotNull(message = "stockQuantity cannot be null")
     @Positive(message = "stockQuantity must be greater than 0")
-    private Long stockQuantity;
+    private BigDecimal stockQuantity;
 
     @NotNull(message = "leadTimeDays cannot be null")
     @Positive(message = "leadTimeDays must be greater than 0")
