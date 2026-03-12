@@ -3,7 +3,6 @@ import { Table, Button, Tag, Space, Select, Input, message } from "antd";
 import { EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import inboundApi from "../Inbound/InboundAPI/inboundApi";
 import InboundDetail from "../Inbound/InboundDetail";
-import CreateInboundModal from "../Inbound/CreateInboundModal";
 import { INBOUND_FILTER_STATUS_OPTIONS, getInboundStatusMeta } from "../../utils/orderStatus";
 
 const { Option } = Select;
@@ -14,7 +13,6 @@ function WareHouseReceiving() {
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [detailOrderId, setDetailOrderId] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -80,16 +78,8 @@ function WareHouseReceiving() {
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ marginBottom: 20 }}>
         <h1 className="warehouse-title" style={{ margin: 0 }}>Nhập Kho</h1>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
-          onClick={() => setIsCreateModalOpen(true)}
-          size="large"
-        >
-          Tạo đơn nhập
-        </Button>
       </div>
 
       <div style={{ background: "#fff", padding: 24, borderRadius: 8 }}>
@@ -128,12 +118,6 @@ function WareHouseReceiving() {
           onStatusUpdated={() => fetchOrders()}
         />
       )}
-
-      <CreateInboundModal 
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => fetchOrders()}
-      />
     </>
   );
 }

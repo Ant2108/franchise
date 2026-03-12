@@ -79,7 +79,7 @@ const InboundPage = () => {
     try {
       await cartApi.addToCart({
         supplierIngredientId: item.supplierIngredientId,
-        quantity: 1,
+        quantity: item.minimumOrderQuantity || 1,
       });
       message.success(`Đã thêm "${item.ingredientName}" vào giỏ hàng`);
       fetchCart();

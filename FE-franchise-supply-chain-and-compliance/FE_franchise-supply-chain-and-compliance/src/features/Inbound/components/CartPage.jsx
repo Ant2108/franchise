@@ -31,6 +31,35 @@ import cartApi from "../InboundAPI/cartApi";
 
 const { Title, Text } = Typography;
 
+const QuantityInput = ({ initialValue, onSave, disabled }) => {
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        setValue(initialValue);
+    }, [initialValue]);
+
+    const handleSave = () => {
+        if (value && value > 0 && value !== initialValue) {
+            onSave(value);
+        } else {
+            setValue(initialValue);
+        }
+    };
+
+    return (
+        <InputNumber
+            min={1}
+            value={value}
+            disabled={disabled}
+            onChange={(val) => setValue(val)}
+            onBlur={handleSave}
+            onPressEnter={handleSave}
+            size="small"
+            style={{ width: 80 }}
+        />
+    );
+};
+
 const CartPage = () => {
     const navigate = useNavigate();
     const [cartData, setCartData] = useState(null);
@@ -145,16 +174,10 @@ const CartPage = () => {
             width: 140,
             align: "center",
             render: (val, record) => (
-                <InputNumber
-                    min={1}
-                    value={Number(val)}
+                <QuantityInput
+                    initialValue={Number(val)}
                     disabled={updatingItemId === record.cartItemId}
-                    onChange={(newVal) => {
-                        if (newVal && newVal > 0)
-                            handleUpdateQuantity(record.cartItemId, newVal);
-                    }}
-                    size="small"
-                    style={{ width: 80 }}
+                    onSave={(newVal) => handleUpdateQuantity(record.cartItemId, newVal)}
                 />
             ),
         },

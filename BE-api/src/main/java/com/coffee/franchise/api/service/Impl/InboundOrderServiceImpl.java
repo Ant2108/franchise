@@ -81,6 +81,24 @@ public class InboundOrderServiceImpl implements InboundOrderService {
                                                                         + supplierIngredient.getMinimumOrderQuantity());
                                 }
 
+                                BigDecimal availableQuantity = supplierIngredient.getStockQuantity() != null
+                                        ? supplierIngredient.getStockQuantity().subtract(
+                                                supplierIngredient.getReservedQuantity() != null ? supplierIngredient.getReservedQuantity() : BigDecimal.ZERO)
+                                        : null;
+
+                                if (availableQuantity != null &&
+                                                itemReq.getQuantity().compareTo(availableQuantity) > 0) {
+                                        throw new IllegalArgumentException(
+                                                        "Nhà cung cấp không đủ số lượng cho nguyên liệu " + itemReq.getIngredientId()
+                                                                        + ". Có thể đặt tối đa: " + availableQuantity);
+                                }
+
+                                if (supplierIngredient.getReservedQuantity() == null) {
+                                        supplierIngredient.setReservedQuantity(BigDecimal.ZERO);
+                                }
+                                supplierIngredient.setReservedQuantity(supplierIngredient.getReservedQuantity().add(itemReq.getQuantity()));
+                                supplierIngredientRepository.save(supplierIngredient);
+
                                 InboundOrderItem item = InboundOrderItem.builder()
                                                 .inboundOrder(savedOrder)
                                                 .ingredient(ingredientRepository.findById(itemReq.getIngredientId())
@@ -192,6 +210,34 @@ public class InboundOrderServiceImpl implements InboundOrderService {
                         inboundOrderItemRepository.saveAll(orderItems);
                 }
 
+                if (order.getStatus() != InboundOrderStatus.COMPLETED && order.getStatus() != InboundOrderStatus.CANCELLED) {
+                        if (request.getStatus() == InboundOrderStatus.CANCELLED) {
+                                for (InboundOrderItem item : orderItems) {
+                                        supplierIngredientRepository.findBySupplierIdAndIngredientId(order.getSupplier().getId(), item.getIngredient().getId())
+                                                .ifPresent(si -> {
+                                                        if (si.getReservedQuantity() != null) {
+                                                                si.setReservedQuantity(si.getReservedQuantity().subtract(item.getQuantity()).max(BigDecimal.ZERO));
+                                                                supplierIngredientRepository.save(si);
+                                                        }
+                                                });
+                                }
+                        } else if (request.getStatus() == InboundOrderStatus.COMPLETED) {
+                                for (InboundOrderItem item : orderItems) {
+                                        supplierIngredientRepository.findBySupplierIdAndIngredientId(order.getSupplier().getId(), item.getIngredient().getId())
+                                                .ifPresent(si -> {
+                                                        if (si.getReservedQuantity() != null) {
+                                                                si.setReservedQuantity(si.getReservedQuantity().subtract(item.getQuantity()).max(BigDecimal.ZERO));
+                                                        }
+                                                        if (si.getStockQuantity() != null) {
+                                                                BigDecimal received = item.getReceivedQuantity() != null ? item.getReceivedQuantity() : item.getQuantity();
+                                                                si.setStockQuantity(si.getStockQuantity().subtract(received).max(BigDecimal.ZERO));
+                                                        }
+                                                        supplierIngredientRepository.save(si);
+                                                });
+                                }
+                        }
+                }
+
                 // Nếu trạng thái mới là COMPLETED và trạng thái cũ không phải COMPLETED, thì
                 // cập nhật Inventory
                 if (request.getStatus() == InboundOrderStatus.COMPLETED
@@ -274,6 +320,33 @@ public class InboundOrderServiceImpl implements InboundOrderService {
                         BigDecimal totalAmount = BigDecimal.ZERO;
                         for (CartItem cartItem : supplierCartItems) {
                                 SupplierIngredient si = cartItem.getSupplierIngredient();
+
+                                if (si.getMinimumOrderQuantity() != null &&
+                                                cartItem.getQuantity().compareTo(si.getMinimumOrderQuantity()) < 0) {
+                                        throw new IllegalArgumentException(
+                                                        "Số lượng nguyên liệu " + si.getIngredient().getName()
+                                                                        + " phải lớn hơn hoặc bằng mức tối thiểu: "
+                                                                        + si.getMinimumOrderQuantity());
+                                }
+
+                                BigDecimal availableQuantity = si.getStockQuantity() != null
+                                        ? si.getStockQuantity().subtract(
+                                                si.getReservedQuantity() != null ? si.getReservedQuantity() : BigDecimal.ZERO)
+                                        : null;
+
+                                if (availableQuantity != null &&
+                                                cartItem.getQuantity().compareTo(availableQuantity) > 0) {
+                                        throw new IllegalArgumentException(
+                                                        "Nhà cung cấp không đủ số lượng cho nguyên liệu " + si.getIngredient().getName()
+                                                                        + ". Có thể đặt tối đa: " + availableQuantity);
+                                }
+
+                                if (si.getReservedQuantity() == null) {
+                                        si.setReservedQuantity(BigDecimal.ZERO);
+                                }
+                                si.setReservedQuantity(si.getReservedQuantity().add(cartItem.getQuantity()));
+                                supplierIngredientRepository.save(si);
+
                                 InboundOrderItem orderItem = InboundOrderItem.builder()
                                                 .inboundOrder(savedOrder)
                                                 .ingredient(si.getIngredient())
