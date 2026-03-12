@@ -124,7 +124,7 @@ public class SupplierService {
                         .name(si.getSupplier().getName())
                         .ingredientId(si.getIngredient().getId())
                         .ingredientName(si.getIngredient().getName())
-                        .unitPrice(String.valueOf(si.getUnitPrice()))
+                        .unitPrice(si.getUnitPrice())
                         .minimumOrderQuantity(si.getMinimumOrderQuantity())
                         .leadTimeDays(si.getLeadTimeDays())
                         .status(si.getStatus())

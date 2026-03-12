@@ -20,7 +20,10 @@ import "./index.css";
 import IngredientManage from "./features/Ingredient/IngredientManage";
 import InboundPage from "./features/Inbound/components/InboundPage";
 import CartPage from "./features/Inbound/components/CartPage";
-import HomePage from "./layouts/HomePage/HomePage";
+import SupplierCreatePage from "./features/Supplier/SupplierCreatePage";
+import SupplierEditPage from "./features/Supplier/SupplierEditPage";
+import ViewDetailSupplierIngredient from "./features/Supplier/ViewDetailSupplierIngredient";
+
 
 
 function App() {
@@ -33,7 +36,9 @@ function App() {
 
         <Route path="/admin" element={<AdminPage />}>
           <Route path="supplier" element={<SupplierAdminManage />} />
-          <Route path="supplier-category" element={<SupplierAdminCategory />} />
+          <Route path="/admin/supplier/create" element={<SupplierCreatePage />} />
+          <Route path="/admin/supplier/:id/edit" element={<SupplierEditPage />} />
+          <Route path="/admin/supplier/:id/view" element={<ViewDetailSupplierIngredient />} />
           <Route path="inbound" element={<InboundList />} />
           <Route path="outbound" element={<OutboundList />} />
           <Route path="warehouse" element={<AdminWareHousePage />} />

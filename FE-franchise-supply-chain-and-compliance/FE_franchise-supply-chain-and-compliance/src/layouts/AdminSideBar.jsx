@@ -22,15 +22,6 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: <Zap size={20} />,
       items: [
         { name: "Quản Lý", path: "/admin/supplier", icon: <MapPin size={18} /> },
-        { name: "Danh Mục", path: "/admin/WarehouseCategory", icon: <Zap size={18} /> },
-      ]
-    },
-    {
-      type: "folder",
-      name: "Quản lý Indgredient",
-      icon: <Users size={20} />,
-      items: [
-        { name: "Nguyên liệu", path: "/admin/ingredient", icon: <Users size={18} /> },
       ]
     },
     {

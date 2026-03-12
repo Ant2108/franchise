@@ -62,3 +62,15 @@ export const getSupplierIngredients = (id) => {
     return apiClient.get(`/suppliers/${id}/ingredients`);
 };
 
+export const createSupplierIngredients = (data) => {
+    return apiClient.post(`/suppliers/supplier-ingredients`,data)
+};
+
+export const getIngredientAvailable = () => {
+    return apiClient.get(`/ingredients/available`)
+}
+
+export const createIngredient = (data) =>{
+    return apiClient.post(`/ingredients/create`,data)
+}
+

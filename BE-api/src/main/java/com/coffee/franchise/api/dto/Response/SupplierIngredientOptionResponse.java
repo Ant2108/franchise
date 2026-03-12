@@ -1,5 +1,6 @@
 package com.coffee.franchise.api.dto.Response;
 
+import com.coffee.franchise.api.entity.SupplierIngredient;
 import com.coffee.franchise.api.enums.SupplierIngredientStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,13 +17,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class SupplierIngredientOptionResponse {
+    private UUID id;
     private String name;
     private UUID ingredientId;
     private String ingredientName;
-    private String unitPrice;
+    private BigDecimal unitPrice;
     private BigDecimal minimumOrderQuantity;
     private BigDecimal stockQuantity;
     private Integer leadTimeDays;
     private SupplierIngredientStatus status;
+
 
 }

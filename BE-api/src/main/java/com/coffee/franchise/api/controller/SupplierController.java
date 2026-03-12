@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -94,14 +95,17 @@ public class SupplierController {
     }
 
     @PostMapping("/supplier-ingredients")
-    public ResponseEntity<String> addIngredientToSupplier(
+    public ResponseEntity<?> addIngredientToSupplier(
             @Valid @RequestBody SupplierIngredientRequest request) {
         try {
             supplierService.addIngredientToSupplier(request);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Add ingredient successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    Map.of("message", "Add ingredient successfully")
+            );
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", e.getMessage())
+            );
         }
     }
 
