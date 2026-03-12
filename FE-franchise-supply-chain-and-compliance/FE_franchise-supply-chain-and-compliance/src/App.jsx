@@ -23,6 +23,7 @@ import CartPage from "./features/Inbound/components/CartPage";
 import SupplierCreatePage from "./features/Supplier/SupplierCreatePage";
 import SupplierEditPage from "./features/Supplier/SupplierEditPage";
 import ViewDetailSupplierIngredient from "./features/Supplier/ViewDetailSupplierIngredient";
+import HomePage from "./layouts/HomePage/HomePage"
 
 
 
