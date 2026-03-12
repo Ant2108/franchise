@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Tag, Space, Select, Input, message } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, EditOutlined } from "@ant-design/icons";
 import inboundApi from "./InboundAPI/inboundApi";
 import InboundDetail from "./InboundDetail";
-import { INBOUND_FILTER_STATUS_OPTIONS, getInboundStatusMeta } from "../../utils/orderStatus";
+import { INBOUND_FILTER_STATUS_OPTIONS, getInboundStatusMeta} from "../../utils/orderStatus";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -33,6 +33,16 @@ const InboundList = () => {
     useEffect(() => {
         fetchOrders();
     }, [filterStatus]);
+
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            await inboundApi.updateOrderStatus(id, newStatus);
+            message.success(`Cập nhật trạng thái thành công`);
+            fetchOrders();
+        } catch (error) {
+            message.error("Cập nhật trạng thái thất bại: " + (error.response?.data?.message || error.message));
+        }
+    };
 
     const getStatusTag = (status) => {
         const statusMeta = getInboundStatusMeta(status);
@@ -64,6 +74,7 @@ const InboundList = () => {
             key: "expectedDate",
             render: (date) => (date ? new Date(date).toLocaleDateString() : ""),
         },
+        
         {
             title: "Hành động",
             key: "actions",
@@ -76,7 +87,18 @@ const InboundList = () => {
                     >
                         Chi tiết
                     </Button>
+                    {record.status === 'DELIVERING' && (
+                        <Button
+                            type="primary"
+                            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                            icon={<EditOutlined />}
+                            onClick={() => handleStatusChange(record.id, 'COMPLETED')}
+                        >
+                            Xác Nhận Thanh Toán
+                        </Button>
+                    )}
                 </Space>
+
             ),
         },
     ];

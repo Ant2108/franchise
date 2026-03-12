@@ -50,6 +50,7 @@ const CreateInboundModal = ({ open, onClose, onSuccess }) => {
             setIngredients([]);
         }
     };
+    
 
     const handleSupplierChange = (value) => {
         setSelectedSupplierId(value);
