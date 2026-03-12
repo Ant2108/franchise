@@ -10,7 +10,7 @@
 //  @Override
 //  public void addCorsMappings(CorsRegistry registry) {
 //    registry.addMapping("/**") // Cho phép tất cả các API
-//        .allowedOrigins("http://localhost:5173", "http://localhost:5174")
+//        .allowedOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000")
 //        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH") // Cho phép các HTTP methods
 //        .allowedHeaders("*") // Cho phép tất cả các headers
 //        .allowCredentials(true); // Cho phép gửi cookie, authorization headers

@@ -59,7 +59,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
 
                 outboundOrderItemRepository.save(item);
 
-                // Reserve inventory when order is created
+                // Giữ trước số lượng tồn kho khi tạo đơn hàng
                 inventoryService.reserveInventory(savedOrder.getWarehouse().getId(),
                         item.getIngredient().getId(),
                         item.getQuantity());
@@ -99,7 +99,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
         OutboundOrder order = outboundOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("OutboundOrder not found"));
 
-        // If status changes to DELIVERED, confirm the inventory (deduct reserved)
+        // Nếu trạng thái chuyển thành DELIVERED, xác nhận xuất kho (trừ số lượng đã giữ)
         if (request.getStatus() == OutboundOrderStatus.DELIVERED
                 && order.getStatus() != OutboundOrderStatus.DELIVERED) {
             List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
@@ -108,6 +108,20 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
 
             for (OutboundOrderItem item : items) {
                 inventoryService.confirmOutboundInventory(order.getWarehouse().getId(),
+                        item.getIngredient().getId(),
+                        item.getQuantity());
+            }
+        }
+
+        // Nếu trạng thái chuyển thành CANCELED, giải phóng số lượng tồn kho đã giữ
+        if (request.getStatus() == OutboundOrderStatus.CANCELED
+                && order.getStatus() != OutboundOrderStatus.CANCELED) {
+            List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
+                    .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
+                    .collect(Collectors.toList());
+
+            for (OutboundOrderItem item : items) {
+                inventoryService.releaseInventory(order.getWarehouse().getId(),
                         item.getIngredient().getId(),
                         item.getQuantity());
             }
