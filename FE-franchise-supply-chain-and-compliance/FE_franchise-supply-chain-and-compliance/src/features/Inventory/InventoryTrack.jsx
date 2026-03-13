@@ -16,7 +16,7 @@ function InventoryTrack() {
     try {
       setLoading(true);
 
-      const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8085/api';
+      const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://gateway-as5x.onrender.com/api';
       const res = await axios.get(`${baseURL}/inventory/track`, {
         params: { warehouseId, ingredientId },
       });

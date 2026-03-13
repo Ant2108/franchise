@@ -187,6 +187,7 @@ public class    SupplierService {
                         .supplierName(item.getSupplier().getName())
                         .ingredientId(item.getIngredient().getId())
                         .ingredientName(item.getIngredient().getName())
+                        .ingredientImageUrl(item.getIngredient().getImageUrl())
                         .unit(item.getIngredient().getUnit())
                         .unitPrice(item.getUnitPrice())
                         .minimumOrderQuantity(item.getMinimumOrderQuantity())

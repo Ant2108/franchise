@@ -14,6 +14,7 @@ public class SupplierMarketplaceItemResponse {
     private String supplierName;
     private UUID ingredientId;
     private String ingredientName;
+    private String ingredientImageUrl;
     private String unit;
     private BigDecimal unitPrice;
     private BigDecimal minimumOrderQuantity;
