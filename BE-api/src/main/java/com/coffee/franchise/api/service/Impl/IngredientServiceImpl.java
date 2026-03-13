@@ -7,11 +7,14 @@ import com.coffee.franchise.api.dto.Request.UpdateIngredientRequest;
 import com.coffee.franchise.api.entity.Ingredient;
 import com.coffee.franchise.api.exception.AppException;
 import com.coffee.franchise.api.repository.IngredientRepository;
+import com.coffee.franchise.api.service.CloudinaryService;
 import com.coffee.franchise.api.service.IngredientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 @Service
@@ -19,17 +22,25 @@ public class IngredientServiceImpl implements IngredientService {
 
     @Autowired
     private IngredientRepository ingredientRepo;
+    @Autowired
+    CloudinaryService cloudinaryService;
 
     @Override
-    public IngredientResponse createIngredient(IngredientRequest ingredientRequest) {
+    public IngredientResponse createIngredient(IngredientRequest ingredientRequest, MultipartFile image) throws AppException, IOException {
          Ingredient existIngredient = ingredientRepo.findByName(ingredientRequest.getIngredientName());
          if ( existIngredient != null) {
              throw new RuntimeException("Ingredient name already exists");
+         }
+         String imageUrl = null;
+
+         if(image != null && !image.isEmpty()) {
+             imageUrl =  cloudinaryService.uploadImage(image);
          }
 
         Ingredient ingredient = Ingredient.builder()
                 .name(ingredientRequest.getIngredientName())
                 .unit(ingredientRequest.getUnit())
+                .imageUrl(imageUrl)
                 .alertThreshold(ingredientRequest.getAlertThreshold())
                 .description(ingredientRequest.getDescription())
                 .build();

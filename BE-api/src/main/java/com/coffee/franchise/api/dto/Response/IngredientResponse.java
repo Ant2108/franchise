@@ -22,12 +22,14 @@ public class IngredientResponse {
     public String unit;
     public BigDecimal alertThreshold;
     public String description;
+    public String imageUrl;
 
 
     public static IngredientResponse fromEntity(Ingredient ingredient) {
         return IngredientResponse.builder()
                 .id(ingredient.getId())
                 .ingredientName(ingredient.getName())
+                .imageUrl(ingredient.getImageUrl())
                 .unit(ingredient.getUnit())
                 .alertThreshold(ingredient.getAlertThreshold())
                 .description(ingredient.getDescription())

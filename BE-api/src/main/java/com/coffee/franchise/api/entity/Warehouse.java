@@ -62,4 +62,7 @@ public class Warehouse {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

@@ -9,12 +9,16 @@ import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.WarehouseStatus;
 import com.coffee.franchise.api.repository.InventoryRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
+import com.coffee.franchise.api.service.CloudinaryService;
 import com.coffee.franchise.api.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +28,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
     private final InventoryRepository inventoryRepository;
+    @Autowired
+    CloudinaryService cloudinaryService;
 
     // ================= GET BY ID =================
     @Override
@@ -34,7 +40,11 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     // ================= CREATE =================
     @Override
-    public WarehouseResponse createWarehouse(WarehouseRequest request) {
+    public WarehouseResponse createWarehouse(WarehouseRequest request)  {
+           String imageUrl = null;
+
+
+
 
         String generatedCode = generateWarehouseCode();
 
@@ -45,6 +55,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .description(request.getDescription())
+                .imageUrl(imageUrl)
                 .status(request.getStatus() != null
                         ? request.getStatus()
                         : WarehouseStatus.ACTIVE)

@@ -2,6 +2,7 @@ package com.coffee.franchise.api.dto.Request;
 
 import com.coffee.franchise.api.enums.WarehouseStatus;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 

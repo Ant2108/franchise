@@ -19,7 +19,9 @@ import com.coffee.franchise.api.utility.DistanceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -30,12 +32,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class SupplierService {
+public class    SupplierService {
     @Autowired
     WarehouseRepository warehouseRepository;
 
     @Autowired
     IngredientRepository ingredientRepository;
+
+    @Autowired
+    CloudinaryService cloudinaryService;
 
     private final SupplierRepository supplierRepository;
     private final SupplierIngredientRepository supplierIngredientRepository;
@@ -47,11 +52,25 @@ public class SupplierService {
 
     // S18 - Create Supplier
     @Transactional
-    public SupplierResponse createSupplier(SupplierRequest dto) {
+    public SupplierResponse createSupplier(SupplierRequest dto, MultipartFile image) throws IOException {
+        if (image != null) {
+            System.out.println("image name: " + image.getOriginalFilename());
+            System.out.println("image size: " + image.getSize());
+            System.out.println("image type: " + image.getContentType());
+        }
+
+        String imageUrl = null;
+
+        if (image != null && !image.isEmpty()) {
+            imageUrl = cloudinaryService.uploadImage(image);
+        }
+
+
         Supplier supplier = Supplier.builder()
                 .name(dto.getName())
                 .contactName(dto.getContactName())
                 .email(dto.getEmail())
+                .imageUrl(imageUrl)
                 .phone(dto.getPhone())
                 .address(dto.getAddress())
                 .latitude(dto.getLatitude())
@@ -67,9 +86,16 @@ public class SupplierService {
 
     // S20 - Update Supplier
     @Transactional
-    public SupplierResponse updateSupplier(UUID id, SupplierRequest dto) {
+    public SupplierResponse updateSupplier(UUID id, SupplierRequest dto,MultipartFile image) throws IOException {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
+
+
+        if(image != null && !image.isEmpty()) {
+             String imageUrl = cloudinaryService.uploadImage(image);
+             supplier.setImageUrl(imageUrl);
+        }
+
 
         supplier.setName(dto.getName());
         supplier.setContactName(dto.getContactName());
@@ -128,8 +154,9 @@ public class SupplierService {
                         .minimumOrderQuantity(si.getMinimumOrderQuantity())
                         .leadTimeDays(si.getLeadTimeDays())
                         .status(si.getStatus())
-                        .stockQuantity(si.getStockQuantity() != null ? 
-                                si.getStockQuantity().subtract(si.getReservedQuantity() != null ? si.getReservedQuantity() : BigDecimal.ZERO) 
+                        .imageUrl(si.getIngredient().getImageUrl())
+                        .stockQuantity(si.getStockQuantity() != null ?
+                                si.getStockQuantity().subtract(si.getReservedQuantity() != null ? si.getReservedQuantity() : BigDecimal.ZERO)
                                 : null)
                         .build())
                 .collect(Collectors.toList());
@@ -213,6 +240,7 @@ public class SupplierService {
                 .email(supplier.getEmail())
                 .phone(supplier.getPhone())
                 .address(supplier.getAddress())
+                .imageUrl(supplier.getImageUrl())
                 .longitude(supplier.getLongitude())
                 .latitude(supplier.getLatitude())
                 .status(supplier.getStatus())
@@ -223,8 +251,8 @@ public class SupplierService {
     public void deleteSupplier(UUID id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
-
-        supplierRepository.delete(supplier);
+        supplier.setStatus(SupplierStatus.INACTIVE);
+        supplierRepository.save(supplier);
     }
 
     @Transactional
@@ -249,6 +277,8 @@ public class SupplierService {
             throw new RuntimeException("Ingredient already belongs to another supplier");
         }
 
+
+
         SupplierIngredient supplierIngredient = SupplierIngredient.builder()
                 .supplier(supplier)
                 .ingredient(ingredient)
@@ -256,10 +286,25 @@ public class SupplierService {
                 .minimumOrderQuantity(request.getMinimumOrderQuantity())
                 .stockQuantity(request.getStockQuantity())
                 .leadTimeDays(request.getLeadTimeDays())
+
                 .status(request.getStatus())
                 .build();
 
         supplierIngredientRepository.save(supplierIngredient);
+    }
+    public SupplierIngredientOptionResponse mapToResponses(SupplierIngredient entity) {
+        return SupplierIngredientOptionResponse.builder()
+                .id(entity.getId())
+                .name(entity.getSupplier().getName())
+                .imageUrl(entity.getSupplier().getImageUrl())
+                .ingredientId(entity.getIngredient().getId())
+                .ingredientName(entity.getIngredient().getName())
+                .unitPrice(entity.getUnitPrice())
+                .minimumOrderQuantity(entity.getMinimumOrderQuantity())
+                .stockQuantity(entity.getStockQuantity())
+                .leadTimeDays(entity.getLeadTimeDays())
+                .status(entity.getStatus())
+                .build();
     }
 
 

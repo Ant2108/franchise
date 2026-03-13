@@ -25,6 +25,5 @@ public class OutboundOrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
-
     private BigDecimal quantity;
 }

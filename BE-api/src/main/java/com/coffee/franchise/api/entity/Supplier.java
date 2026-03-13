@@ -47,4 +47,7 @@ public class Supplier {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

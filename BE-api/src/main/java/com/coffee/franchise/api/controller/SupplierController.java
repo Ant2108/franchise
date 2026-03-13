@@ -8,9 +8,12 @@ import com.coffee.franchise.api.dto.Response.SupplierResponse;
 import com.coffee.franchise.api.service.SupplierService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,22 +29,24 @@ public class SupplierController {
     }
 
     // CREATE
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SupplierResponse> createSupplier(
-            @Valid @RequestBody SupplierRequest dto) {
+            @Valid @ModelAttribute SupplierRequest dto, @RequestPart(required = false) MultipartFile imageFile) throws IOException {
 
-        SupplierResponse response = supplierService.createSupplier(dto);
+        SupplierResponse response = supplierService.createSupplier(dto, imageFile);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     // UPDATE
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SupplierResponse> updateSupplier(
             @PathVariable UUID id,
-            @Valid @RequestBody SupplierRequest dto) {
+            @Valid @ModelAttribute SupplierRequest dto,
+            @RequestPart(required = false) MultipartFile image
+            ) throws IOException {
 
         return ResponseEntity.ok(
-                supplierService.updateSupplier(id, dto)
+                supplierService.updateSupplier(id, dto, image)
         );
     }
 
@@ -94,9 +99,9 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.getSupplierIngredients(id));
     }
 
-    @PostMapping("/supplier-ingredients")
+    @PostMapping( "/supplier-ingredients")
     public ResponseEntity<?> addIngredientToSupplier(
-            @Valid @RequestBody SupplierIngredientRequest request) {
+            @Valid @ModelAttribute SupplierIngredientRequest request) {
         try {
             supplierService.addIngredientToSupplier(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(

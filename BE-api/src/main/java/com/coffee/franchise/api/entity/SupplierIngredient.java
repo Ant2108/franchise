@@ -3,6 +3,8 @@ package com.coffee.franchise.api.entity;
 import com.coffee.franchise.api.enums.SupplierIngredientStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
