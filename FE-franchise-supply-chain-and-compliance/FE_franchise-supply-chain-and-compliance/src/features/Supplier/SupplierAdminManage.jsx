@@ -1,22 +1,30 @@
 import { useEffect, useState } from "react";
 import {
-  Table,
   Input,
   Button,
-  Modal,
   Tag,
   Spin,
   message,
-  Space,
   Popconfirm,
+  Empty,
+  Pagination,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   getSuppliers,
-  
   deleteSupplier,
 } from "./SupplierAPI/supplierApi";
+import { StarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, PictureOutlined } from "@ant-design/icons";
 import "./SupplierAdminManage.css";
+import supplierImg from "../../assets/supplier-2.jpg";
+const ITEMS_PER_PAGE = 8;
+
+// Mock images array - rotate through for demo
+const MOCK_IMAGES = [
+  supplierImg,
+  supplierImg,
+  supplierImg,
+];
 
 export default function SupplierAdminManage() {
   const navigate = useNavigate();
@@ -24,22 +32,27 @@ export default function SupplierAdminManage() {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
- 
-  
+  // Get mock image for supplier
+  const getMockImage = (index) => {
+    const mockIndex = index % MOCK_IMAGES.length;
+    return MOCK_IMAGES[mockIndex];
+  };
 
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
       const data = await getSuppliers(keyword);
       setSuppliers(data || []);
+      setCurrentPage(1);
     } catch (error) {
-  console.error("Supplier page error:", {
-    url: error?.response?.config?.url,
-    status: error?.response?.status,
-    data: error?.response?.data,
-  });
-  } finally {
+      console.error("Supplier page error:", {
+        url: error?.response?.config?.url,
+        status: error?.response?.status,
+        data: error?.response?.data,
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -56,6 +69,12 @@ export default function SupplierAdminManage() {
     return () => clearTimeout(timeout);
   }, [keyword]);
 
+  // Pagination logic
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedSuppliers = suppliers.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(suppliers.length / ITEMS_PER_PAGE);
+
   const handleDelete = async (id) => {
     try {
       await deleteSupplier(id);
@@ -67,111 +86,162 @@ export default function SupplierAdminManage() {
     }
   };
 
-  const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      width: 100,
-      render: (id) => (typeof id === "string" ? id.slice(0, 8) : id),
-    },
-    {
-      title: "Supplier",
-      dataIndex: "name",
-    },
-    {
-      title: "Người liên hệ",
-      dataIndex: "contactName",
-      render: (val) => val || "—",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      render: (val) => val || "—",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phone",
-      render: (val) => val || "—",
-    },
-    {
-      title: "Nguyên liệu",
-      dataIndex: "categoriesSupplied",
-      render: (val) => (val && val.length > 0 ? val.join(", ") : "—"),
-    },
-    {
-      title: "Rating",
-      dataIndex: "avgRating",
-      render: (val) => <span>⭐ {val || 0}</span>,
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      render: (status) => (
-        <Tag color={status === "ACTIVE" ? "green" : "default"}>
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: "Hành động",
-      render: (_, record) => (
-        <Space>
-          <Button size="small" onClick={() => navigate(`/admin/supplier/${record.id}/view`)}>
-            Xem
-          </Button>
-
-          <Button
-            size="small"
-            type="primary"
-            onClick={() => navigate(`/admin/supplier/${record.id}/edit`)}
-          >
-            Sửa
-          </Button>
-
-          <Popconfirm
-            title="Bạn chắc chắn muốn xóa?"
-            onConfirm={() => handleDelete(record.id)}
-          >
-            <Button size="small" danger>
-              Xóa
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   return (
-    <div className="supplier-page">
-      <div className="header-row">
-        <div>
-          <h2>Supplier Management</h2>
-          <p>Quản lý supplier và đánh giá</p>
+    <div className="supplier-page-grid">
+      {/* Header Section */}
+      <div className="supplier-header">
+        <div className="supplier-header-content">
+          <div>
+            <h1 className="supplier-title">Quản lý Nhà cung cấp</h1>
+            <p className="supplier-subtitle">Danh sách và quản lý các nhà cung cấp</p>
+          </div>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => navigate("/admin/supplier/create")}
+            className="btn-add-supplier"
+          >
+            + Thêm Supplier
+          </Button>
         </div>
 
-        <Button
-          type="primary"
-          onClick={() => navigate("/admin/supplier/create")}
-        >
-          + Thêm Supplier
-        </Button>
+        {/* Search Section */}
+        <div className="supplier-search-section">
+          <Input
+            placeholder="🔍 Tìm kiếm nhà cung cấp..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="supplier-search-input"
+            size="large"
+            prefix={null}
+          />
+        </div>
       </div>
 
-      <Input
-        placeholder="Tìm theo tên supplier..."
-        value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-        className="search-input"
-      />
+      {/* Loading State */}
+      {loading && (
+        <div className="supplier-loading">
+          <Spin size="large" />
+        </div>
+      )}
 
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={suppliers}
-        loading={loading}
-      />
+      {/* Empty State */}
+      {!loading && suppliers.length === 0 && (
+        <div className="supplier-empty">
+          <Empty
+            description="Không có nhà cung cấp"
+            style={{ marginTop: 48 }}
+          />
+        </div>
+      )}
 
-      
+      {/* Supplier Cards Grid */}
+      {!loading && suppliers.length > 0 && (
+        <>
+          <div className="supplier-grid-container">
+            {paginatedSuppliers.map((supplier, index) => (
+              <div key={supplier.id} className="supplier-card" >
+                {/* Card Image Section */}
+                <div
+                  className="supplier-card-image"
+                  onClick={() => navigate(`/admin/supplier/${supplier.id}/view`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {supplier.image ? (
+                    <img src={supplier.image} alt={supplier.name} className="supplier-image" />
+                  ) : (
+                    <img
+                      src={getMockImage(index)}
+                      alt={supplier.name}
+                      className="supplier-image"
+                    />
+                  )}
+                </div>
+
+                {/* Card Header with Status */}
+                <div className="supplier-card-header" onClick={() => navigate(`/admin/supplier/${supplier.id}/view`) }>
+                  <div className="supplier-status-badge">
+                    <Tag
+                      color={supplier.status === "ACTIVE" ? "success" : "default"}
+                      className="supplier-status-tag"
+                    >
+                      {supplier.status}
+                    </Tag>
+                  </div>
+                  <div className="supplier-rating-badge">
+                    <StarOutlined className="star-icon" />
+                    <span className="rating-text">
+                      {(supplier.avgRating || 0).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="supplier-card-body">
+                  <h3
+                    className="supplier-name"
+                    title={supplier.name}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {supplier.name}
+                  </h3>
+
+                  {/* ID Display */}
+                  <div className="supplier-id">
+                    ID: {typeof supplier.id === "string" ? supplier.id.slice(0, 8) : supplier.id}
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="supplier-info">
+                    <div className="info-row">
+                      <span className="info-label">Người liên hệ:</span>
+                      <span className="info-value">{supplier.contactName || "—"}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Email:</span>
+                      <span className="info-value email-text">{supplier.email || "—"}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Điện thoại:</span>
+                      <span className="info-value">{supplier.phone || "—"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="supplier-card-actions">
+                  <Popconfirm>
+                    <Button
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      className="delete-btn"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(supplier.id) }} 
+                    >
+                      Xóa
+                    </Button>
+                  </Popconfirm>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Section */}
+          {totalPages > 1 && (
+            <div className="supplier-pagination-section">
+              <Pagination
+                current={currentPage}
+                total={suppliers.length}
+                pageSize={ITEMS_PER_PAGE}
+                onChange={(page) => setCurrentPage(page)}
+                showSizeChanger={false}
+                showQuickJumper
+                align="center"
+              />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

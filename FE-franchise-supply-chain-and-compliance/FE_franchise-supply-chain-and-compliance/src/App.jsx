@@ -24,6 +24,7 @@ import SupplierCreatePage from "./features/Supplier/SupplierCreatePage";
 import SupplierEditPage from "./features/Supplier/SupplierEditPage";
 import ViewDetailSupplierIngredient from "./features/Supplier/ViewDetailSupplierIngredient";
 import HomePage from "./layouts/HomePage/HomePage"
+import SupplierAddIngredents from "./features/Supplier/SupplierAddIngredents";
 
 
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/admin/supplier/create" element={<SupplierCreatePage />} />
           <Route path="/admin/supplier/:id/edit" element={<SupplierEditPage />} />
           <Route path="/admin/supplier/:id/view" element={<ViewDetailSupplierIngredient />} />
+          <Route path="/admin/supplier/:id/add-ingredient" element={<SupplierAddIngredents />} />
           <Route path="inbound" element={<InboundList />} />
           <Route path="outbound" element={<OutboundList />} />
           <Route path="warehouse" element={<AdminWareHousePage />} />

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Card,
   Table,
   Tag,
   Spin,
@@ -12,9 +11,14 @@ import {
   InputNumber,
   Input,
   Space,
+  Popconfirm,
+  Dropdown,
+  Menu,
+  Tooltip,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, SettingOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined, StarOutlined, DeleteOutlined, EditOutlined, EyeOutlined} from "@ant-design/icons";
+import "./ViewDetailSupplierIngredient.css";
 import {
   getSupplierDetail,
   getSupplierIngredients,
@@ -22,6 +26,7 @@ import {
   getIngredientAvailable,
   createIngredient,
 } from "./SupplierAPI/supplierApi";
+import { Box } from "lucide-react";
 
 const { TextArea } = Input;
 
@@ -156,21 +161,21 @@ const ViewDetailSupplierIngredient = () => {
       ingredientName: selectedIngredient?.label || "—",
       ingredient: selectedIngredient?.raw
         ? {
-            ...selectedIngredient.raw,
-            name:
-              selectedIngredient.raw?.name ||
-              selectedIngredient.raw?.ingredientName ||
-              selectedIngredient?.label,
-            ingredientName:
-              selectedIngredient.raw?.ingredientName ||
-              selectedIngredient.raw?.name ||
-              selectedIngredient?.label,
-          }
+          ...selectedIngredient.raw,
+          name:
+            selectedIngredient.raw?.name ||
+            selectedIngredient.raw?.ingredientName ||
+            selectedIngredient?.label,
+          ingredientName:
+            selectedIngredient.raw?.ingredientName ||
+            selectedIngredient.raw?.name ||
+            selectedIngredient?.label,
+        }
         : {
-            id: values.ingredientId,
-            name: selectedIngredient?.label || "—",
-            ingredientName: selectedIngredient?.label || "—",
-          },
+          id: values.ingredientId,
+          name: selectedIngredient?.label || "—",
+          ingredientName: selectedIngredient?.label || "—",
+        },
       unitPrice: values.unitPrice,
       minimumOrderQuantity: values.minimumOrderQuantity,
       stockQuantity: values.stockQuantity,
@@ -322,6 +327,18 @@ const ViewDetailSupplierIngredient = () => {
       setSubmittingCreateIngredient(false);
     }
   };
+  const actionMenu = (
+    <Menu
+      items={[
+        {
+          key: "edit",
+          icon: <EditOutlined />,
+          label: "Chỉnh sửa supplier",
+          onClick: () => navigate(`/admin/supplier/${id}/edit`),
+        },
+      ]}
+    />
+  );
 
   const columns = [
     {
@@ -370,66 +387,110 @@ const ViewDetailSupplierIngredient = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: 24 }}>
-        <Card>
-          <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
-            <Spin size="large" />
-          </div>
-        </Card>
+      <div className="loading-container">
+        <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 24 }}>
-      <Card style={{ marginBottom: 20 }}>
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate("/admin/supplier")}
-          style={{ marginBottom: 16 }}
-        >
-          Quay lại
-        </Button>
+    <div className="detail-page">
+      <div className="detail-container">
+        {/* Header */}
+        <div className="detail-header">
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate("/admin/supplier")}
+            className="detail-back-btn"
+          >
+            Quay lại
+          </Button>
 
-        <h2>Chi tiết Supplier</h2>
+          <div className="detail-title-section">
+            <div>
+              <h1 className="detail-title">{supplier?.name || "—"}</h1>
+              <p className="detail-subtitle">Quản lý thông tin nhà cung cấp và danh sách nguyên liệu</p>
+            </div>
+            <Tooltip title="Chỉnh sửa supplier" placement="left">
+              <Button
+                shape="circle"
+                icon={<SettingOutlined />}
+                className="supplier-setting-btn"
+                onClick={() => navigate(`/admin/supplier/${id}/edit`)}
+              />
+            </Tooltip>
+          </div>
+        </div>
 
-        <p><b>Tên supplier:</b> {supplier?.name || "—"}</p>
-        <p><b>Người liên hệ:</b> {supplier?.contactName || "—"}</p>
-        <p><b>Email:</b> {supplier?.email || "—"}</p>
-        <p><b>Số điện thoại:</b> {supplier?.phone || "—"}</p>
-        <p><b>Địa chỉ:</b> {supplier?.address || "—"}</p>
-        <p>
-          <b>Trạng thái:</b>{" "}
-          <Tag color={supplier?.status === "ACTIVE" ? "green" : "default"}>
-            {supplier?.status || "—"}
-          </Tag>
-        </p>
-      </Card>
+        {/* Supplier Info Grid */}
+        <div className="info-grid">
+          {/* Contact Name Card */}
+          <div className="info-card">
+            <span className="info-card-label" style={{ display: "block", marginBottom: "12px" }}>Người liên hệ</span>
+            <p className="info-card-value">{supplier?.contactName || "—"}</p>
+          </div>
+          {/* Email Card */}
+          <div className="info-card">
+            <div className="info-card-header">
+              <div className="info-card-icon primary">
+                <MailOutlined />
+              </div>
+              <span className="info-card-label">Email</span>
+            </div>
+            <p className="info-card-value">{supplier?.email || "—"}</p>
+          </div>
 
-      <Card
-        title={`Danh sách nguyên liệu (${ingredients.length})`}
-        extra={
-          <Space>
-            <Button onClick={handleOpenCreateIngredientModal}>
-              Tạo nguyên liệu
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleOpenAddModal}
-            >
-              Thêm nguyên liệu
-            </Button>
-          </Space>
-        }
-      >
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={ingredients}
-          pagination={{ pageSize: 5 }}
-        />
-      </Card>
+          {/* Phone Card */}
+          <div className="info-card">
+            <div className="info-card-header">
+              <div className="info-card-icon accent">
+                <PhoneOutlined />
+              </div>
+              <span className="info-card-label">Số điện thoại</span>
+            </div>
+            <p className="info-card-value">{supplier?.phone || "—"}</p>
+          </div>
+
+          {/* Address Card */}
+          <div className="info-card">
+            <div className="info-card-header">
+              <div className="info-card-icon secondary">
+                <Box />
+              </div>
+              <span className="info-card-label">Tổng Nguyên Liệu Trong Kho</span>
+            </div>
+            <p className="info-card-value">{ingredients.length}</p>
+          </div>
+        </div>
+
+        {/* Ingredients Table Section */}
+        <div className="table-section">
+          <div className="table-header">
+            <h2 className="table-title">Danh sách nguyên liệu</h2>
+            <div className="ingredient-actions">
+              <Button
+                icon={<PlusOutlined />}
+                className="table-btn btn-add"
+                onClick={() => navigate(`/admin/supplier/${id}/add-ingredient`)}
+              >
+                Thêm nguyên liệu
+              </Button>
+
+            </div>
+            
+          </div>
+          <div className="table-wrapper">
+            <Table
+              rowKey="id"
+              columns={columns}
+              dataSource={ingredients}
+              pagination={{ pageSize: 10 }}
+              className="premium-table"
+            />
+          </div>
+        </div>
+      </div>
 
       <Modal
         title="Thêm nguyên liệu cho supplier"
@@ -510,6 +571,7 @@ const ViewDetailSupplierIngredient = () => {
               ]}
             />
           </Form.Item>
+          
         </Form>
       </Modal>
 
