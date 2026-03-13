@@ -187,6 +187,7 @@ public class CartServiceImpl implements CartService {
                 .supplierIngredientId(si.getId())
                 .ingredientId(si.getIngredient().getId())
                 .ingredientName(si.getIngredient().getName())
+                .ingredientImageUrl(si.getIngredient().getImageUrl())
                 .unit(si.getIngredient().getUnit())
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())

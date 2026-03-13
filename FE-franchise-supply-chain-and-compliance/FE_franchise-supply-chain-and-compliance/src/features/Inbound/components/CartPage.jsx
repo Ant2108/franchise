@@ -150,7 +150,37 @@ const CartPage = () => {
             title: "Nguyên liệu",
             dataIndex: "ingredientName",
             key: "ingredientName",
-            render: (text) => <Text strong>{text}</Text>,
+            render: (text, record) => (
+                <Space align="center">
+                    {record.ingredientImageUrl ? (
+                        <img
+                            src={record.ingredientImageUrl}
+                            alt={text}
+                            style={{
+                                width: 48,
+                                height: 48,
+                                objectFit: "cover",
+                                borderRadius: 8,
+                            }}
+                        />
+                    ) : (
+                        <div
+                            style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 8,
+                                background: "#f0f0f0",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <ShoppingOutlined style={{ fontSize: 20, color: "#bfbfbf" }} />
+                        </div>
+                    )}
+                    <Text strong>{text}</Text>
+                </Space>
+            ),
         },
         {
             title: "Đơn vị",

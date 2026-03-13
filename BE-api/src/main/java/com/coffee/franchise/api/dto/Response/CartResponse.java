@@ -40,6 +40,7 @@ public class CartResponse {
         private UUID supplierIngredientId;
         private UUID ingredientId;
         private String ingredientName;
+        private String ingredientImageUrl;
         private String unit;
         private BigDecimal quantity;
         private BigDecimal unitPrice;

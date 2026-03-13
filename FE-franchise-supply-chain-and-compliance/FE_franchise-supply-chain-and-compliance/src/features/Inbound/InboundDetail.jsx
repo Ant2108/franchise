@@ -123,8 +123,8 @@ const InboundDetail = ({ orderId, open, onClose, onStatusUpdated }) => {
             key: "ingredient",
             render: (_, record) => record.ingredientName || `ID: ${record.ingredientId}`,
         },
-        { title: "Đơn vị tính", dataIndex: "unit", key: "unit", render: (_, record) => record.unit || "" },
         { title: "Số lượng yêu cầu", dataIndex: "quantity", key: "quantity" },
+        { title: "Đơn vị tính", dataIndex: "unit", key: "unit", render: (_, record) => record.unit || "" },
         {
             title: "Đã nhận",
             key: "received",

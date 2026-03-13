@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Input,
   Button,
   Card,
-  Badge,
   Pagination,
   Empty,
   Spin,
@@ -14,7 +12,6 @@ import {
   Typography,
   Tag,
   Space,
-  Tooltip,
 } from "antd";
 import {
   ShoppingCartOutlined,
@@ -32,7 +29,6 @@ const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500";
 
 const InboundPage = () => {
-  const navigate = useNavigate();
   const [marketItems, setMarketItems] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +57,7 @@ const InboundPage = () => {
     try {
       const data = await cartApi.getCart();
       setCartData(data);
+      window.dispatchEvent(new CustomEvent("warehouse-cart-updated"));
     } catch (error) {
       console.error("Failed to fetch cart:", error);
       setCartData(null);
@@ -113,31 +110,6 @@ const InboundPage = () => {
     >
       {/* HEADER */}
       <div style={{ flexShrink: 0, marginBottom: 20 }}>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={3} style={{ margin: 0, color: "#1677ff" }}>
-              Inbound Suppliers
-            </Title>
-            <Text type="secondary">Franchise Supply Marketplace</Text>
-          </Col>
-          <Col>
-            <Tooltip title="Xem giỏ hàng">
-              <Badge count={cartCount} overflowCount={99}>
-                <Button
-                  type="text"
-                  icon={
-                    <ShoppingCartOutlined
-                      style={{ fontSize: 24, color: "#1677ff" }}
-                    />
-                  }
-                  onClick={() => navigate("/warehouse/cart")}
-                  style={{ width: 48, height: 48 }}
-                />
-              </Badge>
-            </Tooltip>
-          </Col>
-        </Row>
-
         <Search
           placeholder="Search ingredient or supplier..."
           value={searchKeyword}
@@ -218,7 +190,7 @@ const InboundPage = () => {
                         }}
                       >
                         <img
-                          src={DEFAULT_IMAGE}
+                          src={item.ingredientImageUrl || DEFAULT_IMAGE}
                           alt={item.ingredientName || "ingredient"}
                           style={{
                             width: "100%",
