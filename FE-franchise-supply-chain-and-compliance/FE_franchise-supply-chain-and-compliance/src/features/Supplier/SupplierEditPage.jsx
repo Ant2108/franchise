@@ -127,7 +127,7 @@ if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
       await updateSupplier(id, payload);
 
       message.success("Cập nhật supplier thành công!");
-      navigate("/admin/supplier");
+      navigate(`/admin/supplier/${id}/view`);
     } catch (err) {
       console.error(err?.response?.data || err);
       message.error("Cập nhật supplier thất bại!");
@@ -245,7 +245,7 @@ if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
           <Button
             icon={<ArrowLeftOutlined />}
             className="back-button"
-            onClick={() => navigate("/admin/supplier")}
+            onClick={() => navigate(`/admin/supplier/${id}/view`)}
           >
             Trở Về Danh Sách
           </Button>
@@ -414,7 +414,7 @@ if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
             <div className="form-actions">
               <Button
                 className="cancel-btn"
-                onClick={() => navigate("/admin/supplier")}
+                onClick={() => navigate(`/admin/supplier/${id}/view`)}
               >
                 Hủy Bỏ
               </Button>
