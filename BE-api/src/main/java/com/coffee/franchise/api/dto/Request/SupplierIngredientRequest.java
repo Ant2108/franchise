@@ -42,4 +42,5 @@ public class SupplierIngredientRequest {
 
     @NotNull(message = "status cannot be null")
     private SupplierIngredientStatus status;
+
 }

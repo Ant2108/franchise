@@ -26,6 +26,7 @@ public class SupplierIngredientOptionResponse {
     private BigDecimal stockQuantity;
     private Integer leadTimeDays;
     private SupplierIngredientStatus status;
+    private String imageUrl;
 
 
 }

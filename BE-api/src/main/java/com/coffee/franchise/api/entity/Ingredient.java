@@ -27,4 +27,7 @@ public class Ingredient {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

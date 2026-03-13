@@ -39,5 +39,6 @@ public class InboundOrderResponse {
         private BigDecimal quantity;
         private BigDecimal receivedQuantity;
         private BigDecimal unitPrice;
+        private String imageUrl;
     }
 }

@@ -1,5 +1,6 @@
 package com.coffee.franchise.api.service.Impl;
 
+import com.cloudinary.Cloudinary;
 import com.coffee.franchise.api.dto.Request.OutboundOrderRequest;
 import com.coffee.franchise.api.dto.Response.OutboundOrderResponse;
 import com.coffee.franchise.api.dto.Request.OutboundOrderStatusUpdateRequest;
@@ -10,11 +11,13 @@ import com.coffee.franchise.api.repository.IngredientRepository;
 import com.coffee.franchise.api.repository.OutboundOrderItemRepository;
 import com.coffee.franchise.api.repository.OutboundOrderRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
+import com.coffee.franchise.api.service.CloudinaryService;
 import com.coffee.franchise.api.service.InventoryService;
 import com.coffee.franchise.api.service.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,10 +33,11 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
     private final WarehouseRepository warehouseRepository;
     private final IngredientRepository ingredientRepository;
     private final InventoryService inventoryService;
+    private final CloudinaryService cloudinary;
 
     @Override
     @Transactional
-    public OutboundOrderResponse createOutboundOrder(OutboundOrderRequest request) {
+    public OutboundOrderResponse createOutboundOrder(OutboundOrderRequest request, MultipartFile file) {
         OutboundOrder order = OutboundOrder.builder()
                 .warehouse(warehouseRepository.findById(request.getWarehouseId())
                         .filter(w -> !Boolean.TRUE.equals(w.getDeleted()))
@@ -46,6 +50,8 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                 .build();
 
         OutboundOrder savedOrder = outboundOrderRepository.save(order);
+
+
 
         if (request.getItems() != null && !request.getItems().isEmpty()) {
             request.getItems().forEach(itemReq -> {

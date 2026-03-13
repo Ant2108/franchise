@@ -3,6 +3,7 @@ package com.coffee.franchise.api.dto.Response;
 import com.coffee.franchise.api.enums.SupplierStatus;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,4 +24,5 @@ public class SupplierResponse {
     private SupplierStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String imageUrl;
 }
