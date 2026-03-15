@@ -26,6 +26,8 @@ import ViewDetailSupplierIngredient from "./features/Supplier/ViewDetailSupplier
 import HomePage from "./layouts/HomePage/HomePage"
 import SupplierAddIngredents from "./features/Supplier/SupplierAddIngredents";
 import AdminWareHouseManager from "./features/Warehouse/AdminManager/AdminWareHouseManager";
+import Login from "./features/Auth/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function App() {
@@ -33,10 +35,11 @@ function App() {
       <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<Login />} />
 
         {/* ================= ADMIN ================= */}
 
-        <Route path="/admin" element={<AdminPage />}>
+        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>}>
           <Route path="supplier" element={<SupplierAdminManage />} />
           <Route path="/admin/supplier/create" element={<SupplierCreatePage />} />
           <Route path="/admin/supplier/:id/edit" element={<SupplierEditPage />} />
@@ -52,7 +55,7 @@ function App() {
         </Route>
 
         {/* ================= WAREHOUSE ================= */}
-        <Route path="/warehouse" element={<WarehouseLayout />}>
+        <Route path="/warehouse" element={<ProtectedRoute><WarehouseLayout /></ProtectedRoute>}>
           <Route index element={<WareHouseDashboard />} />
           <Route path="inventory" element={<WareHouseInventory />} />
           <Route path="orders" element={<WareHouseOrders />} />

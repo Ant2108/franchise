@@ -25,10 +25,11 @@ spring:
 
 eureka:
   client:
+    enabled: true
     service-url:
       defaultZone: ${EUREKA_URL:https://eureka-server-oonv.onrender.com/eureka/}
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: true
+    fetch-registry: true
 
   instance:
     hostname: ${RENDER_EXTERNAL_HOSTNAME:localhost}
