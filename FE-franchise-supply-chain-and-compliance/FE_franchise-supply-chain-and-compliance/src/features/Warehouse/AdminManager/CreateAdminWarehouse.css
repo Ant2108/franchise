@@ -1,106 +1,170 @@
+/* ============================= */
+/* PAGE */
+/* ============================= */
+
 .create-page {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: #f3efea;
+  padding: 32px;
+  font-family: "Inter", sans-serif;
 }
 
-.create-hero {
-  background: linear-gradient(90deg, #d9821f, #e2ba84);
-  padding: 28px 0 110px;
-}
+/* ============================= */
+/* TITLE */
+/* ============================= */
 
-.hero-content {
-  width: min(1100px, calc(100% - 40px));
-  margin: 0 auto;
-  color: #fff;
-}
-
-.hero-content h1 {
-  margin: 18px 0 8px;
-  font-size: 34px;
+.create-title {
+  font-size: 48px;
   font-weight: 700;
-  color: #fff;
+  color: #2f2a26;
+  margin-bottom: 30px;
+  letter-spacing: -1px;
+  font-family: "Playfair Display", serif;
+}
+/* HEADER CONTAINER */
+.create-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:28px;
 }
 
-.hero-content p {
-  margin: 0;
-  font-size: 16px;
-  opacity: 0.95;
+/* BACK BUTTON */
+.back-button12{
+  height:42px;
+  padding:0 16px;
+  border-radius:10px;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #e5e5e5;
+  background:#fff;
+  transition:all .2s ease;
 }
 
-.back-button {
-  border-radius: 10px;
-  height: 40px;
+/* HOVER */
+.back-button12:hover{
+  background:#f7f7f7;
+  border-color:#d4d4d4;
 }
+
+/* ============================= */
+/* CONTAINER */
+/* ============================= */
 
 .create-container {
-  width: min(1100px, calc(100% - 40px));
-  margin: -70px auto 0;
-  padding-bottom: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* ============================= */
+/* FORM CARD */
+/* ============================= */
+
 .form-card {
-  border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.08);
 }
+
+/* ============================= */
+/* GRID */
+/* ============================= */
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 30px;
   align-items: start;
 }
 
+/* ============================= */
+/* SECTION */
+/* ============================= */
+
 .section-title {
-  font-size: 30px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #222;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #2f2a26;
 }
 
 .section-divider {
   height: 1px;
   background: #ececec;
-  margin: 28px 0;
+  margin: 30px 0;
 }
 
+/* ============================= */
+/* MAP CARD */
+/* ============================= */
+
 .map-card {
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #ececec;
+  border: 1px solid #e5e5e5;
+  position: relative;
 }
+
+/* ============================= */
+/* COORDINATE */
+/* ============================= */
 
 .coordinate-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 18px;
+  margin-top: 18px;
 }
+
+/* ============================= */
+/* MAP BUTTON */
+/* ============================= */
+
+.map-action {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+}
+
+/* ============================= */
+/* BUTTONS */
+/* ============================= */
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 14px;
+  margin-top: 24px;
 }
 
 .cancel-btn {
   min-width: 110px;
   height: 42px;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .create-btn {
-  min-width: 140px;
+  min-width: 150px;
   height: 42px;
-  border-radius: 12px;
-  background: #d9821f;
-  border-color: #d9821f;
+  border-radius: 10px;
+  background: #000;
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: all .2s;
 }
 
-.create-btn:hover,
-.create-btn:focus {
-  background: #c57416 !important;
-  border-color: #c57416 !important;
+.create-btn:hover {
+  background: #1f1f1f;
+  transform: translateY(-1px);
 }
+
+/* ============================= */
+/* MAP MARKER */
+/* ============================= */
 
 .marker-wrapper {
   position: relative;
@@ -110,8 +174,8 @@
 
 .radar-ring {
   position: absolute;
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   left: 50%;
   top: 18px;
   transform: translate(-50%, -50%);
@@ -129,41 +193,44 @@
   animation: marker-bounce 1.4s infinite;
 }
 
+/* ============================= */
+/* ANIMATION */
+/* ============================= */
+
 @keyframes pulse-ring {
   0% {
     transform: translate(-50%, -50%) scale(0.6);
     opacity: 0.7;
   }
   70% {
-    transform: translate(-50%, -50%) scale(1.3);
+    transform: translate(-50%, -50%) scale(1.4);
     opacity: 0;
   }
   100% {
-    transform: translate(-50%, -50%) scale(1.3);
     opacity: 0;
   }
 }
 
 @keyframes marker-bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
+/* ============================= */
+/* RESPONSIVE */
+/* ============================= */
+
 @media (max-width: 992px) {
-  .form-grid,
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
   .coordinate-grid {
     grid-template-columns: 1fr;
   }
 
-  .hero-content h1 {
-    font-size: 28px;
-  }
-
-  .section-title {
-    font-size: 24px;
+  .create-title {
+    font-size: 32px;
   }
 }

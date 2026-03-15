@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Zap, Users, LogOut, BarChart3, Settings, FileText, MapPin, Ticket,Car, ChevronLeft, ChevronRight,Coins, Clock } from "lucide-react";
+import { Zap, Users, LogOut, BarChart3, Settings, FileText, MapPin, Ticket,Car, ChevronLeft, ChevronRight,Coins, Clock, List, User} from "lucide-react";
 import "./AdminSideBar.css";
 
 const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
@@ -35,10 +35,11 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     {
       type: "folder",
-      name: "Quản lý Warehouse",
+      name: "Warehouse",
       icon: <BarChart3 size={20} />,
       items: [
-        { name: "Quản lý Warehouse", path: "/admin/warehouse", icon: <BarChart3 size={18} /> },
+        { name: "Warehouse List", path: "/admin/warehouse", icon: <List size={18} /> },
+        { name: "Warehouse Manager", path: "/admin/warehouse-manager", icon: <User size={18} /> },
       ]
     },
     {

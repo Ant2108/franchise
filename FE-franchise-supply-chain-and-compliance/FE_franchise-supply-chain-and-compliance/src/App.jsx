@@ -25,12 +25,12 @@ import SupplierEditPage from "./features/Supplier/SupplierEditPage";
 import ViewDetailSupplierIngredient from "./features/Supplier/ViewDetailSupplierIngredient";
 import HomePage from "./layouts/HomePage/HomePage"
 import SupplierAddIngredents from "./features/Supplier/SupplierAddIngredents";
-
+import AdminWareHouseManager from "./features/Warehouse/AdminManager/AdminWareHouseManager";
 
 
 function App() {
   return (
-    <Router>
+      <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
 
@@ -45,6 +45,7 @@ function App() {
           <Route path="inbound" element={<InboundList />} />
           <Route path="outbound" element={<OutboundList />} />
           <Route path="warehouse" element={<AdminWareHousePage />} />
+          <Route path="warehouse-manager" element={<AdminWareHouseManager />} />
           <Route path="warehouse/update/:id" element={<UpdateAdminWarehousePage />} />
           <Route path="warehouse/create" element={<CreateAdminWarehouse />} />
           <Route path="ingredient" element={< IngredientManage />} />
@@ -66,7 +67,7 @@ function App() {
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
 
       </Routes>
-    </Router>
+      </Router>
   );
 }
 
