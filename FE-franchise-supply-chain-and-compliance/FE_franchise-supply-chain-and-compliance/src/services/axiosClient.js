@@ -1,3 +1,4 @@
+import { getCookie } from "../utils/cookieUtils";
 const API_URL = import.meta.env.VITE_API_BASE_URL ;
 
 /**
@@ -33,20 +34,22 @@ const handleResponse = async (response) => {
  */
 const getDefaultHeaders = () => {
     const headers = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     };
 
-    // TẠM THỜI: Lấy warehouse_id từ localStorage hoặc dùng ID mặc định để test
-    const warehouseId = localStorage.getItem('warehouse_id') || '11111111-1111-1111-1111-111111111111';
-    if (warehouseId) {
-        headers['X-Warehouse-Id'] = warehouseId;
+    const token = getCookie("access_token");
+
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
     }
 
-    // TODO: Thêm token nếu có xác thực
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //     headers['Authorization'] = `Bearer ${token}`;
-    // }
+    const warehouseId =
+        localStorage.getItem("warehouse_id") ||
+        "11111111-1111-1111-1111-111111111111";
+
+    if (warehouseId) {
+        headers["X-Warehouse-Id"] = warehouseId;
+    }
 
     return headers;
 };
@@ -62,6 +65,7 @@ const apiClient = {
         const response = await fetch(url, {
             method: 'GET',
             headers: getDefaultHeaders(),
+            credentials: "include",
         });
         return handleResponse(response);
     },
@@ -81,6 +85,7 @@ const apiClient = {
             method: 'POST',
             headers: headers,
             body: isFormData ? data : JSON.stringify(data),
+            credentials: "include"
         });
         return handleResponse(response);
     },
@@ -100,6 +105,7 @@ const apiClient = {
             method: 'PUT',
             headers: headers,
             body: isFormData ? data : JSON.stringify(data),
+            credentials: "include"
         });
         return handleResponse(response);
     },
@@ -108,7 +114,23 @@ const apiClient = {
         const response = await fetch(`${API_URL}${endpoint}`, {
             method: 'DELETE',
             headers: getDefaultHeaders(),
+            credentials: "include"  
         });
+        return handleResponse(response);
+    },
+    patch: async (endpoint, data = {}, params = {}) => {
+        const headers = getDefaultHeaders();
+
+        const query = new URLSearchParams(params).toString();
+        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
+
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+
         return handleResponse(response);
     },
 };

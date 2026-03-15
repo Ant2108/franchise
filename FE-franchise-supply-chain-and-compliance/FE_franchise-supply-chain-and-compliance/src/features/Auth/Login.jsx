@@ -41,6 +41,12 @@ const Login = () => {
 
       // 2. Lưu token vào cookie
       setCookie('access_token', token, 7);
+      await fetch(`${GATEWAY_URL}/auth/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }); 
 
       // 3. Gọi API /me trên Eureka Server (kèm token) → lấy role
       const meRes = await fetch(`${GATEWAY_URL}/auth/me`, {
