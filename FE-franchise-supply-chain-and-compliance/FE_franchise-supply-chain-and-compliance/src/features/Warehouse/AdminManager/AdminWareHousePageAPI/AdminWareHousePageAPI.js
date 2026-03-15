@@ -2,10 +2,12 @@ import apiClient from '../../../../services/axiosClient';
 
 const WareHouseAdminAPI = {
     getAllWarehouses: (params = {}) => {
-        return apiClient.get('/warehouses', { params: params});},
+        return apiClient.get('/warehouses', params);
+    },
 
     getWarehouseDetail: (id) => {
-        return apiClient.get(`/warehouses/${id}/detail`);},
+        return apiClient.get(`/warehouses/${id}/detail`);
+    },
 
     createWarehouse: (data) => {
         return apiClient.post('/warehouses', data);

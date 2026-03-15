@@ -9,6 +9,7 @@ import com.coffee.franchise.api.enums.WarehouseStatus;
 import com.coffee.franchise.api.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,29 +22,32 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WarehouseController {
     private final WarehouseService warehouseService;
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public List<WarehouseResponse> getAllWarehouses() {
         return warehouseService.getAllWarehouses();
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public WarehouseResponse createWarehouse(@RequestBody WarehouseRequest request)  {
         return warehouseService.createWarehouse(request);
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/{id}/detail")
     public WarehouseResponse getWarehouseById(@PathVariable UUID id) {
         return warehouseService.getWarehouse(id);
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public WarehouseResponse updateWarehouse(@PathVariable UUID id, @RequestBody WarehouseRequest request) {
         return warehouseService.updateWarehouse(request, id);
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}")
     public WarehouseResponse updateStatus(@PathVariable UUID id, @RequestBody WarehouseUpdateStatusRequest request) {
         return warehouseService.updateStatus(id, request.getStatus());
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/{id}/inventory")
     public List<InventoryListItemResponse>  getInventory(@PathVariable UUID id) {
         return warehouseService.findInventoryByWarehouseId(id);
