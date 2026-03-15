@@ -66,20 +66,40 @@ const apiClient = {
         return handleResponse(response);
     },
 
-    post: async (endpoint, data = {}) => {
-        const response = await fetch(`${API_URL}${endpoint}`, {
+    post: async (endpoint, data = {}, params = {}) => {
+        const isFormData = data instanceof FormData;
+        const headers = getDefaultHeaders();
+        
+        if (isFormData) {
+            delete headers['Content-Type'];
+        }
+
+        const query = new URLSearchParams(params).toString();
+        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
+
+        const response = await fetch(url, {
             method: 'POST',
-            headers: getDefaultHeaders(),
-            body: JSON.stringify(data),
+            headers: headers,
+            body: isFormData ? data : JSON.stringify(data),
         });
         return handleResponse(response);
     },
 
-    put: async (endpoint, data = {}) => {
-        const response = await fetch(`${API_URL}${endpoint}`, {
+    put: async (endpoint, data = {}, params = {}) => {
+        const isFormData = data instanceof FormData;
+        const headers = getDefaultHeaders();
+
+        if (isFormData) {
+            delete headers['Content-Type'];
+        }
+
+        const query = new URLSearchParams(params).toString();
+        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
+
+        const response = await fetch(url, {
             method: 'PUT',
-            headers: getDefaultHeaders(),
-            body: JSON.stringify(data),
+            headers: headers,
+            body: isFormData ? data : JSON.stringify(data),
         });
         return handleResponse(response);
     },

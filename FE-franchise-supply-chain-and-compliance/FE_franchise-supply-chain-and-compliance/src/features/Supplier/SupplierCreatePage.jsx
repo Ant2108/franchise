@@ -8,9 +8,10 @@ import {
   message,
   InputNumber,
   AutoComplete,
+  Upload,
 } from "antd";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { createSupplier } from "./SupplierAPI/supplierApi";
@@ -67,21 +68,25 @@ const SupplierCreatePage = () => {
     try {
       const values = await form.validateFields();
 
-      const payload = {
-        name: values.name,
-        contactName: values.contactName,
-        email: values.email,
-        phone: values.phone,
-        address: values.address,
-        latitude: Number(values.latitude),
-        longitude: Number(values.longitude),
-        status: values.status,
-      };
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("contactName", values.contactName);
+      formData.append("email", values.email);
+      formData.append("phone", values.phone);
+      formData.append("address", values.address);
+      formData.append("latitude", values.latitude);
+      formData.append("longitude", values.longitude);
+      formData.append("status", values.status);
 
-      console.log("Payload gửi lên BE:", payload);
+      if (values.imageFile && values.imageFile.length > 0) {
+        formData.append("imageFile", values.imageFile[0].originFileObj);
+      }
+
+      console.log("Gửi lên BE - FormData (All fields)");
 
       setLoading(true);
-      await createSupplier(payload);
+      // Gửi thẳng formData, không dùng query params nữa
+      await createSupplier(formData);
 
       message.success("Tạo supplier thành công!");
       navigate("/admin/supplier");
@@ -257,6 +262,27 @@ const SupplierCreatePage = () => {
                     <Option value="ACTIVE">Active</Option>
                     <Option value="INACTIVE">Inactive</Option>
                   </Select>
+                </Form.Item>
+
+                <Form.Item
+                  name="imageFile"
+                  label="Hình Ảnh Supplier"
+                  valuePropName="fileList"
+                  getValueFromEvent={(e) => {
+                    if (Array.isArray(e)) return e;
+                    return e && e.fileList;
+                  }}
+                >
+                  <Upload
+                    listType="picture-card"
+                    maxCount={1}
+                    beforeUpload={() => false}
+                  >
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  </Upload>
                 </Form.Item>
               </div>
 

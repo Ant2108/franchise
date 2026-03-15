@@ -27,8 +27,8 @@ export const getSupplierDetail = (id) => {
 /**
  * Tạo mới supplier.
  */
-export const createSupplier = (data) => {
-    return apiClient.post('/suppliers', data);
+export const createSupplier = (data, params) => {
+    return apiClient.post('/suppliers', data, params);
 };
 
 /**
