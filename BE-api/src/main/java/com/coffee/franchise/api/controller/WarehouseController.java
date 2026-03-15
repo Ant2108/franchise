@@ -21,7 +21,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WarehouseController {
     private final WarehouseService warehouseService;
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<WarehouseResponse> getAllWarehouses() {
         return warehouseService.getAllWarehouses();
