@@ -179,39 +179,41 @@ const CreateAdminWarehouse = () => {
 return (
   <div className="create-page">
 
-    {/* HEADER */}
-    <div className="create-hero">
-      <div className="hero-content">
+    <div className="create-container">
+
+      {/* HEADER */}
+      <div className="create-header">
+
+        <div>
+          <h1 className="create-title">
+            Tạo Kho Hàng
+          </h1>
+        </div>
 
         <Button
           icon={<ArrowLeftOutlined />}
-          className="back-button"
+          className="back-button12"
           onClick={() =>
             navigate("/admin/warehouse", {
-              state: { internalNavigation: true },
+              state: { internalNavigation: true }
             })
           }
         >
-          Trở Về Danh Sách
+          Quay Lại
         </Button>
 
-        <h1>Tạo Kho Hàng Mới</h1>
-        <p>Điền thông tin để tạo kho hàng mới</p>
       </div>
-    </div>
 
-
-    <div className="create-container">
 
       <Card className="form-card">
 
         <Form form={form} layout="vertical">
 
-          {/* GRID TOP */}
+          {/* GRID */}
           <div className="form-grid">
 
-            {/* LEFT */}
-            <div className="form-left">
+            {/* LEFT FORM */}
+            <div>
 
               <div className="section-title">
                 Thông Tin Cơ Bản
@@ -249,29 +251,30 @@ return (
 
 
             {/* RIGHT MAP */}
-            <div className="form-right">
+            <div>
 
               <div className="section-title">
-                Bản Đồ Vị Trí
+                Vị Trí Kho
               </div>
 
               <div className="map-card">
 
                 <MapContainer
-                  center={[16.047079, 108.20623]}
+                  center={position}
                   zoom={15}
-                
                   style={{ height: "360px", width: "100%" }}
                   whenCreated={(map) => {
                     map.on("click", (e) => {
+
                       const { lat, lng } = e.latlng;
 
                       setPosition([lat, lng]);
 
                       form.setFieldsValue({
                         latitude: lat,
-                        longitude: lng,
+                        longitude: lng
                       });
+
                     });
                   }}
                 >
@@ -285,7 +288,7 @@ return (
 
                   <Marker
                     position={position}
-                    draggable={true}
+                    draggable
                     icon={createIcon()}
                     eventHandlers={{
                       dragend: (e) => {
@@ -299,10 +302,10 @@ return (
 
                         form.setFieldsValue({
                           latitude: latlng.lat,
-                          longitude: latlng.lng,
+                          longitude: latlng.lng
                         });
 
-                      },
+                      }
                     }}
                   />
 
@@ -315,40 +318,44 @@ return (
           </div>
 
 
-          {/* DIVIDER */}
           <div className="section-divider" />
 
 
           {/* LOCATION */}
           <div className="section-title">
-            Vị Trí Kho Hàng
+            Địa Chỉ Kho
           </div>
-
 
           <Form.Item
             name="location"
             label="Địa Chỉ"
             rules={[{ required: true, message: "Required" }]}
           >
+
             <AutoComplete
               options={addressOptions}
               onSearch={searchAddress}
               onSelect={onSelectAddress}
               style={{ width: "100%" }}
             >
+
               <Input
                 placeholder="Nhập địa chỉ"
                 addonAfter={
                   <Button
                     onClick={() =>
-                      fetchCoordinates(form.getFieldValue("location"))
+                      fetchCoordinates(
+                        form.getFieldValue("location")
+                      )
                     }
                   >
-                    Tìm Tọa Độ
+                    Tìm
                   </Button>
                 }
               />
+
             </AutoComplete>
+
           </Form.Item>
 
 
@@ -358,18 +365,14 @@ return (
               name="latitude"
               label="Vĩ Độ"
             >
-              <InputNumber
-                style={{ width: "100%" }}
-              />
+              <InputNumber style={{ width: "100%" }} />
             </Form.Item>
 
             <Form.Item
               name="longitude"
               label="Kinh Độ"
             >
-              <InputNumber
-                style={{ width: "100%" }}
-              />
+              <InputNumber style={{ width: "100%" }} />
             </Form.Item>
 
           </div>
@@ -382,21 +385,20 @@ return (
               className="cancel-btn"
               onClick={() =>
                 navigate("/admin/warehouse", {
-                  state: { internalNavigation: true },
+                  state: { internalNavigation: true }
                 })
               }
             >
-              Hủy Bỏ
+              Hủy
             </Button>
 
-            <Button
-              type="primary"
+            <button
               className="create-btn"
-              loading={loading}
+              disabled={loading}
               onClick={handleSubmit}
             >
-              Tạo Kho Hàng
-            </Button>
+              {loading ? "Đang tạo..." : "Tạo Kho Hàng"}
+            </button>
 
           </div>
 

@@ -67,15 +67,6 @@
   margin-top: 20px;
 }
 
-.action-row .ant-btn-primary {
-  background: #d8841c;
-  border-color: #d8841c;
-}
-
-.action-row .ant-btn-primary:hover {
-  background: #bf7417 !important;
-  border-color: #bf7417 !important;
-}
 
 .map-box {
   position: relative;

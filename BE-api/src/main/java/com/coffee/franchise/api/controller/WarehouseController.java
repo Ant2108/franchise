@@ -8,6 +8,7 @@ import com.coffee.franchise.api.entity.Warehouse;
 import com.coffee.franchise.api.enums.WarehouseStatus;
 import com.coffee.franchise.api.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WarehouseController {
     private final WarehouseService warehouseService;
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<WarehouseResponse> getAllWarehouses() {
         return warehouseService.getAllWarehouses();

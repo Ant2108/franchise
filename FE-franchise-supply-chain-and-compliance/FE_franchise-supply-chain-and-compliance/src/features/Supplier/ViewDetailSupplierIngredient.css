@@ -275,15 +275,15 @@
 
 /* Add Ingredient (main button) */
 .btn-add {
-    background: linear-gradient(135deg, #c67117, #E8C595);
+    background: linear-gradient(135deg, black, black);
     color: white;
     border: none;
-    box-shadow: 0 4px 12px rgba(198, 113, 23, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .btn-add:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(198, 113, 23, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* Table Styling */

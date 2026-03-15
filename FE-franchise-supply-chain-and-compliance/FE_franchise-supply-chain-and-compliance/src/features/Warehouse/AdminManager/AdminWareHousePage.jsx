@@ -168,9 +168,8 @@ export default function AdminWareHousePage() {
       >
         <motion.div className="warehouse-header">
           <h1>
-            <FaWarehouse /> Quản lý Kho Hàng
+            Quản lý Kho Hàng
           </h1>
-          <p>Quản lý và giám sát tất cả các kho hàng</p>
         </motion.div>
 
         {loading && <p>Loading...</p>}
@@ -287,7 +286,7 @@ export default function AdminWareHousePage() {
                       </td>
                       <td>
                         <button
-                          className="action-btn edit-btn"
+                          className="action-btn "
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/admin/warehouse/update/${wh.id}`, {

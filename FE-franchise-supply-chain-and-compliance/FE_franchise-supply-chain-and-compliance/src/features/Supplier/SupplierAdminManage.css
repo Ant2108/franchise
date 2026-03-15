@@ -2,9 +2,9 @@
 
 :root {
   --primary-color: #c67117;
-  --primary-hover: #D98324;
+  --primary-hover: #d98324;
   --secondary-color: #f0f4ff;
-  --accent-color: #E8C595;
+  --accent-color: #e8c595;
   --border-color: #e5e7eb;
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
@@ -20,7 +20,6 @@
   min-height: 100vh;
   padding: 32px 24px;
 }
-
 
 /* Header Section */
 .supplier-header {
@@ -46,7 +45,11 @@
   color: var(--text-primary);
   margin: 0 0 8px 0;
   line-height: 1.2;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--accent-color) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -60,7 +63,11 @@
 }
 
 .btn-add-supplier {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--accent-color) 100%
+  ) !important;
   border: none !important;
   font-weight: 600;
   padding: 10px 24px !important;
@@ -278,7 +285,8 @@
   font-size: 11px;
   color: var(--text-secondary);
   margin-bottom: 12px;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+  font-family:
+    "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
   letter-spacing: 0.5px;
   font-weight: 500;
 }
@@ -352,7 +360,11 @@
 }
 
 .edit-btn {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--accent-color) 100%
+  ) !important;
   border: none !important;
   color: white !important;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
@@ -514,55 +526,3 @@
   margin: 0;
 }
 
-.supplier-pagination-section .ant-pagination-item {
-  border-color: var(--border-color);
-  border-radius: 4px;
-  min-width: 32px;
-}
-
-.supplier-pagination-section .ant-pagination-item-active {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.supplier-pagination-section .ant-pagination-item-active a {
-  color: white;
-}
-
-.supplier-pagination-section .ant-pagination-item:not(.ant-pagination-item-active) a {
-  color: var(--text-primary);
-}
-
-.supplier-pagination-section .ant-pagination-item:hover {
-  border-color: var(--primary-color);
-}
-
-.supplier-pagination-section .ant-pagination-item:hover a {
-  color: var(--primary-color);
-}
-
-.supplier-pagination-section .ant-pagination-next,
-.supplier-pagination-section .ant-pagination-prev {
-  border-color: var(--border-color);
-}
-
-.supplier-pagination-section .ant-pagination-next:hover,
-.supplier-pagination-section .ant-pagination-prev:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-/* Ant Design Overrides */
-.ant-tag-success {
-  background-color: #f6ffed;
-  border-color: #b7eb8f;
-  color: var(--success-color);
-}
-
-.ant-empty {
-  color: var(--text-secondary);
-}
-
-.ant-spin {
-  color: var(--primary-color);
-}

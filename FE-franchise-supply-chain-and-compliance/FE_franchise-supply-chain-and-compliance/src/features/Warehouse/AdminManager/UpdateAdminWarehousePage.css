@@ -12,7 +12,7 @@
 /* ================= HEADER ================= */
 .page-header {
   width: 100%;
-  background: linear-gradient(90deg, #D98324, #D98324, #E8C595);
+  background: linear-gradient(90deg, #000000, #000000, #000000);
   padding: 70px 0 120px;
   color: white;
 }
@@ -31,7 +31,7 @@
 /* CODE PILL */
 .code-pill {
   background: white;
-  color: #6a5acd;
+  color: #000000;
   font-size: 24px;
   font-weight: 600;
   padding: 6px 14px;
@@ -204,7 +204,7 @@ textarea {
 .warehouseupdate-page input:focus,
 .warehouseupdate-page select:focus,
 .warehouseupdate-page textarea:focus {
-  border-color: #D98324;
+  border-color: #000000;
   outline: none;
   background: white;
   box-shadow: 0 0 0 3px rgba(217, 131, 36, 0.15);
@@ -226,7 +226,7 @@ textarea {
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #D98324, #D98324, #E8C595);
+  background: linear-gradient(135deg, #000000, #000000, #000000);
   color: white;
   border: none;
   padding: 13px 32px;
