@@ -14,17 +14,10 @@ import {
   getSuppliers,
   deleteSupplier,
 } from "./SupplierAPI/supplierApi";
-import { StarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, PictureOutlined } from "@ant-design/icons";
-import "./SupplierAdminManage.css";
-import supplierImg from "../../assets/supplier-2.jpg";
+import { StarOutlined, DeleteOutlined, PictureOutlined } from "@ant-design/icons";
 const ITEMS_PER_PAGE = 8;
 
-// Mock images array - rotate through for demo
-const MOCK_IMAGES = [
-  supplierImg,
-  supplierImg,
-  supplierImg,
-];
+import "./SupplierAdminManage.css";
 
 export default function SupplierAdminManage() {
   const navigate = useNavigate();
@@ -34,11 +27,7 @@ export default function SupplierAdminManage() {
   const [keyword, setKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Get mock image for supplier
-  const getMockImage = (index) => {
-    const mockIndex = index % MOCK_IMAGES.length;
-    return MOCK_IMAGES[mockIndex];
-  };
+
 
   const fetchSuppliers = async () => {
     try {
@@ -147,14 +136,16 @@ export default function SupplierAdminManage() {
                   onClick={() => navigate(`/admin/supplier/${supplier.id}/view`)}
                   style={{ cursor: "pointer" }}
                 >
-                  {supplier.image ? (
-                    <img src={supplier.image} alt={supplier.name} className="supplier-image" />
-                  ) : (
-                    <img
-                      src={getMockImage(index)}
-                      alt={supplier.name}
-                      className="supplier-image"
+                  {supplier.imageUrl || supplier.image ? (
+                    <img 
+                      src={supplier.imageUrl || supplier.image} 
+                      alt={supplier.name} 
+                      className="supplier-image" 
                     />
+                  ) : (
+                    <div className="supplier-image-placeholder">
+                      <PictureOutlined />
+                    </div>
                   )}
                 </div>
 
