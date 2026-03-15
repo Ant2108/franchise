@@ -49,7 +49,6 @@ const SupplierEditPage = () => {
   const createIcon = () => {
     const html = `
       <div class="marker-wrapper">
-        <div class="radar-ring radar-active"></div>
         <div class="bounce">
           <svg width="36" height="48" viewBox="0 0 36 48">
             <path
