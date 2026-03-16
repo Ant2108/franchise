@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Boxes,
@@ -9,8 +9,20 @@ import {
   Bell,
   LogOut
 } from "lucide-react";
+import { removeCookie, removeUserRoles } from "../../utils/cookieUtils";
 
 const WarehouseSidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+      removeCookie("access_token");
+      removeCookie("refresh_token");
+      removeUserRoles();
+      navigate("/login");
+    }
+  };
+
   return (
     <aside className="pm-sidebar">
       {/* Brand Logo */}
@@ -80,7 +92,7 @@ const WarehouseSidebar = () => {
             <span className="pm-user-name">Admin User</span>
             <span className="pm-user-role">Manager</span>
           </div>
-          <button className="pm-logout-btn">
+          <button className="pm-logout-btn" onClick={handleLogout}>
             <LogOut size={16} />
           </button>
         </div>

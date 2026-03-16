@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+
 
 @Entity
 @Table(name = "inbound_orders")
@@ -39,4 +41,8 @@ public class InboundOrder {
 
     @Column(name = "actual_date")
     private LocalDateTime actualDate;
+
+    @OneToMany(mappedBy = "inboundOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InboundOrderItem> items;
 }
+

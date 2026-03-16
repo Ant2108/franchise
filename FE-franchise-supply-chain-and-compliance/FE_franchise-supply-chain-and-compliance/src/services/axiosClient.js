@@ -1,138 +1,172 @@
-import { getCookie } from "../utils/cookieUtils";
-const API_URL = import.meta.env.VITE_API_BASE_URL ;
+import axios from 'axios';
+import { getCookie, setCookie, removeCookie, removeUserRoles } from '../utils/cookieUtils';
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
- * Xử lý response từ fetch, tự động parse JSON và bắt lỗi.
+ * Tạo Axios instance với cấu hình mặc định
  */
-const handleResponse = async (response) => {
-  const text = await response.text();
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
 
-  // Thử parse JSON nếu có thể
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text || null;
-  }
+let isRefreshing = false;
+let failedQueue = [];
 
-  if (!response.ok) {
-    const message =
-      data?.message ||
-      data?.error ||
-      (typeof data === "string" ? data : null) ||
-      `Request failed with status ${response.status}`;
-
-    throw new Error(message);
-  }
-
-  return data;
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
 };
 
 /**
- * Tạo headers mặc định cho mỗi request.
- * Có thể mở rộng thêm Authorization token ở đây.
+ * Request Interceptor - Thêm token vào mỗi request
  */
-const getDefaultHeaders = () => {
-    const headers = {
-        "Content-Type": "application/json",
-    };
-
-    const token = getCookie("access_token");
-
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getCookie('access_token');
+    
     if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
-    const warehouseId =
-        localStorage.getItem("warehouse_id") ||
-        "11111111-1111-1111-1111-111111111111";
-
+    const warehouseId = localStorage.getItem('warehouse_id') || '11111111-1111-1111-1111-111111111111';
     if (warehouseId) {
-        headers["X-Warehouse-Id"] = warehouseId;
+      config.headers['X-Warehouse-Id'] = warehouseId;
     }
 
-    return headers;
-};
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 /**
- * API Client dùng chung cho toàn dự án.
- * Cung cấp các method: get, post, put, delete.
+ * Response Interceptor - Xử lý lỗi tập trung và token refresh
+ */
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = getCookie('refresh_token');
+        
+        if (!refreshToken) {
+          // Tránh lặp vô hạn nếu không có refresh token
+          throw new Error('No refresh token available');
+        }
+
+        const response = await axios.post(`${API_URL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        const { accessToken, refreshToken: newRefreshToken } = response.data.result || response.data;
+        
+        if (accessToken) {
+          setCookie('access_token', accessToken, 7);
+          if (newRefreshToken) {
+            setCookie('refresh_token', newRefreshToken, 7);
+          }
+          processQueue(null, accessToken);
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return axiosInstance(originalRequest);
+        }
+        
+        throw new Error('Failed to refresh token');
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        
+        // Dọn dẹp sạch sẽ khi không thể refresh
+        removeCookie('access_token');
+        removeCookie('refresh_token');
+        removeUserRoles();
+        
+        // Chỉ redirect nếu không phải đang ở trang login
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+/**
+ * API Client wrapper với các method tiện lợi
  */
 const apiClient = {
-    get: async (endpoint, params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: getDefaultHeaders(),
-            credentials: "include",
-        });
-        return handleResponse(response);
-    },
+  get: async (endpoint, params = {}, config = {}) => {
+    const response = await axiosInstance.get(endpoint, { ...config, params });
+    return response.data;
+  },
 
-    post: async (endpoint, data = {}, params = {}) => {
-        const isFormData = data instanceof FormData;
-        const headers = getDefaultHeaders();
-        
-        if (isFormData) {
-            delete headers['Content-Type'];
-        }
+  post: async (endpoint, data = {}, config = {}) => {
+    const isFormData = data instanceof FormData;
+    const headers = isFormData ? {} : undefined;
+    
+    const response = await axiosInstance.post(endpoint, data, {
+      ...config,
+      headers: { ...config.headers, ...headers },
+    });
+    return response.data;
+  },
 
-        const query = new URLSearchParams(params).toString();
-        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
+  put: async (endpoint, data = {}, config = {}) => {
+    const isFormData = data instanceof FormData;
+    const headers = isFormData ? {} : undefined;
+    
+    const response = await axiosInstance.put(endpoint, data, {
+      ...config,
+      headers: { ...config.headers, ...headers },
+    });
+    return response.data;
+  },
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: isFormData ? data : JSON.stringify(data),
-            credentials: "include"
-        });
-        return handleResponse(response);
-    },
+  patch: async (endpoint, data = {}, config = {}) => {
+    const response = await axiosInstance.patch(endpoint, data, config);
+    return response.data;
+  },
 
-    put: async (endpoint, data = {}, params = {}) => {
-        const isFormData = data instanceof FormData;
-        const headers = getDefaultHeaders();
-
-        if (isFormData) {
-            delete headers['Content-Type'];
-        }
-
-        const query = new URLSearchParams(params).toString();
-        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
-
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: headers,
-            body: isFormData ? data : JSON.stringify(data),
-            credentials: "include"
-        });
-        return handleResponse(response);
-    },
-
-    delete: async (endpoint) => {
-        const response = await fetch(`${API_URL}${endpoint}`, {
-            method: 'DELETE',
-            headers: getDefaultHeaders(),
-            credentials: "include"  
-        });
-        return handleResponse(response);
-    },
-    patch: async (endpoint, data = {}, params = {}) => {
-        const headers = getDefaultHeaders();
-
-        const query = new URLSearchParams(params).toString();
-        const url = query ? `${API_URL}${endpoint}?${query}` : `${API_URL}${endpoint}`;
-
-        const response = await fetch(url, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify(data),
-            credentials: "include"
-        });
-
-        return handleResponse(response);
-    },
+  delete: async (endpoint, config = {}) => {
+    const response = await axiosInstance.delete(endpoint, config);
+    return response.data;
+  },
 };
 
 export default apiClient;

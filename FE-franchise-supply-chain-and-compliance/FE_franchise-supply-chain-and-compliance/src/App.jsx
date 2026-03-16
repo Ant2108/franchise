@@ -28,6 +28,7 @@ import SupplierAddIngredents from "./features/Supplier/SupplierAddIngredents";
 import AdminWareHouseManager from "./features/Warehouse/AdminManager/AdminWareHouseManager";
 import Login from "./features/Auth/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 
 function App() {
@@ -39,7 +40,7 @@ function App() {
 
         {/* ================= ADMIN ================= */}
 
-        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>}>
+        <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['ADMIN']}><AdminPage /></RoleProtectedRoute>}>
           <Route path="supplier" element={<SupplierAdminManage />} />
           <Route path="/admin/supplier/create" element={<SupplierCreatePage />} />
           <Route path="/admin/supplier/:id/edit" element={<SupplierEditPage />} />
@@ -55,7 +56,7 @@ function App() {
         </Route>
 
         {/* ================= WAREHOUSE ================= */}
-        <Route path="/warehouse" element={<ProtectedRoute><WarehouseLayout /></ProtectedRoute>}>
+        <Route path="/warehouse" element={<RoleProtectedRoute allowedRoles={['WAREHOUSE_MANAGER']}><WarehouseLayout /></RoleProtectedRoute>}>
           <Route index element={<WareHouseDashboard />} />
           <Route path="inventory" element={<WareHouseInventory />} />
           <Route path="orders" element={<WareHouseOrders />} />

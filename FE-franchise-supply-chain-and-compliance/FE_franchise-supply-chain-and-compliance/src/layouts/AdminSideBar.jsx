@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Zap, Users, LogOut, BarChart3, Settings, FileText, MapPin, Ticket,Car, ChevronLeft, ChevronRight,Coins, Clock, List, User} from "lucide-react";
+import { removeCookie, removeUserRoles } from "../utils/cookieUtils";
 import "./AdminSideBar.css";
 
 const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const [openFolders, setOpenFolders] = useState({});
+  const navigate = useNavigate();
 
   const toggleFolder = (folderName) => {
     if (isCollapsed) setIsCollapsed(false);
@@ -155,8 +157,10 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
           className="logout-btn"
           onClick={() => {
             if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-              localStorage.removeItem("token");
-              window.location.href = "/login";
+              removeCookie("access_token");
+              removeCookie("refresh_token");
+              removeUserRoles();
+              navigate("/login");
             }
           }}
         >
