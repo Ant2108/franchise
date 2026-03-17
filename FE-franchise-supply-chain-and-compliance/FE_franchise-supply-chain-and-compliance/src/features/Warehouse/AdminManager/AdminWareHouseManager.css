@@ -304,8 +304,9 @@
   flex:1;
   padding:8px;
   border-radius:8px;
-  border:1px solid #e2e8f0;
+  border:1px solid #e4703f;
   background:white;
+  color: #fc4a2a;
   cursor:pointer;
   display:flex;
   align-items:center;
@@ -319,7 +320,7 @@
 
 .warehouse-manager-btn.delete:hover{
   background:#fee2e2;
-  border-color:#f87171;
+  border-color:#f62929;
 }
 /* PAGINATION */
 
