@@ -19,7 +19,7 @@ const WarehouseSidebar = () => {
       removeCookie("access_token");
       removeCookie("refresh_token");
       removeUserRoles();
-      localStorage.removeItem('warehouse_id');
+      removeCookie("warehouse_id");
       navigate("/login");
     }
   };
