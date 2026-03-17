@@ -135,13 +135,13 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Warehouse warehouse = findActiveWarehouseOrThrow(warehouseId);
 
-        // ✅ Unassign
+        // Unassign
         if (managerId == null) {
             warehouse.setManagerId(null);
             return mapToResponse(warehouseRepository.save(warehouse));
         }
 
-        // ✅ Check manager đang ở warehouse khác
+        // Check manager đang ở warehouse khác
         Warehouse currentWarehouseOfManager = warehouseRepository
                 .findByManagerIdAndDeletedFalse(managerId)
                 .orElse(null);
@@ -156,12 +156,12 @@ public class WarehouseServiceImpl implements WarehouseService {
                 );
             }
 
-            // 👉 remove khỏi warehouse cũ
+            // remove khỏi warehouse cũ
             currentWarehouseOfManager.setManagerId(null);
             warehouseRepository.save(currentWarehouseOfManager);
         }
 
-        // ✅ Check warehouse đã có manager chưa
+        // Check warehouse đã có manager chưa
         if (warehouse.getManagerId() != null &&
                 !warehouse.getManagerId().equals(managerId)) {
 
@@ -173,10 +173,19 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
         }
 
-        // ✅ Assign
+        // Assign
         warehouse.setManagerId(managerId);
 
         return mapToResponse(warehouseRepository.save(warehouse));
+    }
+    public WarehouseResponse getByManagerId(UUID warehouseId) {
+        Warehouse warehouse = warehouseRepository
+                .findByManagerIdAndDeletedFalse(warehouseId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Manager chưa được assign warehouse"
+                ));
+        return mapToResponse(warehouse);
     }
 
     // ================= MAPPER =================
