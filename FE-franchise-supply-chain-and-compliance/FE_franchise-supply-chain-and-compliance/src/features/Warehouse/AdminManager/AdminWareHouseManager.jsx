@@ -176,23 +176,13 @@ const AdminWareHouseManagers = () => {
               {/* BUTTONS */}
               <div className="warehouse-manager-buttons">
                 <button
-                  className="warehouse-manager-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Optional: handle edit navigation here if distinct from detail
-                  }}
-                >
-                  <FaEdit /> Edit
-                </button>
-
-                <button
                   className="warehouse-manager-btn delete"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(warehouse.id);
                   }}
                 >
-                  <FaTrash /> Delete
+                  <FaTrash /> Đuổi Việc!
                 </button>
               </div>
             </div>

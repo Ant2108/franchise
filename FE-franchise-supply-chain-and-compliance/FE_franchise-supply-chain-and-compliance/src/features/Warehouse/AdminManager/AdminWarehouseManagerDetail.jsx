@@ -151,12 +151,14 @@ const AdminWarehouseManagerDetail = () => {
 
     } catch (err) {
       const status = err.response?.status;
-      // Nếu vẫn lọt qua (do data local chưa update kịp), vẫn chặn log lỗi conflict
-      if (status === 409 || status === 500) {
+      
+      // Nếu là lỗi conflict (409/500) VÀ chúng ta chưa confirm
+      if (!confirmReplace && (status === 409 || status === 500)) {
         setShowReplaceConfirm(true);
       } else {
+        // Đây mới thực sự là lỗi API nghiêm trọng (Network, Validation, hoặc Server crash thật)
         console.error("❌ Assignment Error:", err);
-        message.error(err.response?.data?.message || "Something went wrong");
+        message.error(err.response?.data?.message || "Something went wrong. Please check backend logs.");
       }
     } finally {
       setIsAssigning(false);
