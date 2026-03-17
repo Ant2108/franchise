@@ -12,10 +12,12 @@ import {
   FaWarehouse,
   FaCalendarAlt,
   FaEdit,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import "./AdminWarehouseManagerDetail.css";
 import { AdminWareHouseManager } from "./AdminWareHousePageAPI/AdminWareHouseManager";
 import WareHouseAdminAPI from "./AdminWareHousePageAPI/AdminWareHousePageAPI";
+import { message } from "antd";
 
 const AdminWarehouseManagerDetail = () => {
   const { id } = useParams();
@@ -79,8 +81,60 @@ const AdminWarehouseManagerDetail = () => {
     fetchInitialData();
   }, [id]);
 
+  const refreshData = async () => {
+    try {
+      const [managersRes, warehousesRes] = await Promise.all([
+        AdminWareHouseManager.getWarehouseManagers(),
+        WareHouseAdminAPI.getAllWarehouses()
+      ]);
+
+      const rawData = managersRes?.result?.content || [];
+      const warehousesList = Array.isArray(warehousesRes) ? warehousesRes : [];
+      setAllWarehouses(warehousesList);
+
+      const selectedManager = rawData.find((m) => String(m.id) === String(id));
+      if (selectedManager) {
+        setManager({
+          id: selectedManager.id,
+          firstName: selectedManager.firstName || "N/A",
+          lastName: selectedManager.lastName || "N/A",
+          fullName: `${selectedManager.firstName || ""} ${selectedManager.lastName || ""}`,
+          email: selectedManager.email || "N/A",
+          phone: selectedManager.phoneNumber || "N/A",
+          status: selectedManager.status?.toLowerCase() || "inactive",
+          role: selectedManager.roles?.[0]?.name || "Warehouse Manager",
+          createdAt: selectedManager.createdAt || "N/A",
+        });
+
+        const assigned = warehousesList.find(w => String(w.managerId) === String(id));
+        setAssignedWarehouse(assigned);
+        if (assigned) setSelectedWarehouseId(assigned.id);
+      }
+    } catch (err) {
+      console.error("❌ Error refreshing data:", err);
+    }
+  };
+
   const handleAssign = async (confirmReplace = false) => {
     if (!selectedWarehouseId) return;
+
+    // Chặn đứng mọi khả năng gây lỗi 500/409 trước khi gọi API
+    if (!confirmReplace) {
+      const targetWarehouse = allWarehouses.find(w => String(w.id) === String(selectedWarehouseId));
+      const targetManagerId = targetWarehouse?.managerId ? String(targetWarehouse.managerId) : null;
+      const currentManagerId = String(id);
+
+      // 1. Check Kho đích đã có Manager khác chưa
+      const isWarehouseOccupied = targetManagerId && targetManagerId !== currentManagerId;
+      
+      // 2. Check Manager hiện tại đã quản lý kho nào chưa (Switching logic)
+      const isManagerAlreadyAssigned = assignedWarehouse && String(assignedWarehouse.id) !== String(selectedWarehouseId);
+
+      if (isWarehouseOccupied || isManagerAlreadyAssigned) {
+        setShowReplaceConfirm(true);
+        return; // Dừng lại ở đây, không gọi API -> Console sạch sẽ
+      }
+    }
 
     setIsAssigning(true);
     try {
@@ -91,20 +145,19 @@ const AdminWarehouseManagerDetail = () => {
       );
 
       await refreshData();
-
       setIsModalOpen(false);
       setShowReplaceConfirm(false);
+      message.success("Warehouse assigned successfully!");
 
     } catch (err) {
-      console.error("❌ Assignment Error:", err);
-
-      if (err.response?.status === 409) {
-        // 👉 show confirm popup
+      const status = err.response?.status;
+      // Nếu vẫn lọt qua (do data local chưa update kịp), vẫn chặn log lỗi conflict
+      if (status === 409 || status === 500) {
         setShowReplaceConfirm(true);
-        return;
+      } else {
+        console.error("❌ Assignment Error:", err);
+        message.error(err.response?.data?.message || "Something went wrong");
       }
-
-      alert(err.response?.data?.message || "Something went wrong");
     } finally {
       setIsAssigning(false);
     }
@@ -117,16 +170,18 @@ const AdminWarehouseManagerDetail = () => {
 
       await WareHouseAdminAPI.assignManager(
         assignedWarehouse.id,
-        null, // 👈 KEY CHÍNH
+        null, 
         false
       );
 
       await refreshData();
 
-      alert("Unassigned successfully!");
+      await refreshData();
+
+      message.success("Unassigned successfully!");
     } catch (err) {
       console.error("❌ Unassign Error:", err);
-      alert(err.response?.data?.message || "Unassign failed");
+      message.error(err.response?.data?.message || "Unassign failed");
     } finally {
       setIsAssigning(false);
     }
@@ -292,6 +347,15 @@ const AdminWarehouseManagerDetail = () => {
                       <h4>{assignedWarehouse.name}</h4>
                       <p>{assignedWarehouse.code} • {assignedWarehouse.location}</p>
                     </div>
+                    <button 
+                      className="unassign-action-btn" 
+                      onClick={handleUnassign}
+                      title="Remove assignment"
+                      disabled={isAssigning}
+                    >
+                      <FaSignOutAlt />
+                      <span>Unassign</span>
+                    </button>
                   </div>
                 ) : (
                   <div className="no-assignment">
