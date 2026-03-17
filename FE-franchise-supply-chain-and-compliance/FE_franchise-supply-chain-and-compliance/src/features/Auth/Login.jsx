@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { setCookie } from '../../utils/cookieUtils';
+import { setCookie, setUserRoles } from '../../utils/cookieUtils';
+import apiClient from '../../services/axiosClient';
 import './Login.css';
-
-const GATEWAY_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,7 +13,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,56 +23,34 @@ const Login = () => {
     setError('');
 
     try {
-      // 1. Gọi API login trên Eureka Server → lấy access token
-      const loginRes = await fetch(`${GATEWAY_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const loginData = await apiClient.post('/auth/login', { email, password });
+      const { accessToken, refreshToken } = loginData.result || loginData;
+      
+      if (!accessToken) throw new Error('Unable to retrieve token from server');
 
-      if (!loginRes.ok) {
-        const errData = await loginRes.json().catch(() => null);
-        throw new Error(errData?.message || 'Invalid email or password');
+      setCookie('access_token', accessToken, 7);
+      if (refreshToken) {
+        setCookie('refresh_token', refreshToken, 7);
       }
 
-      const loginData = await loginRes.json();
-      const token = loginData.result?.accessToken;
+      const userData = await apiClient.get('/auth/me');
+      const user = userData.result || userData;
 
-      if (!token) throw new Error('Unable to retrieve token from server');
+      const isAdmin = user.roles?.some(r => r.code === 'ADMIN');
+      const isWarehouseManager = user.roles?.some(r => r.code === 'WAREHOUSE_MANAGER');
 
-      // 2. Lưu token vào cookie
-      setCookie('access_token', token, 7);
-      await fetch(`${GATEWAY_URL}/auth/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }); 
-
-      // 3. Gọi API /me trên Eureka Server (kèm token) → lấy role
-      const meRes = await fetch(`${GATEWAY_URL}/auth/me`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!meRes.ok) throw new Error('Unable to authenticate user');
-
-      const user = await meRes.json();
-      const userData = user.result || user;
-
-      // 4. Kiểm tra roles array, tìm code === 'ADMIN'
-      const isAdmin = userData.roles?.some(r => r.code === 'ADMIN');
+      setUserRoles(user.roles || []);
 
       if (isAdmin) {
         navigate('/admin');
-      } else {
+      } else if (isWarehouseManager) {
         navigate('/warehouse');
+      } else {
+        navigate('/');
       }
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.message || err.message || 'Login failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

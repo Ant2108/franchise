@@ -16,6 +16,8 @@ import java.util.UUID;
 @Repository
 public interface SupplierIngredientRepository extends JpaRepository<SupplierIngredient, UUID> {
     Optional<SupplierIngredient> findBySupplierIdAndIngredientId(UUID supplierId, UUID ingredientId);
+    List<SupplierIngredient> findBySupplierIdAndIngredientIdIn(UUID supplierId, List<UUID> ingredientIds);
+
 
     @Query("""
             SELECT SUM(s.unitPrice)
