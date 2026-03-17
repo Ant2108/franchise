@@ -41,13 +41,29 @@ const Login = () => {
 
       setUserRoles(user.roles || []);
 
-      if (isAdmin) {
-        navigate('/admin');
-      } else if (isWarehouseManager) {
-        navigate('/warehouse');
-      } else {
-        navigate('/');
-      }
+     if (isAdmin) {
+      navigate('/admin');
+
+    } else if (isWarehouseManager) {
+        try {
+          const warehouseRes = await apiClient.get(`/warehouses/by-manager/${user.id}`);
+          const warehouse = warehouseRes.result || warehouseRes;
+
+          if (!warehouse || !warehouse.id) {
+            throw new Error("No warehouse assigned to this manager");
+          }
+          
+          // Save warehouse ID to Cookies for the axios interceptor
+          setCookie('warehouse_id', warehouse.id, 7);
+          
+          navigate(`/warehouse/${warehouse.id}`);
+
+        } catch (err) {
+          navigate('/no-warehouse');
+        }
+    } else {
+      navigate('/');
+    }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Login failed';
       setError(errorMessage);

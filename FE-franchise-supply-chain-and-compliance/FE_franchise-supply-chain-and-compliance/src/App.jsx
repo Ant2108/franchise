@@ -59,6 +59,7 @@ function App() {
 
         {/* ================= WAREHOUSE ================= */}
         <Route path="/warehouse" element={<RoleProtectedRoute allowedRoles={['WAREHOUSE_MANAGER']}><WarehouseLayout /></RoleProtectedRoute>}>
+          <Route path=":id" element={<WareHouseDashboard/>} />
           <Route index element={<WareHouseDashboard />} />
           <Route path="inventory" element={<WareHouseInventory />} />
           <Route path="orders" element={<WareHouseOrders />} />

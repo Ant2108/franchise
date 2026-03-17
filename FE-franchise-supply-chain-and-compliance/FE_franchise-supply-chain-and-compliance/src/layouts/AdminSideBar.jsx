@@ -160,6 +160,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
               removeCookie("access_token");
               removeCookie("refresh_token");
               removeUserRoles();
+              removeCookie("warehouse_id");
               navigate("/login");
             }
           }}

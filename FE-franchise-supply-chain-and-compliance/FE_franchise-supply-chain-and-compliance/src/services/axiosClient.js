@@ -40,7 +40,7 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    const warehouseId = localStorage.getItem('warehouse_id');
+    const warehouseId = getCookie("warehouse_id");
     if (warehouseId) {
       config.headers['X-Warehouse-Id'] = warehouseId;
     }
@@ -111,6 +111,7 @@ axiosInstance.interceptors.response.use(
         removeCookie('access_token');
         removeCookie('refresh_token');
         removeUserRoles();
+        removeCookie('warehouse_id');
         
         // Chỉ redirect nếu không phải đang ở trang login
         if (window.location.pathname !== '/login') {
