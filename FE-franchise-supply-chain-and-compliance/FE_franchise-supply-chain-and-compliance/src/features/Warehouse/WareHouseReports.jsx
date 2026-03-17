@@ -28,14 +28,16 @@ function WareHouseReports() {
   const [lowStockSearch, setLowStockSearch] = useState("");
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const warehouseId = localStorage.getItem("warehouse_id");
 
   useEffect(() => {
     setIsLoaded(true);
 
     const fetchLogs = async () => {
       try {
-        const data = await WareHouseInventoryLogAPI.getAllInventoryLogs();
-        setInventoryLogs(data);
+        if (!warehouseId) return;
+        const data = await WareHouseInventoryLogAPI.getInventoryLogs(warehouseId);
+        setInventoryLogs(Array.isArray(data) ? data : data?.data || []);
       } catch (error) {
         console.error("Failed to fetch inventory logs:", error);
       }
@@ -47,8 +49,15 @@ function WareHouseReports() {
           inboundApi.getOrders(),
           outboundApi.getOrders(),
         ]);
-        const inbounds = Array.isArray(inboundData) ? inboundData : inboundData?.data ?? [];
-        const outbounds = Array.isArray(outboundData) ? outboundData : outboundData?.data ?? [];
+        let inbounds = Array.isArray(inboundData) ? inboundData : inboundData?.data ?? [];
+        let outbounds = Array.isArray(outboundData) ? outboundData : outboundData?.data ?? [];
+        
+        // Filter by warehouseId if available
+        if (warehouseId) {
+          inbounds = inbounds.filter(o => o.warehouseId === warehouseId);
+          outbounds = outbounds.filter(o => o.warehouseId === warehouseId);
+        }
+
         setInboundOrders(inbounds);
         setOutboundOrders(outbounds);
 
@@ -95,9 +104,14 @@ function WareHouseReports() {
           metadataApi.getIngredients(),
           metadataApi.getWarehouses(),
         ]);
-        const inventories = Array.isArray(data) ? data : data?.data ?? [];
+        let inventories = Array.isArray(data) ? data : data?.data ?? [];
         const ingredients = Array.isArray(ingredientsList) ? ingredientsList : ingredientsList?.data ?? [];
         const warehouses = Array.isArray(warehousesList) ? warehousesList : warehousesList?.data ?? [];
+
+        // Filter by warehouseId
+        if (warehouseId) {
+          inventories = inventories.filter(inv => inv.warehouseId === warehouseId);
+        }
 
         const ingredientMap = {};
         ingredients.forEach((i) => { ingredientMap[i.id] = { name: i.name, unit: i.unit }; });
@@ -133,7 +147,12 @@ function WareHouseReports() {
     const fetchLowStockAlerts = async () => {
       try {
         const data = await WareHouseInventoryLogAPI.getLowStockAlerts();
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        let list = Array.isArray(data) ? data : data?.data ?? [];
+        
+        if (warehouseId) {
+          list = list.filter(a => a.warehouseId === warehouseId);
+        }
+        
         setLowStockAlerts(list);
       } catch (error) {
         console.error("Failed to fetch low stock alerts:", error);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useOutletContext } from "react-router-dom";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
@@ -55,6 +56,7 @@ const topProducts = [
 
 /* ================= COMPONENT ================= */
 export default function WareHouseDashboard() {
+  const { selectedWarehouse } = useOutletContext();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function WareHouseDashboard() {
       <div className="pm-hero">
         <div className="pm-hero-content">
           <div className="pm-hero-greeting">
-            <h1>Good morning, Admin! 👋</h1>
+            <h1>Good morning, <strong>{selectedWarehouse?.name || "Loading..."}</strong>👋</h1>
             <p>Here’s what’s happening in your warehouse today.</p>
           </div>
           <div className="pm-quick-actions">

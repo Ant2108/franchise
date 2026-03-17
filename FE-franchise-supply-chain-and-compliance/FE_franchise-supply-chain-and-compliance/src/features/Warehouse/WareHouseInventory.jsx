@@ -3,6 +3,7 @@ import InventoryList from "../Inventory/InventoryList";
 import inventoryApi from "../Inventory/InventoryAPI/inventoryApi";
 
 import { useState, useMemo, useEffect } from "react";
+import { getCookie } from "../../utils/cookieUtils";
 
 import {
   DatabaseOutlined,
@@ -23,7 +24,14 @@ function WareHouseInventory() {
     try {
       setLoading(true);
       const res = await inventoryApi.getAll();
-      setInventories(res || []);
+      const warehouseId = getCookie("warehouse_id");
+      let data = Array.isArray(res) ? res : res?.data || [];
+      
+      if (warehouseId) {
+        data = data.filter(item => item.warehouseId === warehouseId);
+      }
+      
+      setInventories(data);
     } catch (err) {
       console.error("Fetch inventory error:", err);
     } finally {
