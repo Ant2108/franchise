@@ -59,7 +59,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .status(request.getStatus() != null
                         ? request.getStatus()
                         : WarehouseStatus.ACTIVE)
-                .managerId(UUID.randomUUID())
+                .managerId(request.getManagerId())
                 .deleted(false)
                 .build();
 
@@ -129,6 +129,46 @@ public class WarehouseServiceImpl implements WarehouseService {
                                 HttpStatus.NOT_FOUND,
                                 "Warehouse not found with id " + id
                         ));
+    }
+    @Override
+    public WarehouseResponse assignManager(UUID warehouseId, UUID managerId, boolean confirmReplace) {
+
+        Warehouse warehouse = findActiveWarehouseOrThrow(warehouseId);
+
+        // remove manager
+        if (managerId == null) {
+            warehouse.setManagerId(null);
+            return mapToResponse(warehouseRepository.save(warehouse));
+        }
+
+        // check manager B đã thuộc warehouse khác chưa
+        boolean exists = warehouseRepository
+                .existsByManagerIdAndDeletedFalseAndIdNot(managerId, warehouseId);
+
+        if (exists) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Manager already assigned to another warehouse"
+            );
+        }
+
+        // LOGIC MỚI: warehouse đã có manager A
+        if (warehouse.getManagerId() != null &&
+                !warehouse.getManagerId().equals(managerId)) {
+
+            //chưa confirm → chặn
+            if (!confirmReplace) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, // 409 chuẩn hơn 400
+                        "Warehouse already has a manager. Confirm to replace."
+                );
+            }
+        }
+
+        // 👉 OK → assign
+        warehouse.setManagerId(managerId);
+
+        return mapToResponse(warehouseRepository.save(warehouse));
     }
 
     // ================= MAPPER =================

@@ -21,6 +21,9 @@ public interface WarehouseService {
     List<WarehouseResponse> getAllWarehouses();
     void deleteWarehouse(UUID id);
     List<InventoryListItemResponse> findInventoryByWarehouseId(UUID warehouseId);
+    WarehouseResponse assignManager(UUID warehouseId, UUID managerId, boolean confirmReplace);
+
+
 
 
 

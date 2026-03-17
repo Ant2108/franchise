@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
     boolean existsByCode(String code);
     List<Warehouse> findByDeletedFalse();
+    boolean existsByManagerIdAndDeletedFalseAndIdNot(UUID managerId, UUID id);
 }

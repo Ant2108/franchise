@@ -40,7 +40,7 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    const warehouseId = localStorage.getItem('warehouse_id') || '11111111-1111-1111-1111-111111111111';
+    const warehouseId = localStorage.getItem('warehouse_id');
     if (warehouseId) {
       config.headers['X-Warehouse-Id'] = warehouseId;
     }
