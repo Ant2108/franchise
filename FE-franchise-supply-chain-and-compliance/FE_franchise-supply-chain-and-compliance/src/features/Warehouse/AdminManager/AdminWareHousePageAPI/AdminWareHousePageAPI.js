@@ -24,6 +24,16 @@ const WareHouseAdminAPI = {
             status,
             notes
         });
+    },
+
+    assignManager: (warehouseId, managerId, confirmReplace = false) => {
+        const queryParams = new URLSearchParams();
+        if (managerId) queryParams.append('managerId', managerId);
+        else queryParams.append('managerId', '');
+        
+        queryParams.append('confirmReplace', confirmReplace);
+        
+        return apiClient.put(`/warehouses/${warehouseId}/assign-manager?${queryParams.toString()}`, {});
     }
 };
 

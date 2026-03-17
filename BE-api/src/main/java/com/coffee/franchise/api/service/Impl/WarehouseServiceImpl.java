@@ -135,37 +135,45 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Warehouse warehouse = findActiveWarehouseOrThrow(warehouseId);
 
-        // remove manager
+        // ✅ Unassign
         if (managerId == null) {
             warehouse.setManagerId(null);
             return mapToResponse(warehouseRepository.save(warehouse));
         }
 
-        // check manager B đã thuộc warehouse khác chưa
-        boolean exists = warehouseRepository
-                .existsByManagerIdAndDeletedFalseAndIdNot(managerId, warehouseId);
+        // ✅ Check manager đang ở warehouse khác
+        Warehouse currentWarehouseOfManager = warehouseRepository
+                .findByManagerIdAndDeletedFalse(managerId)
+                .orElse(null);
 
-        if (exists) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Manager already assigned to another warehouse"
-            );
+        if (currentWarehouseOfManager != null &&
+                !currentWarehouseOfManager.getId().equals(warehouseId)) {
+
+            if (!confirmReplace) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Manager is assigned to another warehouse. Confirm to move."
+                );
+            }
+
+            // 👉 remove khỏi warehouse cũ
+            currentWarehouseOfManager.setManagerId(null);
+            warehouseRepository.save(currentWarehouseOfManager);
         }
 
-        // LOGIC MỚI: warehouse đã có manager A
+        // ✅ Check warehouse đã có manager chưa
         if (warehouse.getManagerId() != null &&
                 !warehouse.getManagerId().equals(managerId)) {
 
-            //chưa confirm → chặn
             if (!confirmReplace) {
                 throw new ResponseStatusException(
-                        HttpStatus.CONFLICT, // 409 chuẩn hơn 400
+                        HttpStatus.CONFLICT,
                         "Warehouse already has a manager. Confirm to replace."
                 );
             }
         }
 
-        // 👉 OK → assign
+        // ✅ Assign
         warehouse.setManagerId(managerId);
 
         return mapToResponse(warehouseRepository.save(warehouse));
