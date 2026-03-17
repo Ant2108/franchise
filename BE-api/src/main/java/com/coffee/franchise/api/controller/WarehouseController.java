@@ -61,5 +61,9 @@ public class WarehouseController {
     ) {
         return warehouseService.assignManager(id, managerId, confirmReplace);
     }
+    @GetMapping("/by-manager/{managerId}")
+    public WarehouseResponse getByManager(@PathVariable UUID managerId) {
+        return warehouseService.getByManagerId(managerId);
+    }
 
 }
