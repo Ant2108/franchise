@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import "./AdminWarehouseManagerDetail.css";
 import { AdminWareHouseManager } from "./AdminWareHousePageAPI/AdminWareHouseManager";
+import WareHouseAdminAPI from "./AdminWareHousePageAPI/AdminWareHousePageAPI";
 
 const AdminWarehouseManagerDetail = () => {
   const { id } = useParams();
@@ -23,16 +24,30 @@ const AdminWarehouseManagerDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [allWarehouses, setAllWarehouses] = useState([]);
+  const [assignedWarehouse, setAssignedWarehouse] = useState(null);
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState("");
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
-    const fetchManagerDetail = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const res = await AdminWareHouseManager.getWarehouseManagers();
-        const rawData = res?.result?.content || [];
-        
+        const [managersRes, warehousesRes] = await Promise.all([
+          AdminWareHouseManager.getWarehouseManagers(),
+          WareHouseAdminAPI.getAllWarehouses()
+        ]);
+
+        const rawData = managersRes?.result?.content || [];
+        const warehousesList = Array.isArray(warehousesRes) ? warehousesRes : [];
+        setAllWarehouses(warehousesList);
+
         // Find the specific manager by ID
         const selectedManager = rawData.find((m) => String(m.id) === String(id));
-        
+
         if (selectedManager) {
           setManager({
             id: selectedManager.id,
@@ -43,23 +58,105 @@ const AdminWarehouseManagerDetail = () => {
             phone: selectedManager.phoneNumber || "N/A",
             status: selectedManager.status?.toLowerCase() || "inactive",
             role: selectedManager.roles?.[0]?.name || "Warehouse Manager",
-            username: selectedManager.username || "N/A",
             createdAt: selectedManager.createdAt || "N/A",
-            // You can add more fields here if they exist in the API response
           });
+
+          // Find assigned warehouse
+          const assigned = warehousesList.find(w => String(w.managerId) === String(id));
+          setAssignedWarehouse(assigned);
+          if (assigned) setSelectedWarehouseId(assigned.id);
         } else {
           setError("Manager not found");
         }
       } catch (err) {
-        console.error("❌ Error fetching manager details:", err);
-        setError("Failed to load manager details");
+        console.error("❌ Error fetching data:", err);
+        setError("Failed to load data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchManagerDetail();
+    fetchInitialData();
   }, [id]);
+
+  const handleAssign = async (confirmReplace = false) => {
+    if (!selectedWarehouseId) return;
+
+    setIsAssigning(true);
+    try {
+      await WareHouseAdminAPI.assignManager(
+        selectedWarehouseId,
+        id,
+        confirmReplace
+      );
+
+      await refreshData();
+
+      setIsModalOpen(false);
+      setShowReplaceConfirm(false);
+
+    } catch (err) {
+      console.error("❌ Assignment Error:", err);
+
+      if (err.response?.status === 409) {
+        // 👉 show confirm popup
+        setShowReplaceConfirm(true);
+        return;
+      }
+
+      alert(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+  const handleUnassign = async () => {
+    if (!assignedWarehouse) return;
+
+    try {
+      setIsAssigning(true);
+
+      await WareHouseAdminAPI.assignManager(
+        assignedWarehouse.id,
+        null, // 👈 KEY CHÍNH
+        false
+      );
+
+      await refreshData();
+
+      alert("Unassigned successfully!");
+    } catch (err) {
+      console.error("❌ Unassign Error:", err);
+      alert(err.response?.data?.message || "Unassign failed");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  const cancelReplace = () => {
+    setShowReplaceConfirm(false);
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+    if (assignedWarehouse) setSelectedWarehouseId(assignedWarehouse.id);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setShowReplaceConfirm(false);
+    setSearchTerm("");
+  };
+
+  const handleSelectWarehouse = (warehouseId) => {
+    setSelectedWarehouseId(warehouseId);
+    setShowReplaceConfirm(false);
+  };
+
+  const filteredWarehouses = allWarehouses.filter(w => 
+    w.status === "ACTIVE" && 
+    (w.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     w.code.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   if (loading) {
     return (
@@ -178,22 +275,150 @@ const AdminWarehouseManagerDetail = () => {
               </div>
             </div>
 
-            {/* WAREHOUSE ASSIGNMENT (PLACEHOLDER/EXTENDED) */}
-            <div className="detail-card">
+            {/* WAREHOUSE ASSIGNMENT */}
+            <div className="detail-card assignment-overview-card">
               <h3 className="card-title">
-                <FaWarehouse /> Assigned Warehouse
+                <FaWarehouse /> Warehouse Assignment
               </h3>
-              <div className="warehouse-assignment">
-                <div className="warehouse-icon-box">
-                  <FaWarehouse />
-                </div>
-                <div className="warehouse-details">
-                  <h4>Secondary Warehouse A</h4>
-                  <p>123 Industrial Dr, Silicon Valley, CA</p>
-                  <span className="assignment-status">Primary Manager</span>
-                </div>
+              
+              <div className="assignment-overview">
+                {assignedWarehouse ? (
+                  <div className="assigned-display">
+                    <div className="warehouse-icon-box active">
+                      <FaWarehouse />
+                    </div>
+                    <div className="warehouse-details">
+                      <span className="tiny-label">Current Assignment</span>
+                      <h4>{assignedWarehouse.name}</h4>
+                      <p>{assignedWarehouse.code} • {assignedWarehouse.location}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="no-assignment">
+                    <p>Not currently assigned to any warehouse.</p>
+                  </div>
+                )}
+                <button className="manage-assignment-btn" onClick={openModal}>
+                  {assignedWarehouse ? "Switch Warehouse" : "Assign to Warehouse"}
+                </button>
               </div>
             </div>
+
+            {/* ASSIGNMENT MODAL */}
+            {isModalOpen && (
+              <div className="modal-overlay">
+                <div className="assignment-modal">
+                  <div className="modal-header">
+                    <h3>Manage Warehouse Assignment</h3>
+                    <button className="close-modal-btn" onClick={closeModal}>&times;</button>
+                  </div>
+                  
+                  <div className="modal-body">
+                    <div className="dual-pane">
+                      {/* LEFT PANE: CURRENT */}
+                      <div className="pane current-pane">
+                        <h4 className="pane-title">Current Allocation</h4>
+                        {assignedWarehouse ? (
+                          <div className="pane-card active">
+                            <div className="pane-icon"><FaWarehouse /></div>
+                            <div className="pane-info">
+                              <h5>{assignedWarehouse.name}</h5>
+                              <p>{assignedWarehouse.code}</p>
+                              <p className="loc">{assignedWarehouse.location}</p>
+                              <span className="status-tag">Assigned</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="pane-card empty">
+                            <p>No warehouse currently assigned</p>
+                          </div>
+                        )}
+                        
+                        {selectedWarehouseId && selectedWarehouseId !== assignedWarehouse?.id && (
+                          <div className="selection-preview animate-in">
+                            <div className="preview-arrow">→</div>
+                            <div className="preview-content">
+                              <p>Assigning to:</p>
+                              <strong>{allWarehouses.find(w => w.id === selectedWarehouseId)?.name}</strong>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* RIGHT PANE: AVAILABLE */}
+                      <div className="pane list-pane">
+                        <h4 className="pane-title">Active Warehouses</h4>
+                        <div className="search-wrapper">
+                          <input 
+                            type="text" 
+                            placeholder="Search warehouse..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+                        <div className="warehouse-list">
+                          {filteredWarehouses.map(w => (
+                            <div 
+                              key={w.id} 
+                              className={`list-item ${selectedWarehouseId === w.id ? 'selected' : ''}`}
+                              onClick={() => handleSelectWarehouse(w.id)}
+                            >
+                              <div className="item-meta">
+                                <h6>{w.name}</h6>
+                                <span>{w.code}</span>
+                              </div>
+                              {selectedWarehouseId === w.id && <FaCheckCircle className="check-icon" />}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div className="modal-footer">
+                    <button className="modal-btn-secondary" onClick={closeModal}>Cancel</button>
+                    <button 
+                      className="modal-btn-primary" 
+                      onClick={() => handleAssign(false)}
+                      disabled={!selectedWarehouseId || isAssigning || selectedWarehouseId === assignedWarehouse?.id}
+                    >
+                      {isAssigning ? "Assigning..." : "Apply Assignment"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CONFLICT / REPLACE POPUP */}
+            {showReplaceConfirm && (
+              <div className="modal-overlay secondary-overlay">
+                <div className="conflict-popup animate-in">
+                  <div className="conflict-icon-box">
+                    <FaShieldAlt />
+                  </div>
+                  <h3>Management Conflict</h3>
+                  <p>
+                    This warehouse already has an assigned manager. 
+                    Do you want to <strong>replace</strong> the existing manager with <strong>{manager.fullName}</strong>?
+                  </p>
+                  <div className="conflict-actions">
+                    <button className="btn-cancel" onClick={() => setShowReplaceConfirm(false)}>
+                      Go Back
+                    </button>
+                    <button 
+                      className="btn-replace" 
+                      onClick={() => {
+                        handleAssign(true);
+                        setShowReplaceConfirm(false);
+                      }}
+                      disabled={isAssigning}
+                    >
+                      {isAssigning ? "Processing..." : "Confirm & Replace"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

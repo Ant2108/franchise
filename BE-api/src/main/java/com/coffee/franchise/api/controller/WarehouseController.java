@@ -56,7 +56,7 @@ public class WarehouseController {
     @PutMapping("/{id}/assign-manager")
     public WarehouseResponse assignManager(
             @PathVariable UUID id,
-            @RequestParam UUID managerId,
+            @RequestParam(required = false) UUID managerId,
             @RequestParam(required = false, defaultValue = "false") boolean confirmReplace
     ) {
         return warehouseService.assignManager(id, managerId, confirmReplace);
