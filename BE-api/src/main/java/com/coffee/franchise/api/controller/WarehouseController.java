@@ -52,4 +52,14 @@ public class WarehouseController {
     public List<InventoryListItemResponse>  getInventory(@PathVariable UUID id) {
         return warehouseService.findInventoryByWarehouseId(id);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/assign-manager")
+    public WarehouseResponse assignManager(
+            @PathVariable UUID id,
+            @RequestParam UUID managerId,
+            @RequestParam(required = false, defaultValue = "false") boolean confirmReplace
+    ) {
+        return warehouseService.assignManager(id, managerId, confirmReplace);
+    }
+
 }

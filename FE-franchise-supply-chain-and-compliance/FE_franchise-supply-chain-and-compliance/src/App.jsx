@@ -26,6 +26,7 @@ import ViewDetailSupplierIngredient from "./features/Supplier/ViewDetailSupplier
 import HomePage from "./layouts/HomePage/HomePage"
 import SupplierAddIngredents from "./features/Supplier/SupplierAddIngredents";
 import AdminWareHouseManager from "./features/Warehouse/AdminManager/AdminWareHouseManager";
+import AdminWarehouseManagerDetail from "./features/Warehouse/AdminManager/AdminWarehouseManagerDetail";
 import Login from "./features/Auth/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
@@ -50,6 +51,7 @@ function App() {
           <Route path="outbound" element={<OutboundList />} />
           <Route path="warehouse" element={<AdminWareHousePage />} />
           <Route path="warehouse-manager" element={<AdminWareHouseManager />} />
+          <Route path="warehouse-manager/:id" element={<AdminWarehouseManagerDetail />} />
           <Route path="warehouse/update/:id" element={<UpdateAdminWarehousePage />} />
           <Route path="warehouse/create" element={<CreateAdminWarehouse />} />
           <Route path="ingredient" element={< IngredientManage />} />
