@@ -29,6 +29,9 @@ public class OutboundOrder {
     @Enumerated(EnumType.STRING)
     private OutboundOrderStatus status;
 
+    @Column(name = "batch_code")
+    private String batchCode;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

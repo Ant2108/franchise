@@ -18,6 +18,7 @@ import java.util.UUID;
 public class OutboundOrderRequest {
     private UUID warehouseId;
     private UUID destinationFranchiseId;
+    private String batchCode;
     private List<OutboundOrderItemRequest> items;
 
     @Data

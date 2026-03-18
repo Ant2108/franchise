@@ -3,14 +3,13 @@ package com.coffee.franchise.api.service;
 import com.coffee.franchise.api.dto.Request.OutboundOrderRequest;
 import com.coffee.franchise.api.dto.Response.OutboundOrderResponse;
 import com.coffee.franchise.api.dto.Request.OutboundOrderStatusUpdateRequest;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface OutboundOrderService {
 
-        OutboundOrderResponse createOutboundOrder(OutboundOrderRequest request, MultipartFile file);
+        OutboundOrderResponse createOutboundOrder(OutboundOrderRequest request);
 
         List<OutboundOrderResponse> getAllOutboundOrders();
 
