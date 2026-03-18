@@ -117,9 +117,8 @@ public class    SupplierService {
 
     // S22 - Search Supplier
     public List<SupplierResponse> searchSupplier(String keyword) {
-
         List<Supplier> suppliers = supplierRepository
-                .findByNameContainingIgnoreCase(keyword);
+                .findByNameContainingIgnoreCaseAndStatus(keyword, SupplierStatus.ACTIVE);
 
         return suppliers.stream()
                 .map(this::mapToResponse)
@@ -131,6 +130,13 @@ public class    SupplierService {
         return supplierRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<SupplierResponse> getSupplierActive() {
+           return  supplierRepository.findActiveSuppliers().stream()
+                   .map(this::mapToResponse)
+                   .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -293,20 +299,9 @@ public class    SupplierService {
 
         supplierIngredientRepository.save(supplierIngredient);
     }
-    public SupplierIngredientOptionResponse mapToResponses(SupplierIngredient entity) {
-        return SupplierIngredientOptionResponse.builder()
-                .id(entity.getId())
-                .name(entity.getSupplier().getName())
-                .imageUrl(entity.getSupplier().getImageUrl())
-                .ingredientId(entity.getIngredient().getId())
-                .ingredientName(entity.getIngredient().getName())
-                .unitPrice(entity.getUnitPrice())
-                .minimumOrderQuantity(entity.getMinimumOrderQuantity())
-                .stockQuantity(entity.getStockQuantity())
-                .leadTimeDays(entity.getLeadTimeDays())
-                .status(entity.getStatus())
-                .build();
-    }
+
+
+
 
 
 }
