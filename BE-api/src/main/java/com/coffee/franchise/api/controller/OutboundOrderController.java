@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,15 +21,14 @@ public class OutboundOrderController {
 
     private final OutboundOrderService outboundOrderService;
 
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping
     public ResponseEntity<OutboundOrderResponse> createOutboundOrder(
             @RequestHeader(value = "X-Warehouse-Id", required = false) UUID warehouseId,
-            @Valid @RequestBody OutboundOrderRequest request,
-            MultipartFile multipartFile) {
+            @Valid @RequestBody OutboundOrderRequest request) {
         if (warehouseId != null) {
             request.setWarehouseId(warehouseId);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(outboundOrderService.createOutboundOrder(request, multipartFile));
+        return ResponseEntity.status(HttpStatus.CREATED).body(outboundOrderService.createOutboundOrder(request));
     }
 
     @GetMapping
