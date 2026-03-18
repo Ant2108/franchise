@@ -84,6 +84,10 @@ public class SupplierController {
                 supplierService.getAllSuppliers()
         );
     }
+    @GetMapping("/supplier-active")
+    public ResponseEntity<List<SupplierResponse>> getAllActiveSuppliers() {
+        return ResponseEntity.ok(supplierService.getSupplierActive());
+    }
 
     @GetMapping("/marketplace")
     public ResponseEntity<List<SupplierMarketplaceItemResponse>> getMarketplaceItems(

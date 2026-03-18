@@ -12,6 +12,7 @@ import com.coffee.franchise.api.service.IngredientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class IngredientServiceImpl implements IngredientService {
     @Autowired
     CloudinaryService cloudinaryService;
 
+
+    @Transactional
     @Override
     public IngredientResponse createIngredient(IngredientRequest ingredientRequest, MultipartFile image) throws AppException, IOException {
          Ingredient existIngredient = ingredientRepo.findByName(ingredientRequest.getIngredientName());
