@@ -15,6 +15,8 @@ import com.coffee.franchise.api.service.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +42,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                                 "Warehouse not found or deleted")))
                 .destinationFranchiseId(request.getDestinationFranchiseId())
                 .status(OutboundOrderStatus.PENDING)
+                .batchCode(request.getBatchCode())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -158,6 +161,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                 .destinationFranchiseName("Cửa hàng "
                         + order.getDestinationFranchiseId().toString().substring(0, 4))
                 .status(order.getStatus())
+                .batchCode(order.getBatchCode())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .items(itemResponses)

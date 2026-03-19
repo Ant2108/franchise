@@ -33,49 +33,49 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 
 function App() {
-  return (
-      <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<Login />} />
 
-        {/* ================= ADMIN ================= */}
+                {/* ================= ADMIN ================= */}
 
-        <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['ADMIN']}><AdminPage /></RoleProtectedRoute>}>
-          <Route path="supplier" element={<SupplierAdminManage />} />
-          <Route path="/admin/supplier/create" element={<SupplierCreatePage />} />
-          <Route path="/admin/supplier/:id/edit" element={<SupplierEditPage />} />
-          <Route path="/admin/supplier/:id/view" element={<ViewDetailSupplierIngredient />} />
-          <Route path="/admin/supplier/:id/add-ingredient" element={<SupplierAddIngredents />} />
-          <Route path="inbound" element={<InboundList />} />
-          <Route path="outbound" element={<OutboundList />} />
-          <Route path="warehouse" element={<AdminWareHousePage />} />
-          <Route path="warehouse-manager" element={<AdminWareHouseManager />} />
-          <Route path="warehouse-manager/:id" element={<AdminWarehouseManagerDetail />} />
-          <Route path="warehouse/update/:id" element={<UpdateAdminWarehousePage />} />
-          <Route path="warehouse/create" element={<CreateAdminWarehouse />} />
-          <Route path="ingredient" element={< IngredientManage />} />
-        </Route>
+                <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['ADMIN']}><AdminPage /></RoleProtectedRoute>}>
+                    <Route path="supplier" element={<SupplierAdminManage />} />
+                    <Route path="/admin/supplier/create" element={<SupplierCreatePage />} />
+                    <Route path="/admin/supplier/:id/edit" element={<SupplierEditPage />} />
+                    <Route path="/admin/supplier/:id/view" element={<ViewDetailSupplierIngredient />} />
+                    <Route path="/admin/supplier/:id/add-ingredient" element={<SupplierAddIngredents />} />
+                    <Route path="inbound" element={<InboundList />} />
+                    <Route path="outbound" element={<OutboundList />} />
+                    <Route path="warehouse" element={<AdminWareHousePage />} />
+                    <Route path="warehouse-manager" element={<AdminWareHouseManager />} />
+                    <Route path="warehouse-manager/:id" element={<AdminWarehouseManagerDetail />} />
+                    <Route path="warehouse/update/:id" element={<UpdateAdminWarehousePage />} />
+                    <Route path="warehouse/create" element={<CreateAdminWarehouse />} />
+                    <Route path="ingredient" element={< IngredientManage />} />
+                </Route>
 
-        {/* ================= WAREHOUSE ================= */}
-        <Route path="/warehouse" element={<RoleProtectedRoute allowedRoles={['WAREHOUSE_MANAGER']}><WarehouseLayout /></RoleProtectedRoute>}>
-          <Route path=":id" element={<WareHouseDashboard/>} />
-          <Route index element={<WareHouseDashboard />} />
-          <Route path="inventory" element={<WareHouseInventory />} />
-          <Route path="orders" element={<WareHouseOrders />} />
-          <Route path="shipments" element={<WareHouseShipments />} />
-          <Route path="receiving" element={<WareHouseReceiving />} />
-          <Route path="reports" element={<WareHouseReports />} />
-          <Route path="inbound" element={<InboundPage />} />
-          <Route path="cart" element={<CartPage />} />
-        </Route>
+                {/* ================= WAREHOUSE ================= */}
+                <Route path="/warehouse" element={<RoleProtectedRoute allowedRoles={['WAREHOUSE_MANAGER']}><WarehouseLayout /></RoleProtectedRoute>}>
+                    <Route path=":id" element={<WareHouseDashboard/>} />
+                    <Route index element={<WareHouseDashboard />} />
+                    <Route path="inventory" element={<WareHouseInventory />} />
+                    <Route path="orders" element={<WareHouseOrders />} />
+                    <Route path="shipments" element={<WareHouseShipments />} />
+                    <Route path="receiving" element={<WareHouseReceiving />} />
+                    <Route path="reports" element={<WareHouseReports />} />
+                    <Route path="inbound" element={<InboundPage />} />
+                    <Route path="cart" element={<CartPage />} />
+                </Route>
 
-        {/* Global 404 */}
-        <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+                {/* Global 404 */}
+                <Route path="*" element={<h1>404 - Page Not Found</h1>} />
 
-      </Routes>
-      </Router>
-  );
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

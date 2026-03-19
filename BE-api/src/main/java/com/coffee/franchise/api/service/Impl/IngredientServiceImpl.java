@@ -2,6 +2,7 @@ package com.coffee.franchise.api.service.Impl;
 
 
 import com.coffee.franchise.api.dto.Request.IngredientRequest;
+import com.coffee.franchise.api.dto.Response.IngredientOptionResponse;
 import com.coffee.franchise.api.dto.Response.IngredientResponse;
 import com.coffee.franchise.api.dto.Request.UpdateIngredientRequest;
 import com.coffee.franchise.api.entity.Ingredient;
@@ -62,13 +63,20 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Override
-    public IngredientResponse updateIngredient(UUID id, UpdateIngredientRequest updateIngredientRequest) {
+    public IngredientResponse updateIngredient(UUID id, UpdateIngredientRequest updateIngredientRequest,MultipartFile image) throws AppException, IOException {
+        String imageUrl = null;
+
+        if(image != null && !image.isEmpty()) {
+            imageUrl =  cloudinaryService.uploadImage(image);
+        }
+
         Ingredient existing = ingredientRepo.findById(id).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Ingredient not found"));
 
         existing.setName(updateIngredientRequest.getIngredientName());
         existing.setUnit(updateIngredientRequest.getUnit());
         existing.setAlertThreshold(updateIngredientRequest.getAlertThreshold());
         existing.setDescription(updateIngredientRequest.getDescription());
+        existing.setImageUrl(imageUrl);
 
         return IngredientResponse.fromEntity(ingredientRepo.save(existing));
     }
@@ -82,10 +90,10 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Override
-    public List<IngredientResponse> getAllIngredients() {
+    public List<IngredientOptionResponse> getAllIngredients() {
         return ingredientRepo.findAll()
                 .stream()
-                .map(IngredientResponse :: fromEntity)
+                .map(IngredientOptionResponse :: optionResponse )
                 .toList();
     }
 
@@ -95,5 +103,12 @@ public class IngredientServiceImpl implements IngredientService {
                 .stream()
                 .map(IngredientResponse::fromEntity)
                 .toList();
+    }
+
+    @Override
+    public IngredientResponse getIngredientById(UUID id) {
+            Ingredient ingredient = ingredientRepo.findById(id)
+                    .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Ingredient not found"));
+        return  IngredientResponse.fromEntity(ingredient);
     }
 }

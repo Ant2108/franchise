@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,6 +22,7 @@ public class OutboundOrderResponse {
     private UUID destinationFranchiseId;
     private String destinationFranchiseName;
     private OutboundOrderStatus status;
+    private String batchCode;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<OutboundOrderItemResponse> items;
