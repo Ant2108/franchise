@@ -12,13 +12,16 @@ import {
 } from "lucide-react";
 import { removeCookie, removeUserRoles } from "../../utils/cookieUtils";
 import { Modal, message } from "antd";
+import { getCookie } from "../../utils/cookieUtils";
+
 
 const WarehouseSidebar = () => {
+    const navigate = useNavigate();
 
-  const handleLogout = () => {
-    Modal.confirm({
-      title: "Xác nhận đăng xuất",
-      content: "Bạn có chắc chắn muốn đăng xuất không?",
+    const handleLogout = () => {
+        Modal.confirm({
+            title: "Xác nhận đăng xuất",
+            content: "Bạn có chắc chắn muốn đăng xuất không?",
       okText: "Đăng xuất",
       cancelText: "Hủy",
       okButtonProps: { danger: true },
