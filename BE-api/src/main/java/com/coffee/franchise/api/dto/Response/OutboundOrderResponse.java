@@ -25,6 +25,7 @@ public class OutboundOrderResponse {
     private String batchCode;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private BigDecimal totalPrice;
     private List<OutboundOrderItemResponse> items;
 
     @Data
@@ -38,6 +39,9 @@ public class OutboundOrderResponse {
         private String unit;
         private BigDecimal quantity;
         private String imageUrl;
+        private BigDecimal unitPrice;
+        private BigDecimal totalPrice;
+        private LocalDateTime expiryDate;
 
     }
 }

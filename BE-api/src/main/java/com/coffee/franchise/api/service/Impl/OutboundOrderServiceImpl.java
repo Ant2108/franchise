@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -49,26 +49,37 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
 
         OutboundOrder savedOrder = outboundOrderRepository.save(order);
 
-
+        BigDecimal currentOrderTotalPrice = BigDecimal.ZERO;
 
         if (request.getItems() != null && !request.getItems().isEmpty()) {
-            request.getItems().forEach(itemReq -> {
+            for (var itemReq : request.getItems()) {
+                com.coffee.franchise.api.entity.Ingredient ingredient = ingredientRepository.findById(itemReq.getIngredientId())
+                        .orElseThrow(() -> new IllegalArgumentException("Ingredient not found"));
+                        
+                BigDecimal unitPrice = ingredient.getPrice() != null ? ingredient.getPrice() : BigDecimal.ZERO;
+                BigDecimal itemQuantity = itemReq.getQuantity() != null ? itemReq.getQuantity() : BigDecimal.ZERO;
+
                 OutboundOrderItem item = OutboundOrderItem.builder()
                         .outboundOrder(savedOrder)
-                        .ingredient(ingredientRepository.findById(itemReq.getIngredientId())
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                        "Ingredient not found")))
+                        .ingredient(ingredient)
                         .quantity(itemReq.getQuantity())
+                        .unitPrice(unitPrice)
                         .build();
 
                 outboundOrderItemRepository.save(item);
+
+                BigDecimal itemTotalPrice = unitPrice.multiply(itemQuantity);
+                currentOrderTotalPrice = currentOrderTotalPrice.add(itemTotalPrice);
 
                 // Giữ trước số lượng tồn kho khi tạo đơn hàng
                 inventoryService.reserveInventory(savedOrder.getWarehouse().getId(),
                         item.getIngredient().getId(),
                         item.getQuantity());
-            });
+            }
         }
+        
+        savedOrder.setTotalPrice(currentOrderTotalPrice);
+        savedOrder = outboundOrderRepository.save(savedOrder);
 
         return mapToResponse(savedOrder);
     }
@@ -144,13 +155,22 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                 .collect(Collectors.toList());
 
         List<OutboundOrderResponse.OutboundOrderItemResponse> itemResponses = items.stream()
-                .map(item -> OutboundOrderResponse.OutboundOrderItemResponse.builder()
-                        .id(item.getId())
-                        .ingredientId(item.getIngredient().getId())
-                        .ingredientName(item.getIngredient().getName())
-                        .unit(item.getIngredient().getUnit())
-                        .quantity(item.getQuantity())
-                        .build())
+                .map(item -> {
+                    BigDecimal unitPrice = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+                    BigDecimal quantity = item.getQuantity() != null ? item.getQuantity() : BigDecimal.ZERO;
+                    BigDecimal itemTotalPrice = unitPrice.multiply(quantity);
+
+                    return OutboundOrderResponse.OutboundOrderItemResponse.builder()
+                            .id(item.getId())
+                            .ingredientId(item.getIngredient().getId())
+                            .ingredientName(item.getIngredient().getName())
+                            .unit(item.getIngredient().getUnit())
+                            .quantity(item.getQuantity())
+                            .unitPrice(unitPrice)
+                            .totalPrice(itemTotalPrice)
+                            .expiryDate(LocalDateTime.now().plusMonths(6))
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         return OutboundOrderResponse.builder()
@@ -162,6 +182,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                         + order.getDestinationFranchiseId().toString().substring(0, 4))
                 .status(order.getStatus())
                 .batchCode(order.getBatchCode())
+                .totalPrice(order.getTotalPrice())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .items(itemResponses)

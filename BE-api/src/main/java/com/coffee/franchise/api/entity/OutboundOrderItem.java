@@ -26,4 +26,7 @@ public class OutboundOrderItem {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
     private BigDecimal quantity;
+
+    @Column(name = "unit_price")
+    private BigDecimal unitPrice;
 }
