@@ -3,6 +3,7 @@ package com.coffee.franchise.api.controller;
 import com.coffee.franchise.api.dto.Request.OutboundOrderRequest;
 import com.coffee.franchise.api.dto.Response.OutboundOrderResponse;
 import com.coffee.franchise.api.dto.Request.OutboundOrderStatusUpdateRequest;
+import com.coffee.franchise.api.dto.external.ExternalOutboundStatusUpdateRequest;
 import com.coffee.franchise.api.service.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -49,5 +50,11 @@ public class OutboundOrderController {
     public ResponseEntity<OutboundOrderResponse> updateOutboundOrderStatus(@PathVariable UUID id,
             @RequestBody OutboundOrderStatusUpdateRequest request) {
         return ResponseEntity.ok(outboundOrderService.updateOutboundOrderStatus(id, request));
+    }
+
+    @PutMapping("/webhook/status")
+    public ResponseEntity<OutboundOrderResponse> updateExternalOutboundOrderStatus(
+            @Valid @RequestBody ExternalOutboundStatusUpdateRequest request) {
+        return ResponseEntity.ok(outboundOrderService.updateExternalOutboundOrderStatus(request));
     }
 }

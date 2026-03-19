@@ -18,4 +18,6 @@ public interface OutboundOrderService {
         OutboundOrderResponse getOutboundOrderById(UUID id);
 
         OutboundOrderResponse updateOutboundOrderStatus(UUID id, OutboundOrderStatusUpdateRequest request);
+
+        OutboundOrderResponse updateExternalOutboundOrderStatus(com.coffee.franchise.api.dto.external.ExternalOutboundStatusUpdateRequest request);
 }

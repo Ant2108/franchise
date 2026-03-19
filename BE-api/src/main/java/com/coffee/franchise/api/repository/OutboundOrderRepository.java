@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface OutboundOrderRepository extends JpaRepository<OutboundOrder, UUID> {
     List<OutboundOrder> findByWarehouseId(UUID warehouseId);
+    java.util.Optional<OutboundOrder> findByWarehouseIdAndBatchCode(UUID warehouseId, String batchCode);
 }
