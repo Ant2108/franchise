@@ -12,7 +12,12 @@ import com.coffee.franchise.api.repository.OutboundOrderRepository;
 import com.coffee.franchise.api.repository.WarehouseRepository;
 import com.coffee.franchise.api.service.InventoryService;
 import com.coffee.franchise.api.service.OutboundOrderService;
+import com.coffee.franchise.api.client.StoreApiClient;
+import com.coffee.franchise.api.dto.external.StoreImportItem;
+import com.coffee.franchise.api.dto.external.StoreImportRequest;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OutboundOrderServiceImpl implements OutboundOrderService {
@@ -31,6 +37,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
     private final WarehouseRepository warehouseRepository;
     private final IngredientRepository ingredientRepository;
     private final InventoryService inventoryService;
+    private final StoreApiClient storeApiClient;
 
     @Override
     @Transactional
@@ -114,39 +121,74 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
         OutboundOrder order = outboundOrderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("OutboundOrder not found"));
 
-        // Nếu trạng thái chuyển thành DELIVERED, xác nhận xuất kho (trừ số lượng đã giữ)
-        if (request.getStatus() == OutboundOrderStatus.DELIVERED
-                && order.getStatus() != OutboundOrderStatus.DELIVERED) {
-            List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
-                    .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
-                    .collect(Collectors.toList());
+        if (order.getStatus() == request.getStatus()) {
+             return mapToResponse(order);
+        }
 
+        // Lấy danh sách item thuộc đơn này để xử lý
+        List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
+                .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
+                .collect(Collectors.toList());
+
+        // 1. Logic Inventory Nội Bộ (Warehouse)
+        if (request.getStatus() == OutboundOrderStatus.DELIVERED) {
             for (OutboundOrderItem item : items) {
-                inventoryService.confirmOutboundInventory(order.getWarehouse().getId(),
-                        item.getIngredient().getId(),
-                        item.getQuantity());
+                inventoryService.confirmOutboundInventory(
+                    order.getWarehouse().getId(),
+                    item.getIngredient().getId(),
+                    item.getQuantity()
+                );
             }
         }
 
-        // Nếu trạng thái chuyển thành CANCELED, giải phóng số lượng tồn kho đã giữ
-        if (request.getStatus() == OutboundOrderStatus.CANCELED
-                && order.getStatus() != OutboundOrderStatus.CANCELED) {
-            List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
-                    .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
-                    .collect(Collectors.toList());
-
+        if (request.getStatus() == OutboundOrderStatus.CANCELED) {
             for (OutboundOrderItem item : items) {
-                inventoryService.releaseInventory(order.getWarehouse().getId(),
-                        item.getIngredient().getId(),
-                        item.getQuantity());
+                inventoryService.releaseInventory(
+                    order.getWarehouse().getId(),
+                    item.getIngredient().getId(),
+                    item.getQuantity()
+                );
             }
         }
 
+        // Cập nhật trạng thái
         order.setStatus(request.getStatus());
         order.setUpdatedAt(LocalDateTime.now());
-
         outboundOrderRepository.save(order);
+
+        // 2. Logic Đồng bộ OpenFeign sang Store (Cửa hàng)
+        syncWithStoreApi(order, items, request);
+
         return mapToResponse(order);
+    }
+
+    private void syncWithStoreApi(OutboundOrder order, List<OutboundOrderItem> items, OutboundOrderStatusUpdateRequest request) {
+        List<StoreImportItem> storeItems = items.stream().map(i -> StoreImportItem.builder()
+                .ingredientId(i.getIngredient().getId())
+                .quantityReceived(i.getQuantity())
+                .unitCost(i.getUnitPrice() != null ? i.getUnitPrice() : BigDecimal.ZERO)
+                .expiryDate(LocalDateTime.now().plusMonths(6)) // Add động 6 tháng expiry
+                .build()).collect(Collectors.toList());
+
+        StoreImportRequest storeRequest = StoreImportRequest.builder()
+                .warehouseRequestId(order.getId())
+                .status(request.getStatus().name()) // Động theo trạng thái thực tế
+                .batchCode(order.getBatchCode())
+                .franchiseStoreId(order.getDestinationFranchiseId())
+                .importDate(LocalDateTime.now())
+                .items(storeItems)
+                // Cấu hình linh hoạt rejectionReason nếu API request tương lai của bạn hỗ trợ
+                .rejectionReason(request.getStatus() == OutboundOrderStatus.CANCELED ? "Warehouse canceled order" : null)
+                .build();
+
+        try {
+            storeApiClient.confirmInventoryImport(storeRequest);
+            log.info("Thành công gửi update sync sang API Store cho Order ID: {}", order.getId());
+        } catch (FeignException e) {
+            log.error("API Error từ hệ thống Store trong lúc đồng bộ - Status Code: {}, Lỗi: {}", e.status(), e.contentUTF8());
+            // Việc throw RuntimeException giúp Trigger cho hàm @Transactional Rollback toàn bộ trạng thái và tồn kho nếu API Store gặp từ chối
+            throw new RuntimeException("Gặp sự cố khi đồng bộ qua hệ thống Store: " + e.getMessage());
+        }
     }
 
     private OutboundOrderResponse mapToResponse(OutboundOrder order) {
