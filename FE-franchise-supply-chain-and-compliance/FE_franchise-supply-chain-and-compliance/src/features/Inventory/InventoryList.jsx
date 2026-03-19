@@ -7,86 +7,108 @@ import { Button } from "antd";
 import InventoryItemForm from "./InventoryDetail.jsx";
 
 
-const InventoryList = () => {
+import { getCookie } from "../../utils/cookieUtils";
+
+const InventoryList = ({ data, loading: externalLoading, isDashboard = false }) => {
   const [inventories, setInventories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [UpdateModalID, setIsUpdateModalID] = useState(null)
-  const [DetailModalID, setIsDetailModalID] = useState(null)
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [UpdateModalID, setIsUpdateModalID] = useState(null);
+  const [DetailModalID, setIsDetailModalID] = useState(null);
+
+  // Ưu tiên dùng dữ liệu từ props nếu có, không thì dùng state nội bộ
+  const displayData = data || inventories;
+  const isLoading = externalLoading ?? internalLoading;
   
   const fetchInventories = async () => {
     try {
-      setLoading(true);
-      const res = await inventoryApi.getAll();
-      setInventories(res|| []);
+      setInternalLoading(true);
+      // Gọi qua axiosClient để tận dụng Header X-Warehouse-Id (đã code trong interceptor)
+      // Nếu không dùng axiosClient, hãy lấy warehouseId từ cookie:
+      const warehouseId = getCookie("warehouse_id");
+      
+      const res = await inventoryApi.getAll(); 
+      // Giả sử API trả về list filter theo warehouse thông qua header
+      setInventories(res || []);
     } catch (err) {
       console.error("Fetch inventory error:", err);
     } finally {
-      setLoading(false);
+      setInternalLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInventories();
-  }, []);
+    // Chỉ fetch nếu bên ngoài không truyền data vào
+    if (!data) {
+      fetchInventories();
+    }
+  }, [data]);
 
   return (
-    <div style={styles.card}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Inventory List</h2>
-        <span style={styles.countBadge}>
-          Total: {inventories.length}
-        </span>
-      </div>
+    <div style={isDashboard ? styles.dashboardCard : styles.card}>
+      {!isDashboard && (
+        <div style={styles.header}>
+          <h2 style={styles.title}>Quản lý tồn kho</h2>
+          <span style={styles.countBadge}>
+            Tổng số mặt hàng: {displayData.length}
+          </span>
+        </div>
+      )}
 
-      {loading ? (
+      {isLoading ? (
         <div style={styles.loadingBox}>
           <div style={styles.spinner} />
-          <p>Loading inventory...</p>
+          <p>Đang tải dữ liệu tồn kho...</p>
         </div>
       ) : (
         <div style={styles.tableWrapper}>
           <table style={styles.table}>
             <thead style={styles.thead}>
               <tr>
-                <th style={styles.th}>Inventory ID</th>
-                <th style={styles.th}>Warehouse</th>
-                <th style={styles.th}>Ingredient</th>
-                <th style={styles.th}>Available</th>
-                <th style={styles.th}>Reserved</th>
-                <th style={styles.th}>Last Updated</th>
-                <th style={styles.th}>Actions</th>
+                <th style={styles.th}>Nguyên liệu</th>
+                {!isDashboard && <th style={styles.th}>Kho</th>}
+                <th style={styles.th}>Sẵn có</th>
+                {isDashboard && <th style={styles.th}>Mức tối thiểu</th>}
+                <th style={styles.th}>Dự trữ</th>
+                <th style={styles.th}>Cập nhật</th>
+                <th style={styles.th}>Hành động</th>
               </tr>
             </thead>
 
             <tbody>
-              {inventories.length === 0 ? (
+              {displayData.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={styles.empty}>
-                    No inventory found
+                  <td colSpan={isDashboard ? "6" : "7"} style={styles.empty}>
+                    Không tìm thấy dữ liệu tồn kho
                   </td>
                 </tr>
               ) : (
-                inventories.map((item) => (
+                displayData.map((item) => (
                   <tr key={item.inventoryId} style={styles.tr}>
-                    <td style={styles.mono}>{item.inventoryId}</td>
-                    <td style={styles.td}>{item.warehouseName}</td>
-                    <td style={styles.td}>{item.ingredientName}</td>
+                    <td style={styles.td}>
+                      <strong>{item.ingredientName}</strong>
+                    </td>
+                    {!isDashboard && <td style={styles.td}>{item.warehouseName}</td>}
                     <td style={styles.available}>
                       {item.quantityAvailable}
                     </td>
+                    {isDashboard && <td style={styles.td}>{item.minimumQuantity || 0}</td>}
                     <td style={styles.reserved}>
                       {item.quantityReserved}
                     </td>
-                    <td style={styles.td}>{item.lastUpdated}</td>
-                    <td><Button 
-                    type="primary"
-                    onClick={()=>setIsUpdateModalID(item.inventoryId)}
-                    size="small">Update</Button>
-                    <Button type="default"
-                    onClick={()=> setIsDetailModalID(item.inventoryId)}
-                    size="small">Detail</Button>
+                    <td style={styles.td}>{item.lastUpdated ? new Date(item.lastUpdated).toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <Button 
+                          type="primary"
+                          onClick={()=>setIsUpdateModalID(item.inventoryId)}
+                          size="small">Sửa</Button>
+                        {!isDashboard && (
+                          <Button type="default"
+                            onClick={()=> setIsDetailModalID(item.inventoryId)}
+                            size="small">Chi tiết</Button>
+                        )}
+                      </div>
                     </td>
-                    
                   </tr>
                 ))
               )}
@@ -95,16 +117,18 @@ const InventoryList = () => {
         </div>
       )}
       
-    <InventoryUpdateForm 
-    ID={UpdateModalID}
-    open={!!UpdateModalID}
-  onClose={() => setIsUpdateModalID(null)}
-  onSuccess={fetchInventories} />
-  <InventoryItemForm
-  ID={DetailModalID}
-  open={!!DetailModalID}
-  onClose={()=>setIsDetailModalID(null)}
-  onSuccess={fetchInventories}/>
+      <InventoryUpdateForm 
+        ID={UpdateModalID}
+        open={!!UpdateModalID}
+        onClose={() => setIsUpdateModalID(null)}
+        onSuccess={data ? undefined : fetchInventories} 
+      />
+      <InventoryItemForm
+        ID={DetailModalID}
+        open={!!DetailModalID}
+        onClose={()=>setIsDetailModalID(null)}
+        onSuccess={data ? undefined : fetchInventories}
+      />
     </div>
   );
 };
@@ -215,6 +239,14 @@ const styles = {
     margin: "0 auto 12px",
     animation: "spin 1s linear infinite",
   },
+  dashboardCard: {
+    marginTop: 24,
+    padding: "20px",
+    background: "#ffffff",
+    borderRadius: "16px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+    width: "100%",
+  }
 };
 
 export default InventoryList;

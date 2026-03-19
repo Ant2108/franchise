@@ -10,27 +10,31 @@ import {
     Bell,
     LogOut
 } from "lucide-react";
-import { WarningOutlined, CloseOutlined, InboxOutlined, SearchOutlined } from "@ant-design/icons";
-import WareHouseInventoryLogAPI from "./AdminManager/AdminWareHousePageAPI/AdminWareHouseInventoryLogAPI";
-
-import { removeCookie, removeUserRoles, getCookie } from "../../utils/cookieUtils";
+import { removeCookie, removeUserRoles } from "../../utils/cookieUtils";
+import { Modal, message } from "antd";
 
 const WarehouseSidebar = () => {
 
-    const navigate = useNavigate();
+  const handleLogout = () => {
+    Modal.confirm({
+      title: "Xác nhận đăng xuất",
+      content: "Bạn có chắc chắn muốn đăng xuất không?",
+      okText: "Đăng xuất",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: () => {
+        removeCookie("access_token");
+        removeCookie("refresh_token");
+        removeUserRoles();
+        removeCookie("warehouse_id");
+        message.success("Đăng xuất thành công");
+        navigate("/login");
+      },
+    });
+  };
 
 
     const warehouseId = getCookie('warehouse_id');
-
-    const handleLogout = () => {
-        if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-            removeCookie("access_token");
-            removeCookie("refresh_token");
-            removeUserRoles();
-            removeCookie("warehouse_id");
-            navigate("/login");
-        }
-    };
 
     const [showLowStockModal, setShowLowStockModal] = useState(false);
     const [lowStockAlerts, setLowStockAlerts] = useState([]);

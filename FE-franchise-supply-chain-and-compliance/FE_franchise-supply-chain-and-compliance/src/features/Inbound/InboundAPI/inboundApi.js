@@ -5,7 +5,8 @@ const inboundApi = {
      * Lấy danh sách đơn nhập hàng, hỗ trợ filter qua params (vd: { status: 'PENDING' }).
      */
     getOrders: (params = {}) => {
-        return apiClient.get('/inbounds', params);
+        // Đúng cấu trúc axios: get(url, { params: { ... } })
+        return apiClient.get('/inbounds', { params });
     },
 
     /**
