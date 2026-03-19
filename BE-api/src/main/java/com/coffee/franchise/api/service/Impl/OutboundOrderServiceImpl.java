@@ -15,6 +15,7 @@ import com.coffee.franchise.api.service.OutboundOrderService;
 import com.coffee.franchise.api.client.StoreApiClient;
 import com.coffee.franchise.api.dto.external.StoreImportItem;
 import com.coffee.franchise.api.dto.external.StoreImportRequest;
+import com.coffee.franchise.api.dto.external.ExternalOutboundStatusUpdateRequest;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -160,6 +161,19 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
         syncWithStoreApi(order, items, request);
 
         return mapToResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OutboundOrderResponse updateExternalOutboundOrderStatus(ExternalOutboundStatusUpdateRequest request) {
+        OutboundOrder order = outboundOrderRepository.findByWarehouseIdAndBatchCode(request.getWarehouseId(), request.getBatchCode())
+                .orElseThrow(() -> new IllegalArgumentException("OutboundOrder not found for warehouseId and batchCode"));
+
+        OutboundOrderStatusUpdateRequest updateRequest = OutboundOrderStatusUpdateRequest.builder()
+                .status(request.getStatus())
+                .build();
+
+        return updateOutboundOrderStatus(order.getId(), updateRequest);
     }
 
     private void syncWithStoreApi(OutboundOrder order, List<OutboundOrderItem> items, OutboundOrderStatusUpdateRequest request) {
