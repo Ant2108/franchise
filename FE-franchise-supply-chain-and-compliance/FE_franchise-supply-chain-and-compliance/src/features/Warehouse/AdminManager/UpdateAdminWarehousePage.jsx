@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import WareHouseAdminAPI from "./AdminWareHousePageAPI/AdminWareHousePageAPI";
 import "./UpdateAdminWarehousePage.css";
 import { Button, AutoComplete, Input, message } from "antd";
 import {
@@ -12,6 +11,10 @@ import {
 import { getStatusLabel, getStatusClass } from "../../../utils/statusUtils";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
+import { useWarehouseWizad } from "./hooks/useWarehouseWizad";
+
+// Import the custom hook
+import { useWarehouseForm } from "./hooks/useWarehouseForm";
 
 function ChangeMapView({ coords }) {
   const map = useMap();
@@ -29,29 +32,33 @@ const createIcon = () => {
       <div class="radar-ring radar-active"></div>
       <div class="bounce">
         <svg width="36" height="48" viewBox="0 0 36 48">
-          <path
-            d="M18 0C8 0 0 8 0 18c0 13 18 30 18 30s18-17 18-30C36 8 28 0 18 0z"
-            fill="#22c55e"
-          />
+          <path d="M18 0C8 0 0 8 0 18c0 13 18 30 18 30s18-17 18-30C36 8 28 0 18 0z" fill="#22c55e" />
           <circle cx="18" cy="18" r="7" fill="white"/>
           <circle cx="18" cy="18" r="4" fill="#22c55e"/>
         </svg>
       </div>
     </div>
   `;
-  return L.divIcon({
-    className: "",
-    html,
-    iconSize: [36, 48],
-    iconAnchor: [18, 48],
-  });
+  return L.divIcon({ className: "", html, iconSize: [36, 48], iconAnchor: [18, 48] });
 };
 
 export default function UpdateAdminWarehousePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { updateWarehouse, fetchWarehouseDetail, loading, fetchingDetail } = useWarehouseWizad();
 
-  const [formData, setFormData] = useState({
+  const [position, setPosition] = useState([16.047079, 108.20623]);
+  const [error, setError] = useState(null);
+
+  // Use our custom hook
+  const {
+    formData,
+    setFormData,
+    addressOptions,
+    handleChange,
+    fetchCoordinates,
+    searchAddress,
+  } = useWarehouseForm({
     code: "",
     name: "",
     location: "",
@@ -61,21 +68,11 @@ export default function UpdateAdminWarehousePage() {
     latitude: "",
   });
 
-  const [position, setPosition] = useState([16.047079, 108.20623]);
-  const [addressOptions, setAddressOptions] = useState([]);
-  const debounceTimer = useRef(null);
-
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        setLoading(true);
-        const res = await WareHouseAdminAPI.getWarehouseDetail(id);
-
-        setFormData({
+        const res = await fetchWarehouseDetail(id);
+        const data = {
           code: res?.code || "",
           name: res?.name || "",
           location: res?.location || "",
@@ -83,146 +80,66 @@ export default function UpdateAdminWarehousePage() {
           status: res?.status || "ACTIVE",
           longitude: res?.longitude || "",
           latitude: res?.latitude || "",
-        });
+        };
+        setFormData(data);
 
         if (res?.latitude && res?.longitude) {
           setPosition([parseFloat(res.latitude), parseFloat(res.longitude)]);
         }
       } catch (err) {
         setError("Lỗi khi tải chi tiết kho hàng");
-      } finally {
-        setLoading(false);
       }
     };
-
     fetchDetail();
-  }, [id]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleLocationChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      location: value,
-    }));
-  };
+  }, [id, setFormData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setSaving(true);
       const payload = {
         ...formData,
         latitude: Number(formData.latitude),
         longitude: Number(formData.longitude),
       };
-      await WareHouseAdminAPI.updateWarehouse(id, payload);
-      message.success("Cập nhật thành công!");
-      navigate("/admin/warehouse", {
-        state: { internalNavigation: true },
-      });
+      
+      await updateWarehouse(id, payload);
+      navigate("/admin/warehouse", { state: { internalNavigation: true } });
     } catch (err) {
-      message.error("Cập nhật thất bại!");
-    } finally {
-      setSaving(false);
+      console.error(err);
+      // The updateWarehouse hook already handles error messages
     }
   };
 
-  const fetchCoordinates = async (address) => {
-    if (!address) {
-      message.warning("Vui lòng nhập địa chỉ");
-      return;
-    }
-    try {
-      const query = address + ", Vietnam";
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=1`
-      );
-      const data = await res.json();
-      if (!data || data.length === 0) {
-        message.error("Không tìm thấy địa chỉ");
-        return;
-      }
-      const lat = parseFloat(data[0].lat);
-      const lon = parseFloat(data[0].lon);
-
-      setPosition([lat, lon]);
-      setFormData((prev) => ({
-        ...prev,
-        latitude: lat,
-        longitude: lon,
-      }));
-      message.success("Đã tìm thấy vị trí");
-    } catch (err) {
-      message.error("Không thể lấy tọa độ");
-    }
-  };
-
-  const searchAddress = (value) => {
-    handleLocationChange(value);
-
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    debounceTimer.current = setTimeout(async () => {
-      if (!value || value.length < 3) {
-        setAddressOptions([]);
-        return;
-      }
-      try {
-        const query = value + ", Vietnam";
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=5`
-        );
-        const data = await res.json();
-        const options = data.map((item) => ({
-          value: item.display_name,
-          label: item.display_name,
-          lat: parseFloat(item.lat),
-          lon: parseFloat(item.lon),
-        }));
-        setAddressOptions(options);
-      } catch (err) {
-        console.error(err);
-      }
-    }, 500);
+  const handleFetchCoords = async () => {
+    const coords = await fetchCoordinates(formData.location);
+    if (coords) setPosition(coords);
   };
 
   const onSelectAddress = (value, option) => {
-    const lat = option.lat;
-    const lon = option.lon;
-    setPosition([lat, lon]);
+    const { lat, lon } = option;
+    const latNum = parseFloat(lat);
+    const lonNum = parseFloat(lon);
+    setPosition([latNum, lonNum]);
     setFormData((prev) => ({
       ...prev,
-      latitude: lat,
-      longitude: lon,
+      latitude: latNum,
+      longitude: lonNum,
       location: value,
     }));
   };
 
-  if (loading) return <p style={{ padding: 40 }}>Loading...</p>;
+  if (fetchingDetail) return <p style={{ padding: 40 }}>Đang tải dữ liệu...</p>;
   if (error) return <p style={{ padding: 40 }}>{error}</p>;
 
   return (
     <div className="warehouseupdate-page">
-      {/* HEADER */}
       <div className="page-header">
         <div className="header-inner">
           <div className="header-top">
             <Button
               icon={<ArrowLeftOutlined />}
               className="back-button"
-              onClick={() =>
-                navigate("/admin/warehouse", {
-                  state: { internalNavigation: true },
-                })
-              }
+              onClick={() => navigate("/admin/warehouse", { state: { internalNavigation: true } })}
             >
               Trở Về Danh Sách
             </Button>
@@ -234,34 +151,24 @@ export default function UpdateAdminWarehousePage() {
         </div>
       </div>
 
-      {/* ================= CONTENT ================= */}
       <div className="page-content">
-        {/* SUMMARY */}
         <div className="summary-card">
           <div className="summary-item">
-            <div className="summary-icon purple">
-              <DashboardOutlined />
-            </div>
+            <div className="summary-icon purple"><DashboardOutlined /></div>
             <div>
               <p>Mã Kho</p>
               <h2>{formData.code}</h2>
             </div>
           </div>
-
           <div className="summary-item">
-            <div className="summary-icon blue">
-              <DatabaseOutlined />
-            </div>
+            <div className="summary-icon blue"><DatabaseOutlined /></div>
             <div>
               <p>Tên Kho</p>
               <h2>{formData.name}</h2>
             </div>
           </div>
-
           <div className="summary-item">
-            <div className="summary-icon green">
-              <CheckCircleOutlined />
-            </div>
+            <div className="summary-icon green"><CheckCircleOutlined /></div>
             <div>
               <p>Trạng Thái</p>
               <h2>
@@ -274,7 +181,6 @@ export default function UpdateAdminWarehousePage() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Thông tin cơ bản */}
           <div className="section-card">
             <div className="section-header">Thông Tin Cơ Bản</div>
             <div className="section-body grid-2">
@@ -283,23 +189,21 @@ export default function UpdateAdminWarehousePage() {
                 <input
                   name="name"
                   value={formData.name}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange("name", e.target.value)}
                   required
                 />
               </div>
-
               <div className="full-width">
                 <label>* Mô Tả</label>
                 <textarea
                   name="description"
                   value={formData.description}
-                  onChange={handleChange}
+                  onChange={(e) => handleChange("description", e.target.value)}
                 />
               </div>
             </div>
           </div>
 
-          {/* Vị Trí */}
           <div className="section-card">
             <div className="section-header">Bản Đồ Vị Trí</div>
             <div className="section-body" style={{ paddingBottom: 0 }}>
@@ -308,15 +212,11 @@ export default function UpdateAdminWarehousePage() {
                   center={position}
                   zoom={15}
                   style={{ height: "100%", width: "100%" }}
-                  whenCreated={(map) => {
-                    map.on("click", (e) => {
+                  whenReady={(mapInstance) => {
+                    mapInstance.target.on("click", (e) => {
                       const { lat, lng } = e.latlng;
                       setPosition([lat, lng]);
-                      setFormData((prev) => ({
-                        ...prev,
-                        latitude: lat,
-                        longitude: lng,
-                      }));
+                      setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
                     });
                   }}
                 >
@@ -333,11 +233,7 @@ export default function UpdateAdminWarehousePage() {
                       dragend: (e) => {
                         const latlng = e.target.getLatLng();
                         setPosition([latlng.lat, latlng.lng]);
-                        setFormData((prev) => ({
-                          ...prev,
-                          latitude: latlng.lat,
-                          longitude: latlng.lng,
-                        }));
+                        setFormData((prev) => ({ ...prev, latitude: latlng.lat, longitude: latlng.lng }));
                       },
                     }}
                   />
@@ -356,14 +252,9 @@ export default function UpdateAdminWarehousePage() {
                   style={{ width: "100%" }}
                 >
                   <Input
-                    name="location"
                     placeholder="Nhập địa chỉ"
-                    onChange={handleChange}
-                    addonAfter={
-                      <Button onClick={() => fetchCoordinates(formData.location)}>
-                        Tìm Tọa Độ
-                      </Button>
-                    }
+                    onChange={(e) => handleChange("location", e.target.value)}
+                    addonAfter={<Button onClick={handleFetchCoords}>Tìm Tọa Độ</Button>}
                   />
                 </AutoComplete>
               </div>
@@ -374,19 +265,18 @@ export default function UpdateAdminWarehousePage() {
                   <input
                     name="latitude"
                     value={formData.latitude}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange("latitude", e.target.value)}
                     type="number"
                     step="0.000001"
                     required
                   />
                 </div>
-
                 <div>
                   <label>* Kinh Độ</label>
                   <input
                     name="longitude"
                     value={formData.longitude}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange("longitude", e.target.value)}
                     type="number"
                     step="0.000001"
                     required
@@ -401,7 +291,7 @@ export default function UpdateAdminWarehousePage() {
             <div className="section-body grid-2">
               <div>
                 <label>* Trạng Thái</label>
-                <select name="status" value={formData.status} onChange={handleChange}>
+                <select name="status" value={formData.status} onChange={(e) => handleChange("status", e.target.value)}>
                   <option value="ACTIVE">Hoạt Động</option>
                   <option value="INACTIVE">Không Hoạt Động</option>
                   <option value="MAINTAIN">Bảo Trì</option>
@@ -415,17 +305,12 @@ export default function UpdateAdminWarehousePage() {
             <button
               type="button"
               className="btn-cancel"
-              onClick={() =>
-                navigate("/admin/warehouse", {
-                  state: { internalNavigation: true },
-                })
-              }
+              onClick={() => navigate("/admin/warehouse", { state: { internalNavigation: true } })}
             >
               Hủy Bỏ
             </button>
-
-            <button type="submit" className="btn-save" disabled={saving}>
-              {saving ? "Đang Lưu..." : "Lưu Thay Đổi"}
+            <button type="submit" className="btn-save" disabled={loading}>
+              {loading ? "Đang Lưu..." : "Lưu Thay Đổi"}
             </button>
           </div>
         </form>

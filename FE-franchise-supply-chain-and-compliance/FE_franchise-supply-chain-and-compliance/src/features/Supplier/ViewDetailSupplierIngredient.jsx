@@ -15,318 +15,39 @@ import {
   Dropdown,
   Menu,
   Tooltip,
+  Avatar,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftOutlined, SettingOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined, StarOutlined, DeleteOutlined, EditOutlined, EyeOutlined} from "@ant-design/icons";
+import { ArrowLeftOutlined, SettingOutlined, PlusOutlined, PhoneOutlined, MailOutlined, EnvironmentOutlined, StarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, UserOutlined} from "@ant-design/icons";
 import "./ViewDetailSupplierIngredient.css";
-import {
-  getSupplierDetail,
-  getSupplierIngredients,
-  createSupplierIngredients,
-  getIngredientAvailable,
-  createIngredient,
-} from "./SupplierAPI/supplierApi";
 import { Box } from "lucide-react";
+import { useViewDetailSupplierIngredient } from "./hooks/useViewDetailSupplierIngredient";
 
 const { TextArea } = Input;
 
 const ViewDetailSupplierIngredient = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [addForm] = Form.useForm();
-  const [createIngredientForm] = Form.useForm();
-
-  const [loading, setLoading] = useState(true);
-  const [supplier, setSupplier] = useState(null);
-  const [ingredients, setIngredients] = useState([]);
-
-  const [ingredientOptions, setIngredientOptions] = useState([]);
-  const [loadingIngredientOptions, setLoadingIngredientOptions] = useState(false);
-
-  const [openAddModal, setOpenAddModal] = useState(false);
-  const [openCreateIngredientModal, setOpenCreateIngredientModal] = useState(false);
-
-  const [submittingAdd, setSubmittingAdd] = useState(false);
-  const [submittingCreateIngredient, setSubmittingCreateIngredient] = useState(false);
-
-  const addSubmittingRef = useRef(false);
-  const createIngredientSubmittingRef = useRef(false);
-
-  const unwrapResponse = (res) => res?.data ?? res;
-
-  const normalizeSupplierIngredients = (data) => {
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.supplierIngredients)) return data.supplierIngredients;
-    return [];
-  };
-
-  const fetchSupplierDetail = async () => {
-    const res = await getSupplierDetail(id);
-    const data = unwrapResponse(res);
-    setSupplier(data);
-  };
-
-  const fetchSupplierIngredients = async () => {
-    const res = await getSupplierIngredients(id);
-    const data = unwrapResponse(res);
-    const normalized = normalizeSupplierIngredients(data);
-    setIngredients(normalized);
-    return normalized;
-  };
-
-  const fetchIngredientAvailable = async () => {
-    try {
-      setLoadingIngredientOptions(true);
-
-      const res = await getIngredientAvailable();
-      const data = unwrapResponse(res);
-      const list = Array.isArray(data) ? data : [];
-
-      const mappedOptions = list.map((item) => ({
-        label: item?.ingredientName || item?.name || "Không tên",
-        value: item?.id,
-        raw: item,
-      }));
-
-      setIngredientOptions(mappedOptions);
-      return mappedOptions;
-    } catch (error) {
-      console.error("fetchIngredientAvailable error:", error);
-      message.error("Không tải được danh sách nguyên liệu");
-      setIngredientOptions([]);
-      return [];
-    } finally {
-      setLoadingIngredientOptions(false);
-    }
-  };
-
-  const fetchPageData = async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        fetchSupplierDetail(),
-        fetchSupplierIngredients(),
-        fetchIngredientAvailable(),
-      ]);
-    } catch (error) {
-      console.error("fetchPageData error:", error);
-      message.error("Không tải được chi tiết supplier");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchPageData();
-    }
-  }, [id]);
-
-  const handleOpenAddModal = async () => {
-    addForm.resetFields();
-    addForm.setFieldsValue({ status: "ACTIVE" });
-
-    const options = await fetchIngredientAvailable();
-    setOpenAddModal(true);
-
-    if (options.length === 0) {
-      message.info("Không còn nguyên liệu khả dụng để thêm");
-    }
-  };
-
-  const handleCloseAddModal = () => {
-    setOpenAddModal(false);
-    addForm.resetFields();
-  };
-
-  const handleOpenCreateIngredientModal = () => {
-    createIngredientForm.resetFields();
-    setOpenCreateIngredientModal(true);
-  };
-
-  const handleCloseCreateIngredientModal = () => {
-    setOpenCreateIngredientModal(false);
-    createIngredientForm.resetFields();
-  };
-
-  const buildLocalSupplierIngredientRow = (values) => {
-    const selectedIngredient = ingredientOptions.find(
-      (item) => item.value === values.ingredientId
-    );
-
-    return {
-      id: `local-${values.ingredientId}-${Date.now()}`,
-      ingredientId: values.ingredientId,
-      ingredientName: selectedIngredient?.label || "—",
-      ingredient: selectedIngredient?.raw
-        ? {
-          ...selectedIngredient.raw,
-          name:
-            selectedIngredient.raw?.name ||
-            selectedIngredient.raw?.ingredientName ||
-            selectedIngredient?.label,
-          ingredientName:
-            selectedIngredient.raw?.ingredientName ||
-            selectedIngredient.raw?.name ||
-            selectedIngredient?.label,
-        }
-        : {
-          id: values.ingredientId,
-          name: selectedIngredient?.label || "—",
-          ingredientName: selectedIngredient?.label || "—",
-        },
-      unitPrice: values.unitPrice,
-      minimumOrderQuantity: values.minimumOrderQuantity,
-      stockQuantity: values.stockQuantity,
-      leadTimeDays: values.leadTimeDays,
-      status: values.status,
-    };
-  };
-
-  const appendIngredientIfMissing = (values) => {
-    const ingredientId = values.ingredientId;
-
-    setIngredients((prev) => {
-      const existed = prev.some(
-        (item) =>
-          (item?.ingredient?.id || item?.ingredientId || item?.idIngredient) === ingredientId
-      );
-
-      if (existed) return prev;
-
-      return [...prev, buildLocalSupplierIngredientRow(values)];
-    });
-  };
-
-  const handleAddIngredient = async () => {
-    if (addSubmittingRef.current) return;
-
-    addSubmittingRef.current = true;
-    setSubmittingAdd(true);
-
-    try {
-      const values = await addForm.validateFields();
-
-      const alreadyExists = ingredients.some(
-        (item) =>
-          (item?.ingredient?.id || item?.ingredientId || item?.idIngredient) ===
-          values.ingredientId
-      );
-
-      if (alreadyExists) {
-        message.warning("Nguyên liệu này đã được thêm cho supplier rồi");
-        handleCloseAddModal();
-        return;
-      }
-
-      const payload = {
-        supplierId: id,
-        ingredientId: values.ingredientId,
-        unitPrice: values.unitPrice,
-        minimumOrderQuantity: values.minimumOrderQuantity,
-        stockQuantity: values.stockQuantity,
-        leadTimeDays: values.leadTimeDays,
-        status: values.status,
-      };
-
-      await createSupplierIngredients(payload);
-
-      appendIngredientIfMissing(values);
-      message.success("Thêm nguyên liệu cho supplier thành công");
-      handleCloseAddModal();
-
-      await fetchIngredientAvailable();
-    } catch (error) {
-      console.error("handleAddIngredient error:", error);
-
-      if (error?.errorFields) return;
-
-      const errMsg =
-        error?.message ||
-        error?.response?.data?.message ||
-        error?.response?.data ||
-        "";
-
-      if (
-        String(errMsg).includes("duplicate key") ||
-        String(errMsg).includes("already exists") ||
-        String(errMsg).includes("đã được gán") ||
-        String(errMsg).includes("already assigned") ||
-        String(errMsg).includes("belongs to another supplier")
-      ) {
-        const values = addForm.getFieldsValue();
-        appendIngredientIfMissing(values);
-        message.warning("Nguyên liệu này đã được thêm hoặc đã thuộc supplier khác");
-        handleCloseAddModal();
-        await fetchIngredientAvailable();
-      } else {
-        message.error("Không thể thêm nguyên liệu cho supplier");
-      }
-    } finally {
-      addSubmittingRef.current = false;
-      setSubmittingAdd(false);
-    }
-  };
-
-  const handleCreateIngredient = async () => {
-    if (createIngredientSubmittingRef.current) return;
-
-    createIngredientSubmittingRef.current = true;
-    setSubmittingCreateIngredient(true);
-
-    try {
-      const values = await createIngredientForm.validateFields();
-
-      const payload = {
-        ingredientName: values.ingredientName,
-        unit: values.unit,
-        alertThreshold: values.alertThreshold,
-        description: values.description,
-      };
-
-      const res = await createIngredient(payload);
-      const createdData = unwrapResponse(res);
-
-      message.success("Tạo nguyên liệu thành công");
-      const options = await fetchIngredientAvailable();
-
-      handleCloseCreateIngredientModal();
-      setOpenAddModal(true);
-      addForm.setFieldsValue({ status: "ACTIVE" });
-
-      const createdId = createdData?.id || createdData?.data?.id || null;
-
-      if (createdId && options.some((item) => item.value === createdId)) {
-        addForm.setFieldsValue({
-          ingredientId: createdId,
-        });
-      }
-    } catch (error) {
-      console.error("handleCreateIngredient error:", error);
-
-      if (error?.errorFields) return;
-
-      const errMsg =
-        error?.message ||
-        error?.response?.data?.message ||
-        error?.response?.data ||
-        "";
-
-      if (
-        String(errMsg).toLowerCase().includes("already exists") ||
-        String(errMsg).toLowerCase().includes("duplicate")
-      ) {
-        message.warning("Nguyên liệu này đã tồn tại");
-        await fetchIngredientAvailable();
-      } else {
-        message.error("Không thể tạo nguyên liệu");
-      }
-    } finally {
-      createIngredientSubmittingRef.current = false;
-      setSubmittingCreateIngredient(false);
-    }
-  };
+  const {
+    id,
+    supplier,
+    ingredients,
+    loading,
+    addForm,
+    createIngredientForm,
+    ingredientOptions,
+    loadingIngredientOptions,
+    openAddModal,
+    openCreateIngredientModal,
+    submittingAdd,
+    submittingCreateIngredient,
+    handleOpenAddModal,
+    handleCloseAddModal,
+    handleOpenCreateIngredientModal,
+    handleCloseCreateIngredientModal,
+    handleAddIngredient,
+    handleCreateIngredient,
+  } = useViewDetailSupplierIngredient();
   const actionMenu = (
     <Menu
       items={[
@@ -342,9 +63,23 @@ const ViewDetailSupplierIngredient = () => {
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      render: (value) => (typeof value === "string" ? value.slice(0, 8) : "—"),
+      title: "Hình ảnh",
+      render: (_, record) => {
+        const img =
+          record?.ingredient?.imageUrl ||
+          record?.ingredient?.image ||
+          record?.imageUrl ||
+          record?.image;
+
+        return (
+          <Avatar
+            src={img}
+            shape="square"
+            size={50}
+            style={{ borderRadius: 8 }}
+          />
+        );
+      },
     },
     {
       title: "Tên nguyên liệu",
@@ -360,7 +95,7 @@ const ViewDetailSupplierIngredient = () => {
       render: (val) => (val != null ? `${val}` : "—"),
     },
     {
-      title: "MOQ",
+      title: "Số lượng đặt hàng tối thiểu",
       dataIndex: "minimumOrderQuantity",
       render: (val) => (val != null ? val : "—"),
     },
@@ -408,9 +143,18 @@ const ViewDetailSupplierIngredient = () => {
           </Button>
 
           <div className="detail-title-section">
-            <div>
-              <h1 className="detail-title">{supplier?.name || "—"}</h1>
-              <p className="detail-subtitle">Quản lý thông tin nhà cung cấp và danh sách nguyên liệu</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <Avatar 
+                src={supplier?.imageUrl || supplier?.image} 
+                size={64} 
+                shape="square" 
+                icon={<UserOutlined />} 
+                style={{ border: '1px solid #d9d9d9', borderRadius: '8px' }}
+              />
+              <div>
+                <h1 className="detail-title">{supplier?.name || "—"}</h1>
+                <p className="detail-subtitle">Quản lý thông tin nhà cung cấp và danh sách nguyên liệu</p>
+              </div>
             </div>
             <Tooltip title="Chỉnh sửa supplier" placement="left">
               <Button

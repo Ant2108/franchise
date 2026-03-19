@@ -9,116 +9,25 @@ import {
   Select,
   message,
   Space,
+  Upload
 } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeftOutlined } from "@ant-design/icons";
-import {
-  createIngredient,
-  createSupplierIngredients,
-} from "./SupplierAPI/supplierApi";
+import { ArrowLeftOutlined ,PlusOutlined} from "@ant-design/icons";
+import { useSupplierAddIngredientWizard } from "./hooks/useSupplierAddIngredientWizard";
 const { TextArea } = Input;
-
+import { useImageUpload } from "../../hooks/useImageUpload";
 export default function AddSupplierIngredientWizard() {
-
-  const { id } = useParams();
-
-  const [current, setCurrent] = useState(0);
-  const [ingredientId, setIngredientId] = useState(null);
-  const navigate = useNavigate();
-
-  const [ingredientForm] = Form.useForm();
-  const [supplierForm] = Form.useForm();
-
-  const [loading, setLoading] = useState(false);
-
-    const next = async () => {
-
-        if (current === 0) {
-
-            try {
-
-                const values = await ingredientForm.validateFields();
-
-                setLoading(true);
-
-                const payload = {
-                    ingredientName: values.ingredientName,
-                    unit: values.unit,
-                    alertThreshold: values.alertThreshold,
-                    description: values.description,
-                };
-
-                const res = await createIngredient(payload);
-
-                const created = res?.data ?? res;
-
-                setIngredientId(created?.id);
-
-                message.success("Tạo nguyên liệu thành công");
-
-                setCurrent(1);
-
-            } catch (error) {
-
-                console.error("createIngredient error:", error);
-
-                if (!error?.errorFields) {
-
-                    const errMsg =
-                        error?.response?.data?.message ||
-                        error?.response?.data ||
-                        error?.message;
-
-                    message.error(errMsg || "Không thể tạo nguyên liệu");
-                }
-
-            } finally {
-                setLoading(false);
-            }
-
-        }
-    };
-
-    const finish = async () => {
-
-        try {
-
-            const values = await supplierForm.validateFields();
-
-            setLoading(true);
-
-            const payload = {
-                supplierId: id,
-                ingredientId: ingredientId,
-                unitPrice: values.unitPrice,
-                minimumOrderQuantity: values.minimumOrderQuantity,
-                stockQuantity: values.stockQuantity,
-                leadTimeDays: values.leadTimeDays,
-                status: values.status,
-            };
-
-            await createSupplierIngredients(payload);
-
-            message.success("Thêm nguyên liệu cho supplier thành công");
-
-            ingredientForm.resetFields();
-            supplierForm.resetFields();
-
-            setIngredientId(null);
-            setCurrent(0);
-
-        } catch (error) {
-
-            console.error("createSupplierIngredients error:", error);
-
-            if (!error?.errorFields) {
-                message.error("Không thể thêm nguyên liệu cho supplier");
-            }
-
-        } finally {
-            setLoading(false);
-        }
-    };
+  const {
+    id,
+    current,
+    setCurrent,
+    ingredientForm,
+    supplierForm,
+    loading,
+    next,
+    finish,
+    goBack,
+  } = useSupplierAddIngredientWizard();
+  const { fileList, onChange, beforeUpload, getFileForPayload } = useImageUpload();
 
   return (
     
@@ -154,6 +63,25 @@ export default function AddSupplierIngredientWizard() {
           </Form.Item>
 
           <Form.Item
+            label="Hình ảnh"
+            name="image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => e.fileList}
+            rules={[{ required: true }]}
+          >
+            <Upload
+              beforeUpload={() => false} 
+              listType="picture-card"
+              accept="image/*"
+            >
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+              </div>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item
             label="Alert Threshold"
             name="alertThreshold"
             rules={[{ required: true }]}
@@ -185,7 +113,7 @@ export default function AddSupplierIngredientWizard() {
           </Form.Item>
 
           <Form.Item
-            label="MOQ"
+            label="Số lượng đặt hàng tối thiểu"
             name="minimumOrderQuantity"
             rules={[{ required: true }]}
           >
@@ -235,7 +163,7 @@ export default function AddSupplierIngredientWizard() {
         {current === 0 && (
             <Button
                 icon={<ArrowLeftOutlined />}
-                onClick={() => navigate(`/admin/supplier/${id}/view`)}
+                onClick={goBack}
                 style={{ marginBottom: 16 }}
             >
                 Quay lại
@@ -253,7 +181,7 @@ export default function AddSupplierIngredientWizard() {
         {current === 1 && (
           <Button
             type="primary"
-            onClick={() => navigate(`/admin/supplier/${id}/view`)}
+            onClick={finish}
             loading={loading}
           >
             Finish

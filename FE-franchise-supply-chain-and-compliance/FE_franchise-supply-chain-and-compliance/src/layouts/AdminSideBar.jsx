@@ -3,10 +3,28 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { Zap, Users, LogOut, BarChart3, Settings, FileText, MapPin, Ticket,Car, ChevronLeft, ChevronRight,Coins, Clock, List, User} from "lucide-react";
 import { removeCookie, removeUserRoles } from "../utils/cookieUtils";
 import "./AdminSideBar.css";
-
+import { Modal, message } from "antd";
 const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const [openFolders, setOpenFolders] = useState({});
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: "Xác nhận đăng xuất",
+      content: "Bạn có chắc chắn muốn đăng xuất không?",
+      okText: "Đăng xuất",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: () => {
+        removeCookie("access_token");
+        removeCookie("refresh_token");
+        removeUserRoles();
+        removeCookie("warehouse_id");
+        message.success("Đăng xuất thành công");
+        navigate("/login");
+      },
+    });
+  };
 
   const toggleFolder = (folderName) => {
     if (isCollapsed) setIsCollapsed(false);
@@ -155,15 +173,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
         </div>
         <button
           className="logout-btn"
-          onClick={() => {
-            if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-              removeCookie("access_token");
-              removeCookie("refresh_token");
-              removeUserRoles();
-              removeCookie("warehouse_id");
-              navigate("/login");
-            }
-          }}
+          onClick={handleLogout}
         >
           <LogOut size={18} />
           <span className="menu-text">Đăng xuất</span>

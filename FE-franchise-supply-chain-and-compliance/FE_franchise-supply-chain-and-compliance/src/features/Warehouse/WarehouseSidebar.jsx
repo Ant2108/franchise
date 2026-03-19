@@ -10,18 +10,27 @@ import {
   LogOut
 } from "lucide-react";
 import { removeCookie, removeUserRoles } from "../../utils/cookieUtils";
+import { Modal, message } from "antd";
 
 const WarehouseSidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-      removeCookie("access_token");
-      removeCookie("refresh_token");
-      removeUserRoles();
-      removeCookie("warehouse_id");
-      navigate("/login");
-    }
+    Modal.confirm({
+      title: "Xác nhận đăng xuất",
+      content: "Bạn có chắc chắn muốn đăng xuất không?",
+      okText: "Đăng xuất",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: () => {
+        removeCookie("access_token");
+        removeCookie("refresh_token");
+        removeUserRoles();
+        removeCookie("warehouse_id");
+        message.success("Đăng xuất thành công");
+        navigate("/login");
+      },
+    });
   };
 
   return (
