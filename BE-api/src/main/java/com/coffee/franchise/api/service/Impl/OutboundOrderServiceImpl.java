@@ -126,36 +126,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
              return mapToResponse(order);
         }
 
-        // Lấy danh sách item thuộc đơn này để xử lý
-        List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
-                .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
-                .collect(Collectors.toList());
-
-        // 1. Logic Inventory Nội Bộ (Warehouse)
-        if (request.getStatus() == OutboundOrderStatus.DELIVERED) {
-            for (OutboundOrderItem item : items) {
-                inventoryService.confirmOutboundInventory(
-                    order.getWarehouse().getId(),
-                    item.getIngredient().getId(),
-                    item.getQuantity()
-                );
-            }
-        }
-
-        if (request.getStatus() == OutboundOrderStatus.CANCELED) {
-            for (OutboundOrderItem item : items) {
-                inventoryService.releaseInventory(
-                    order.getWarehouse().getId(),
-                    item.getIngredient().getId(),
-                    item.getQuantity()
-                );
-            }
-        }
-
-        // Cập nhật trạng thái
-        order.setStatus(request.getStatus());
-        order.setUpdatedAt(LocalDateTime.now());
-        outboundOrderRepository.save(order);
+        List<OutboundOrderItem> items = processInternalStatusUpdate(order, request.getStatus());
 
         // 2. Logic Đồng bộ OpenFeign sang Store (Cửa hàng)
         syncWithStoreApi(order, items, request);
@@ -169,11 +140,48 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
         OutboundOrder order = outboundOrderRepository.findByWarehouseIdAndBatchCode(request.getWarehouseId(), request.getBatchCode())
                 .orElseThrow(() -> new IllegalArgumentException("OutboundOrder not found for warehouseId and batchCode"));
 
-        OutboundOrderStatusUpdateRequest updateRequest = OutboundOrderStatusUpdateRequest.builder()
-                .status(request.getStatus())
-                .build();
+        if (order.getStatus() == request.getStatus()) {
+             return mapToResponse(order);
+        }
+        
+        processInternalStatusUpdate(order, request.getStatus());
 
-        return updateOutboundOrderStatus(order.getId(), updateRequest);
+        return mapToResponse(order);
+    }
+
+    private List<OutboundOrderItem> processInternalStatusUpdate(OutboundOrder order, OutboundOrderStatus newStatus) {
+        // Lấy danh sách item thuộc đơn này để xử lý
+        List<OutboundOrderItem> items = outboundOrderItemRepository.findAll().stream()
+                .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
+                .collect(Collectors.toList());
+
+        // 1. Logic Inventory Nội Bộ (Warehouse)
+        if (newStatus == OutboundOrderStatus.DELIVERED) {
+            for (OutboundOrderItem item : items) {
+                inventoryService.confirmOutboundInventory(
+                    order.getWarehouse().getId(),
+                    item.getIngredient().getId(),
+                    item.getQuantity()
+                );
+            }
+        }
+
+        if (newStatus == OutboundOrderStatus.CANCELED) {
+            for (OutboundOrderItem item : items) {
+                inventoryService.releaseInventory(
+                    order.getWarehouse().getId(),
+                    item.getIngredient().getId(),
+                    item.getQuantity()
+                );
+            }
+        }
+
+        // Cập nhật trạng thái
+        order.setStatus(newStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+        outboundOrderRepository.save(order);
+
+        return items;
     }
 
     private void syncWithStoreApi(OutboundOrder order, List<OutboundOrderItem> items, OutboundOrderStatusUpdateRequest request) {
