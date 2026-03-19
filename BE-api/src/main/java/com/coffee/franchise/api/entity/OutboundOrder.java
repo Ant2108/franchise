@@ -3,6 +3,7 @@ package com.coffee.franchise.api.entity;
 import com.coffee.franchise.api.enums.OutboundOrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -37,4 +38,7 @@ public class OutboundOrder {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "total_price")
+    private BigDecimal totalPrice;
 }

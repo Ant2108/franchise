@@ -30,4 +30,6 @@ public class Ingredient {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    private BigDecimal price;
 }
