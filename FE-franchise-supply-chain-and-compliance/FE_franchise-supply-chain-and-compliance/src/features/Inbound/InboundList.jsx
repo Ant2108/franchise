@@ -80,6 +80,16 @@ const InboundList = () => {
             key: "actions",
             render: (_, record) => (
                 <Space>
+                    {record.status === 'PENDING' && (
+                        <Button
+                            type="primary"
+                            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                            icon={<EditOutlined />}
+                            onClick={() => handleStatusChange(record.id, 'COMPLETED')}
+                        >
+                            Xác Nhận Đơn Hàng
+                        </Button>
+                    )}
                     <Button
                         type="primary"
                         icon={<EyeOutlined />}
@@ -87,16 +97,7 @@ const InboundList = () => {
                     >
                         Chi tiết
                     </Button>
-                    {record.status === 'DELIVERING' && (
-                        <Button
-                            type="primary"
-                            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                            icon={<EditOutlined />}
-                            onClick={() => handleStatusChange(record.id, 'COMPLETED')}
-                        >
-                            Xác Nhận Thanh Toán
-                        </Button>
-                    )}
+                    
                 </Space>
 
             ),

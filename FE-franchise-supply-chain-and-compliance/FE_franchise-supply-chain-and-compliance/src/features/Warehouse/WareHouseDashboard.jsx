@@ -23,10 +23,7 @@ import {
 } from "@ant-design/icons";
 import { Spin } from "antd";
 import { getCookie } from "../../utils/cookieUtils";
-import inventoryApi from "../Inventory/InventoryAPI/inventoryApi";
-import inboundApi from "../Inbound/InboundAPI/inboundApi";
-import outboundApi from "../Outbound/OutboundAPI/outboundApi";
-import WareHouseInventoryLogAPI from "./AdminManager/AdminWareHousePageAPI/AdminWareHouseInventoryLogAPI";
+import useWarehouseDashboard from "./AdminManager/hooks/useWarehouseDashboard";
 
 /* ================= CONSTANTS ================= */
 const COLORS = ["#d4a373", "#c68a53", "#a06a33", "#1a1a2e", "#6366f1", "#14b8a6", "#f43f5e", "#8b5cf6"];
@@ -36,145 +33,24 @@ const sparklineData2 = [{v:30},{v:25},{v:28},{v:20},{v:22},{v:15},{v:18},{v:10}]
 /* ================= COMPONENT ================= */
 export default function WareHouseDashboard() {
   const { selectedWarehouse } = useOutletContext();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  // State cho dữ liệu API
-  const [inventoryList, setInventoryList] = useState([]);
-  const [lowStockItems, setLowStockItems] = useState([]);
-  const [inboundOrders, setInboundOrders] = useState([]);
-  const [outboundOrders, setOutboundOrders] = useState([]);
-  const [inventoryLogs, setInventoryLogs] = useState([]);
-
-  const warehouseId = selectedWarehouse?.id || getCookie("warehouse_id");
-
-  const fetchAllData = async () => {
-    if (!warehouseId) {
-      setLoading(false);
-      setIsLoaded(true);
-      return;
-    }
-    try {
-      setLoading(true);
-
-      // Gọi tất cả API song song để nhanh hơn
-      const [invRes, lowStockRes, inboundRes, outboundRes, logsRes] = await Promise.allSettled([
-        inventoryApi.getAll(),
-        inventoryApi.getLowStock(warehouseId),
-        inboundApi.getOrders(),
-        outboundApi.getOrders(),
-        WareHouseInventoryLogAPI.getInventoryLogs(warehouseId),
-      ]);
-
-      // Xử lý kết quả (nếu API nào fail thì dùng mảng rỗng)
-      const extractData = (res) => {
-        if (res.status === "fulfilled") {
-          const d = res.value;
-          return Array.isArray(d) ? d : (d.result || []);
-        }
-        return [];
-      };
-
-      setInventoryList(extractData(invRes));
-      setLowStockItems(extractData(lowStockRes));
-      setInboundOrders(extractData(inboundRes));
-      setOutboundOrders(extractData(outboundRes));
-      setInventoryLogs(extractData(logsRes));
-
-    } catch (err) {
-      console.error("Dashboard fetch error:", err);
-    } finally {
-      setLoading(false);
-      setIsLoaded(true);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllData();
-  }, [warehouseId]);
-
-  // ========== TÍNH TOÁN DỮ LIỆU ==========
-
-  // 1. Tổng số lượng trong kho (Dựa trên quantityAvailable từ API Inventory)
-  const totalInventory = inventoryList.reduce((sum, item) => sum + (item.quantityAvailable || 0), 0);
-  const totalItemsCount = inventoryList.length;
-
-  // 2. Đơn hàng đang hoạt động (chưa COMPLETED, chưa CANCELLED)
-  const activeInbound = inboundOrders.filter(o => o.status !== "COMPLETED" && o.status !== "CANCELLED");
-  const activeOutbound = outboundOrders.filter(o => o.status !== "COMPLETED" && o.status !== "CANCELLED");
-  const totalActiveOrders = activeInbound.length + activeOutbound.length;
-
-  // 3. Low stock count
-  const lowStockCount = lowStockItems.length;
-
-  // 4. Tổng đơn nhập (Inbound total)
-  const totalInboundCount = inboundOrders.length;
-
-  // 5. Biểu đồ Pie - Phân bố tồn kho (Top items by quantity)
-  const sortedInventory = [...inventoryList].sort((a, b) => (b.quantityOnHand || 0) - (a.quantityOnHand || 0));
-  const topItems = sortedInventory.slice(0, 4);
-  const otherItems = sortedInventory.slice(4);
-  const totalQty = inventoryList.reduce((s, i) => s + (i.quantityOnHand || 0), 0);
-
-  const pieChartData = topItems.map(item => ({
-    name: item.ingredient?.name || "Unknown",
-    value: item.quantityOnHand || 0
-  }));
-  if (otherItems.length > 0) {
-    const otherQty = otherItems.reduce((s, i) => s + (i.quantityOnHand || 0), 0);
-    if (otherQty > 0) pieChartData.push({ name: "Khác", value: otherQty });
-  }
-
-  // 6. Biểu đồ Bar - Tồn kho theo sản phẩm (Top 8)
-  const barChartData = sortedInventory.slice(0, 8).map(item => ({
-    name: item.ingredient?.name?.substring(0, 12) || "N/A",
-    qty: item.quantityOnHand || 0,
-    min: item.minimumQuantity || 0
-  }));
-
-  // 7. Recent Activities từ Inventory Logs
-  const recentLogs = inventoryLogs.slice(0, 5).map((log, idx) => {
-    let type = "default";
-    let icon = <SwapOutlined />;
-    let text = "";
-
-    if (log.transactionType === "IN") {
-      type = "success";
-      icon = <InboxOutlined />;
-      text = `Nhập ${log.quantity || 0} ${log.ingredient?.name || "sản phẩm"}`;
-    } else if (log.transactionType === "OUT") {
-      type = "info";
-      icon = <ExportOutlined />;
-      text = `Xuất ${log.quantity || 0} ${log.ingredient?.name || "sản phẩm"}`;
-    } else {
-      type = "warning";
-      icon = <SyncOutlined />;
-      text = `Cập nhật ${log.quantity || 0} ${log.ingredient?.name || "sản phẩm"}`;
-    }
-
-    const timeStr = log.createdAt
-      ? new Date(log.createdAt).toLocaleString("vi-VN")
-      : "Không rõ thời gian";
-
-    return { id: log.id || idx, type, icon, text, time: timeStr };
-  });
-
-  // 8. Top sản phẩm (danh sách tồn kho nhiều nhất)
-  const topProductsList = sortedInventory.slice(0, 5).map((item, idx) => ({
-    id: item.id || idx,
-    name: item.ingredient?.name || "Unknown",
-    qty: item.quantityOnHand || 0,
-    min: item.minimumQuantity || 0,
-    status: (item.quantityOnHand || 0) <= (item.minimumQuantity || 0) ? "low" : "ok"
-  }));
-
-  // 9. Low stock list (cho bảng cảnh báo)
-  const lowStockList = lowStockItems.slice(0, 5).map((item, idx) => ({
-    id: item.id || idx,
-    name: item.ingredientName || item.ingredient?.name || "Unknown",
-    current: item.currentQuantity || item.quantityOnHand || 0,
-    minimum: item.minimumQuantity || 0,
-  }));
+  const {
+    loading,
+    isLoaded,
+    fetchAllData,
+    totalItemsCount,
+    totalActiveOrders,
+    lowStockCount,
+    totalInboundCount,
+    activeInbound,
+    activeOutbound,
+    inboundOrders,
+    pieChartData,
+    barChartData,
+    recentLogs,
+    totalQty,
+    lowStockList
+  } = useWarehouseDashboard(selectedWarehouse);
+  
 
   // ========== RENDER ==========
   if (loading) {

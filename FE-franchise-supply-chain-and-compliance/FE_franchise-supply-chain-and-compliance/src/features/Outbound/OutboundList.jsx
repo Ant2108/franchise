@@ -3,6 +3,7 @@ import { Table, Button, Tag, Space, Select, Input, message } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import outboundApi from "./OutboundAPI/outboundApi";
 import OutboundDetail from "./OutboundDetail";
+import updateOrderStatus from "./OutboundAPI/outboundApi";
 import { OUTBOUND_FILTER_STATUS_OPTIONS, getOutboundStatusMeta } from "../../utils/orderStatus";
 
 const { Option } = Select;
