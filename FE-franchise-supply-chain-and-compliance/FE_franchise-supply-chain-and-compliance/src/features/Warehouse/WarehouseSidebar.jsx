@@ -36,16 +36,6 @@ const WarehouseSidebar = () => {
 
     const warehouseId = getCookie('warehouse_id');
 
-    const handleLogout = () => {
-        if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-            removeCookie("access_token");
-            removeCookie("refresh_token");
-            removeUserRoles();
-            removeCookie("warehouse_id");
-            navigate("/login");
-        }
-    };
-
     const [showLowStockModal, setShowLowStockModal] = useState(false);
     const [lowStockAlerts, setLowStockAlerts] = useState([]);
     const [lowStockSearch, setLowStockSearch] = useState("");
