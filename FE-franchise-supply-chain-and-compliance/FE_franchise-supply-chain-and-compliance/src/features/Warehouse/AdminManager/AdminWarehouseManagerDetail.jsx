@@ -311,10 +311,10 @@ const AdminWarehouseManagerDetail = () => {
                   <label>Assigned Role</label>
                   <p className="role-tag">{manager.role}</p>
                 </div>
-                <div className="info-field">
+                {/* <div className="info-field">
                   <label>System Permissions</label>
-                  <p>Full Access to Warehouse Management</p>
-                </div>
+                  <p>Access to Warehouse Management</p>
+                </div> */}
                 <div className="info-field">
                   <label>Created On</label>
                   <div className="icon-text">
@@ -322,13 +322,13 @@ const AdminWarehouseManagerDetail = () => {
                     <span>{manager.createdAt !== "N/A" ? new Date(manager.createdAt).toLocaleDateString() : "March 15, 2024"}</span>
                   </div>
                 </div>
-                <div className="info-field">
+                {/* <div className="info-field">
                   <label>Last Login</label>
                   <div className="icon-text">
                     <FaClock />
                     <span>Just now</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 

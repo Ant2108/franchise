@@ -1,79 +1,31 @@
-import { useEffect, useState } from "react";
-import {
-  Input,
-  Button,
-  Tag,
-  Spin,
-  message,
-  Popconfirm,
-  Empty,
-  Pagination,
-} from "antd";
+import React from "react";
+import { Input, Button, Spin, Empty, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
-import {
-  getSuppliers,
-  deleteSupplier,
-} from "./SupplierAPI/supplierApi";
-import { StarOutlined, DeleteOutlined, PictureOutlined } from "@ant-design/icons";
-const ITEMS_PER_PAGE = 8;
-
 import "./SupplierAdminManage.css";
+
+// Hooks and Components
+import { useSupplierSearch } from "./hooks/useSupplierSearch";
+import SupplierCard from "./components/SupplierCard";
 
 export default function SupplierAdminManage() {
   const navigate = useNavigate();
 
-  const [suppliers, setSuppliers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [keyword, setKeyword] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  // Use modular hook
+  const {
+    suppliers,
+    loading,
+    keyword,
+    setKeyword,
+    currentPage,
+    setCurrentPage,
+    paginatedSuppliers,
+    totalPages,
+    handleDelete,
+    itemsPerPage,
+    totalCount
+  } = useSupplierSearch();
 
-
-
-  const fetchSuppliers = async () => {
-    try {
-      setLoading(true);
-      const data = await getSuppliers(keyword);
-      setSuppliers(data || []);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Supplier page error:", {
-        url: error?.response?.config?.url,
-        status: error?.response?.status,
-        data: error?.response?.data,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      fetchSuppliers();
-    }, 400);
-
-    return () => clearTimeout(timeout);
-  }, [keyword]);
-
-  // Pagination logic
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedSuppliers = suppliers.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(suppliers.length / ITEMS_PER_PAGE);
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteSupplier(id);
-      message.success("Xóa thành công");
-      await fetchSuppliers();
-    } catch (error) {
-      console.error(error);
-      message.error("Xóa thất bại");
-    }
-  };
+  const handleViewDetail = (id) => navigate(`/admin/supplier/${id}/view`);
 
   return (
     <div className="supplier-page-grid">
@@ -102,7 +54,6 @@ export default function SupplierAdminManage() {
             onChange={(e) => setKeyword(e.target.value)}
             className="supplier-search-input"
             size="large"
-            prefix={null}
           />
         </div>
       </div>
@@ -115,105 +66,23 @@ export default function SupplierAdminManage() {
       )}
 
       {/* Empty State */}
-      {!loading && suppliers.length === 0 && (
+      {!loading && totalCount === 0 && (
         <div className="supplier-empty">
-          <Empty
-            description="Không có nhà cung cấp"
-            style={{ marginTop: 48 }}
-          />
+          <Empty description="Không có nhà cung cấp" style={{ marginTop: 48 }} />
         </div>
       )}
 
       {/* Supplier Cards Grid */}
-      {!loading && suppliers.length > 0 && (
+      {!loading && totalCount > 0 && (
         <>
           <div className="supplier-grid-container">
-            {paginatedSuppliers.map((supplier, index) => (
-              <div key={supplier.id} className="supplier-card" >
-                {/* Card Image Section */}
-                <div
-                  className="supplier-card-image"
-                  onClick={() => navigate(`/admin/supplier/${supplier.id}/view`)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {supplier.imageUrl || supplier.image ? (
-                    <img 
-                      src={supplier.imageUrl || supplier.image} 
-                      alt={supplier.name} 
-                      className="supplier-image" 
-                    />
-                  ) : (
-                    <div className="supplier-image-placeholder">
-                      <PictureOutlined />
-                    </div>
-                  )}
-                </div>
-
-                {/* Card Header with Status */}
-                <div className="supplier-card-header" onClick={() => navigate(`/admin/supplier/${supplier.id}/view`) }>
-                  <div className="supplier-status-badge">
-                    <Tag
-                      color={supplier.status === "ACTIVE" ? "success" : "default"}
-                      className="supplier-status-tag"
-                    >
-                      {supplier.status}
-                    </Tag>
-                  </div>
-                  <div className="supplier-rating-badge">
-                    <StarOutlined className="star-icon" />
-                    <span className="rating-text">
-                      {(supplier.avgRating || 0).toFixed(1)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="supplier-card-body">
-                  <h3
-                    className="supplier-name"
-                    title={supplier.name}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {supplier.name}
-                  </h3>
-
-                  {/* ID Display */}
-                  <div className="supplier-id">
-                    ID: {typeof supplier.id === "string" ? supplier.id.slice(0, 8) : supplier.id}
-                  </div>
-
-                  {/* Contact Information */}
-                  <div className="supplier-info">
-                    <div className="info-row">
-                      <span className="info-label">Người liên hệ:</span>
-                      <span className="info-value">{supplier.contactName || "—"}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="info-label">Email:</span>
-                      <span className="info-value email-text">{supplier.email || "—"}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="info-label">Điện thoại:</span>
-                      <span className="info-value">{supplier.phone || "—"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Actions */}
-                <div className="supplier-card-actions">
-                  <Popconfirm>
-                    <Button
-                      danger
-                      size="small"
-                      icon={<DeleteOutlined />}
-                      className="delete-btn"
-                      onClick={(e) => { e.stopPropagation(); handleDelete(supplier.id) }} 
-                    >
-                      Xóa
-                    </Button>
-                  </Popconfirm>
-                </div>
-              </div>
+            {paginatedSuppliers.map((supplier) => (
+              <SupplierCard
+                key={supplier.id}
+                supplier={supplier}
+                onView={handleViewDetail}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
 
@@ -222,8 +91,8 @@ export default function SupplierAdminManage() {
             <div className="supplier-pagination-section">
               <Pagination
                 current={currentPage}
-                total={suppliers.length}
-                pageSize={ITEMS_PER_PAGE}
+                total={totalCount}
+                pageSize={itemsPerPage}
                 onChange={(page) => setCurrentPage(page)}
                 showSizeChanger={false}
                 showQuickJumper
@@ -236,3 +105,4 @@ export default function SupplierAdminManage() {
     </div>
   );
 }
+
