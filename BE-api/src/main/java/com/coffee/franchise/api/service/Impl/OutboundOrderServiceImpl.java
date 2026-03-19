@@ -79,10 +79,7 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                 BigDecimal itemTotalPrice = unitPrice.multiply(itemQuantity);
                 currentOrderTotalPrice = currentOrderTotalPrice.add(itemTotalPrice);
 
-                // Giữ trước số lượng tồn kho khi tạo đơn hàng
-                inventoryService.reserveInventory(savedOrder.getWarehouse().getId(),
-                        item.getIngredient().getId(),
-                        item.getQuantity());
+                // Không giữ tồn kho ở đây nữa, sẽ giữ khi chuyển status sang SHIPPING
             }
         }
         
@@ -155,7 +152,22 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
                 .filter(i -> i.getOutboundOrder().getId().equals(order.getId()))
                 .collect(Collectors.toList());
 
+        OutboundOrderStatus oldStatus = order.getStatus();
+
         // 1. Logic Inventory Nội Bộ (Warehouse)
+        
+        // Gọi reserveInventory khi chuyển sang SHIPPING
+        if (newStatus == OutboundOrderStatus.SHIPPING && 
+           (oldStatus == OutboundOrderStatus.PENDING || oldStatus == OutboundOrderStatus.PACKING)) {
+            for (OutboundOrderItem item : items) {
+                inventoryService.reserveInventory(
+                    order.getWarehouse().getId(),
+                    item.getIngredient().getId(),
+                    item.getQuantity()
+                );
+            }
+        }
+
         if (newStatus == OutboundOrderStatus.DELIVERED) {
             for (OutboundOrderItem item : items) {
                 inventoryService.confirmOutboundInventory(
@@ -167,12 +179,15 @@ public class OutboundOrderServiceImpl implements OutboundOrderService {
         }
 
         if (newStatus == OutboundOrderStatus.CANCELED) {
-            for (OutboundOrderItem item : items) {
-                inventoryService.releaseInventory(
-                    order.getWarehouse().getId(),
-                    item.getIngredient().getId(),
-                    item.getQuantity()
-                );
+            // Phải check: Chỉ release kho nếu đơn này ĐÃ reserve kho (tức là đã ở trạng thái SHIPPING)
+            if (oldStatus == OutboundOrderStatus.SHIPPING) {
+                for (OutboundOrderItem item : items) {
+                    inventoryService.releaseInventory(
+                        order.getWarehouse().getId(),
+                        item.getIngredient().getId(),
+                        item.getQuantity()
+                    );
+                }
             }
         }
 
