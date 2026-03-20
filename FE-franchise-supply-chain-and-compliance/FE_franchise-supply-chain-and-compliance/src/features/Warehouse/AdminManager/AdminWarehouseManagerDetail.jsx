@@ -15,19 +15,15 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import "./AdminWarehouseManagerDetail.css";
-import { AdminWareHouseManager } from "./AdminWareHousePageAPI/AdminWareHouseManager";
 import WareHouseAdminAPI from "./AdminWareHousePageAPI/AdminWareHousePageAPI";
 import { message } from "antd";
+import { useWarehouseManagerDetail } from "./hooks/useWarehouseManagerDetail";
 
 const AdminWarehouseManagerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [manager, setManager] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { manager, allWarehouses, assignedWarehouse, loading, error, refreshData } = useWarehouseManagerDetail(id);
 
-  const [allWarehouses, setAllWarehouses] = useState([]);
-  const [assignedWarehouse, setAssignedWarehouse] = useState(null);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
@@ -35,85 +31,8 @@ const AdminWarehouseManagerDetail = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        setLoading(true);
-        const [managersRes, warehousesRes] = await Promise.all([
-          AdminWareHouseManager.getWarehouseManagers(),
-          WareHouseAdminAPI.getAllWarehouses()
-        ]);
-
-        const rawData = managersRes?.result?.content || [];
-        const warehousesList = Array.isArray(warehousesRes) ? warehousesRes : [];
-        setAllWarehouses(warehousesList);
-
-        // Find the specific manager by ID
-        const selectedManager = rawData.find((m) => String(m.id) === String(id));
-
-        if (selectedManager) {
-          setManager({
-            id: selectedManager.id,
-            firstName: selectedManager.firstName || "N/A",
-            lastName: selectedManager.lastName || "N/A",
-            fullName: `${selectedManager.firstName || ""} ${selectedManager.lastName || ""}`,
-            email: selectedManager.email || "N/A",
-            phone: selectedManager.phoneNumber || "N/A",
-            status: selectedManager.status?.toLowerCase() || "inactive",
-            role: selectedManager.roles?.[0]?.name || "Warehouse Manager",
-            createdAt: selectedManager.createdAt || "N/A",
-          });
-
-          // Find assigned warehouse
-          const assigned = warehousesList.find(w => String(w.managerId) === String(id));
-          setAssignedWarehouse(assigned);
-          if (assigned) setSelectedWarehouseId(assigned.id);
-        } else {
-          setError("Manager not found");
-        }
-      } catch (err) {
-        console.error("❌ Error fetching data:", err);
-        setError("Failed to load data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, [id]);
-
-  const refreshData = async () => {
-    try {
-      const [managersRes, warehousesRes] = await Promise.all([
-        AdminWareHouseManager.getWarehouseManagers(),
-        WareHouseAdminAPI.getAllWarehouses()
-      ]);
-
-      const rawData = managersRes?.result?.content || [];
-      const warehousesList = Array.isArray(warehousesRes) ? warehousesRes : [];
-      setAllWarehouses(warehousesList);
-
-      const selectedManager = rawData.find((m) => String(m.id) === String(id));
-      if (selectedManager) {
-        setManager({
-          id: selectedManager.id,
-          firstName: selectedManager.firstName || "N/A",
-          lastName: selectedManager.lastName || "N/A",
-          fullName: `${selectedManager.firstName || ""} ${selectedManager.lastName || ""}`,
-          email: selectedManager.email || "N/A",
-          phone: selectedManager.phoneNumber || "N/A",
-          status: selectedManager.status?.toLowerCase() || "inactive",
-          role: selectedManager.roles?.[0]?.name || "Warehouse Manager",
-          createdAt: selectedManager.createdAt || "N/A",
-        });
-
-        const assigned = warehousesList.find(w => String(w.managerId) === String(id));
-        setAssignedWarehouse(assigned);
-        if (assigned) setSelectedWarehouseId(assigned.id);
-      }
-    } catch (err) {
-      console.error("❌ Error refreshing data:", err);
-    }
-  };
+    if (assignedWarehouse) setSelectedWarehouseId(assignedWarehouse.id);
+  }, [assignedWarehouse]);
 
   const handleAssign = async (confirmReplace = false) => {
     if (!selectedWarehouseId) return;

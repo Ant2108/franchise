@@ -101,7 +101,8 @@ public class    SupplierService {
         supplier.setContactName(dto.getContactName());
         supplier.setEmail(dto.getEmail());
         supplier.setPhone(dto.getPhone());
-        supplier.setAddress(dto.getAddress());
+        supplier.setLatitude(dto.getLatitude());
+        supplier.setLongitude(dto.getLongitude());
         supplier.setStatus(dto.getStatus());
         supplier.setUpdatedAt(LocalDateTime.now());
 
