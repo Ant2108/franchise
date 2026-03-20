@@ -9,8 +9,17 @@ import {
   Space,
   Popconfirm,
   Tabs,
+  Tag,
+  Empty,
+  Tooltip,
 } from "antd"
-
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  UndoOutlined,
+  FolderOutlined,
+} from "@ant-design/icons"
 
 import "./SupplierAdminCategory.css";
 
@@ -116,30 +125,91 @@ const AdminCategory = () => {
       title: "ID",
       dataIndex: "id",
       width: 80,
+      render: (val) => (
+        <span style={{
+          fontFamily: "'SF Mono', Monaco, monospace",
+          fontSize: 12,
+          color: "#6b7280",
+          fontWeight: 600,
+        }}>
+          #{val}
+        </span>
+      ),
     },
     {
       title: "Tên danh mục",
       dataIndex: "name",
+      render: (val) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            background: "rgba(198, 113, 23, 0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <FolderOutlined style={{ color: "#c67117", fontSize: 14 }} />
+          </div>
+          <span style={{ fontWeight: 600, color: "#1a1a2e", fontSize: 14 }}>
+            {val}
+          </span>
+        </div>
+      ),
     },
     {
       title: "Hành động",
-      width: 220,
+      width: 240,
       render: (_, record) => (
-        <Space>
+        <Space size={8}>
           {activeTab === "active" ? (
             <>
-              <Button type="primary" onClick={() => handleOpenEdit(record)}>
-                Sửa
-              </Button>
+              <Tooltip title="Chỉnh sửa">
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => handleOpenEdit(record)}
+                  style={{ borderRadius: 10 }}
+                >
+                  Sửa
+                </Button>
+              </Tooltip>
               <Popconfirm
                 title="Bạn chắc chắn muốn xóa?"
+                description="Danh mục sẽ được chuyển vào mục đã xóa"
                 onConfirm={() => handleDelete(record.id)}
+                okText="Xóa"
+                cancelText="Hủy"
               >
-                <Button danger>Xóa</Button>
+                <Tooltip title="Xóa danh mục">
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    style={{ borderRadius: 10 }}
+                  >
+                    Xóa
+                  </Button>
+                </Tooltip>
               </Popconfirm>
             </>
           ) : (
-            <Button onClick={() => handleRestore(record.id)}>Khôi phục</Button>
+            <Tooltip title="Khôi phục danh mục">
+              <Button
+                icon={<UndoOutlined />}
+                onClick={() => handleRestore(record.id)}
+                style={{
+                  borderRadius: 10,
+                  background: "linear-gradient(135deg, #10b981, #34d399)",
+                  border: "none",
+                  color: "white",
+                  fontWeight: 600,
+                }}
+              >
+                Khôi phục
+              </Button>
+            </Tooltip>
           )}
         </Space>
       ),
@@ -149,23 +219,47 @@ const AdminCategory = () => {
   return (
     <div className="admin-category">
       <h2>Quản lý danh mục</h2>
+      <p style={{ color: "#6b7280", fontSize: 14, marginBottom: 24, marginTop: -4, fontWeight: 500 }}>
+        Tạo và quản lý các danh mục nguyên liệu
+      </p>
 
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
         items={[
-          { key: "active", label: "Đang hoạt động" },
-          { key: "inactive", label: "Đã xóa" },
+          {
+            key: "active",
+            label: (
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                Đang hoạt động
+                <Tag color="success" style={{ marginLeft: 4, borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                  {activeTab === "active" ? categories.length : ""}
+                </Tag>
+              </span>
+            ),
+          },
+          {
+            key: "inactive",
+            label: (
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                Đã xóa
+                <Tag color="default" style={{ marginLeft: 4, borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                  {activeTab === "inactive" ? categories.length : ""}
+                </Tag>
+              </span>
+            ),
+          },
         ]}
       />
 
       {activeTab === "active" && (
         <Button
           type="primary"
-          style={{ marginBottom: 16 }}
+          icon={<PlusOutlined />}
+          style={{ marginBottom: 20 }}
           onClick={handleOpenCreate}
         >
-          + Thêm danh mục
+          Thêm danh mục
         </Button>
       )}
 
@@ -174,13 +268,25 @@ const AdminCategory = () => {
         columns={columns}
         dataSource={categories}
         loading={loading}
+        locale={{
+          emptyText: (
+            <Empty
+              description={activeTab === "active" ? "Chưa có danh mục nào" : "Không có danh mục đã xóa"}
+              style={{ padding: "40px 0" }}
+            />
+          ),
+        }}
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: categories.length,
           showSizeChanger: true,
           pageSizeOptions: [5, 10, 20, 50],
-          showTotal: (total) => `Tổng ${total} danh mục`,
+          showTotal: (total) => (
+            <span style={{ fontWeight: 600, color: "#6b7280", fontSize: 13 }}>
+              Tổng {total} danh mục
+            </span>
+          ),
           onChange: (page, pageSize) => {
             setPagination({
               current: page,
@@ -194,20 +300,24 @@ const AdminCategory = () => {
       {/* ================= MODAL ================= */}
       <Modal
         open={openModal}
-        title={editingCategory ? "Cập nhật danh mục" : "Thêm danh mục"}
+        title={editingCategory ? "Cập nhật danh mục" : "Thêm danh mục mới"}
         onCancel={() => setOpenModal(false)}
         onOk={handleSave}
         okText="Lưu"
+        cancelText="Hủy"
+        width={480}
       >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="categoryName"
-            label="Tên danh mục"
-            rules={[{ required: true, message: "Vui lòng nhập tên danh mục" }]}
-          >
-            <Input placeholder="Nhập tên danh mục" />
-          </Form.Item>
-        </Form>
+        <div style={{ padding: "8px 0" }}>
+          <Form form={form} layout="vertical">
+            <Form.Item
+              name="categoryName"
+              label="Tên danh mục"
+              rules={[{ required: true, message: "Vui lòng nhập tên danh mục" }]}
+            >
+              <Input placeholder="Nhập tên danh mục" />
+            </Form.Item>
+          </Form>
+        </div>
       </Modal>
     </div>
   )

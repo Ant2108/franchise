@@ -9,9 +9,10 @@ import {
   InputNumber,
   AutoComplete,
   Spin,
+  Upload,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, PlusOutlined, SaveOutlined } from "@ant-design/icons";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { getSupplierDetail, updateSupplier } from "./SupplierAPI/supplierApi";
@@ -19,8 +20,7 @@ import "./SupplierCreatePage.css";
 
 // Import the custom hook
 import { useSupplierForm } from "./hooks/useSupplierForm";
-import { useImageUpload } from "../../../src/hooks/useImageUpload";
-import { Upload } from "antd";
+import { useImageUpload } from "../../hooks/useImageUpload";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -56,9 +56,9 @@ const SupplierEditPage = () => {
       <div class="marker-wrapper">
         <div class="bounce">
           <svg width="36" height="48" viewBox="0 0 36 48">
-            <path d="M18 0C8 0 0 8 0 18c0 13 18 30 18 30s18-17 18-30C36 8 28 0 18 0z" fill="#22c55e" />
+            <path d="M18 0C8 0 0 8 0 18c0 13 18 30 18 30s18-17 18-30C36 8 28 0 18 0z" fill="#c67117" />
             <circle cx="18" cy="18" r="7" fill="white"/>
-            <circle cx="18" cy="18" r="4" fill="#22c55e"/>
+            <circle cx="18" cy="18" r="4" fill="#c67117"/>
           </svg>
         </div>
       </div>
@@ -157,8 +157,9 @@ const SupplierEditPage = () => {
       <div className="create-page">
         <div className="create-container" style={{ paddingTop: 80 }}>
           <Card className="form-card">
-            <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 60, flexDirection: "column", gap: 16 }}>
               <Spin size="large" />
+              <span style={{ color: "#9ca3af", fontWeight: 500, fontSize: 14 }}>Đang tải thông tin supplier...</span>
             </div>
           </Card>
         </div>
@@ -178,7 +179,7 @@ const SupplierEditPage = () => {
             Trở Về
           </Button>
           <h1>Chỉnh Sửa Supplier</h1>
-          <p>Cập nhật thông tin supplier</p>
+          <p>Cập nhật thông tin nhà cung cấp trong hệ thống</p>
         </div>
       </div>
 
@@ -201,7 +202,7 @@ const SupplierEditPage = () => {
                   <Input placeholder="Nhập số điện thoại" />
                 </Form.Item>
                 <Form.Item name="description" label="Mô Tả">
-                  <TextArea rows={3} placeholder="Nhập mô tả" />
+                  <TextArea rows={3} placeholder="Nhập mô tả supplier" />
                 </Form.Item>
                 <Form.Item name="status" label="Trạng Thái" rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}>
                   <Select placeholder="Chọn trạng thái">
@@ -209,22 +210,23 @@ const SupplierEditPage = () => {
                     <Option value="INACTIVE">Inactive</Option>
                   </Select>
                 </Form.Item>
-                <div style={{ marginTop: 16 }}>
-                  <label>Hình Ảnh Supplier (Không bắt buộc)</label>
-                  <div style={{ marginTop: 8 }}>
-                    <Upload
-                      listType="picture-card"
-                      maxCount={1}
-                      fileList={fileList}
-                      onChange={onChange}
-                      beforeUpload={beforeUpload}
-                    >
-                      <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
-                      </div>
-                    </Upload>
-                  </div>
+                <div style={{ marginTop: 8 }}>
+                  <label style={{ fontWeight: 600, color: "#374151", fontSize: 14, display: "block", marginBottom: 10 }}>
+                    Hình Ảnh Supplier
+                    <span style={{ color: "#9ca3af", fontWeight: 400, fontSize: 12, marginLeft: 8 }}>(Không bắt buộc)</span>
+                  </label>
+                  <Upload
+                    listType="picture-card"
+                    maxCount={1}
+                    fileList={fileList}
+                    onChange={onChange}
+                    beforeUpload={beforeUpload}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                      <PlusOutlined style={{ fontSize: 20, color: "#c67117" }} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>Tải ảnh lên</span>
+                    </div>
+                  </Upload>
                 </div>
               </div>
 
@@ -265,33 +267,51 @@ const SupplierEditPage = () => {
             <div className="section-divider" />
             <div className="section-title">Vị Trí Supplier</div>
             <Form.Item label="Địa Chỉ" required style={{ marginBottom: 16 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 140px", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: 14 }}>
                 <Form.Item name="address" noStyle rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}>
                   <AutoComplete
                     options={addressOptions}
                     onSearch={searchAddress}
                     onSelect={onSelectAddress}
                     style={{ width: "100%" }}
-                    placeholder="Nhập địa chỉ"
+                    placeholder="Nhập địa chỉ để tìm kiếm..."
                     allowClear
                   />
                 </Form.Item>
-                <Button onClick={handleFetchCoords}>Tìm Tọa Độ</Button>
+                <Button
+                  onClick={handleFetchCoords}
+                  style={{
+                    borderRadius: 12,
+                    fontWeight: 600,
+                    height: "100%",
+                    border: "2px solid rgba(198,113,23,0.15)",
+                    color: "#c67117",
+                  }}
+                >
+                  📍 Tìm Tọa Độ
+                </Button>
               </div>
             </Form.Item>
 
             <div className="coordinate-grid">
               <Form.Item name="latitude" label="Vĩ Độ">
-                <InputNumber style={{ width: "100%" }} />
+                <InputNumber style={{ width: "100%" }} placeholder="Latitude" />
               </Form.Item>
               <Form.Item name="longitude" label="Kinh Độ">
-                <InputNumber style={{ width: "100%" }} />
+                <InputNumber style={{ width: "100%" }} placeholder="Longitude" />
               </Form.Item>
             </div>
 
             <div className="form-actions">
               <Button onClick={() => navigate(`/admin/supplier/${id}/view`)}>Hủy Bỏ</Button>
-              <Button type="primary" loading={loading} onClick={handleSubmit}>Cập Nhật Supplier</Button>
+              <Button
+                type="primary"
+                loading={loading}
+                onClick={handleSubmit}
+                icon={<SaveOutlined />}
+              >
+                Cập Nhật Supplier
+              </Button>
             </div>
           </Form>
         </Card>
