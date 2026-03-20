@@ -28,23 +28,20 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
     private final InventoryRepository inventoryRepository;
-    @Autowired
-    CloudinaryService cloudinaryService;
+    private final CloudinaryService cloudinaryService;
 
     // ================= GET BY ID =================
     @Override
     public WarehouseResponse getWarehouse(UUID id) {
-        Warehouse warehouse = findActiveWarehouseOrThrow(id);
-        return mapToResponse(warehouse);
+        return mapToResponse(findActiveWarehouseOrThrow(id));
     }
 
     // ================= CREATE =================
     @Override
-    public WarehouseResponse createWarehouse(WarehouseRequest request)  {
-           String imageUrl = null;
+    public WarehouseResponse createWarehouse(WarehouseRequest request) {
 
-
-
+        // Validate code (nếu bạn cho nhập code thì check ở đây)
+        // if (warehouseRepository.existsByCodeAndDeletedFalse(request.getCode())) { ... }
 
         String generatedCode = generateWarehouseCode();
 
@@ -55,7 +52,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
                 .description(request.getDescription())
-                .imageUrl(imageUrl)
+                .imageUrl(null)
                 .status(request.getStatus() != null
                         ? request.getStatus()
                         : WarehouseStatus.ACTIVE)
@@ -66,7 +63,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         return mapToResponse(warehouseRepository.save(warehouse));
     }
 
-    // ================= UPDATE FULL =================
+    // ================= UPDATE =================
     @Override
     public WarehouseResponse updateWarehouse(WarehouseRequest request, UUID id) {
 
@@ -87,7 +84,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     public WarehouseResponse updateStatus(UUID id, WarehouseStatus status) {
 
         Warehouse warehouse = findActiveWarehouseOrThrow(id);
-
         warehouse.setStatus(status);
 
         return mapToResponse(warehouseRepository.save(warehouse));
@@ -110,44 +106,38 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouseRepository.save(warehouse);
     }
 
+    // ================= INVENTORY =================
     @Override
     public List<InventoryListItemResponse> findInventoryByWarehouseId(UUID warehouseId) {
-        List<Inventory> inventories = inventoryRepository
-                .findByWarehouseId(warehouseId);
 
-        return inventories.stream()
+        // đảm bảo warehouse chưa bị delete
+        findActiveWarehouseOrThrow(warehouseId);
+
+        return inventoryRepository.findByWarehouseId(warehouseId)
+                .stream()
                 .map(InventoryServiceImpl.InventoryMapper::toListItem)
                 .toList();
     }
 
-    // ================= COMMON METHOD =================
-    private Warehouse findActiveWarehouseOrThrow(UUID id) {
-        return warehouseRepository.findById(id)
-                .filter(w -> !Boolean.TRUE.equals(w.getDeleted()))
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Warehouse not found with id " + id
-                        ));
-    }
+    // ================= ASSIGN MANAGER =================
     @Override
     public WarehouseResponse assignManager(UUID warehouseId, UUID managerId, boolean confirmReplace) {
 
         Warehouse warehouse = findActiveWarehouseOrThrow(warehouseId);
 
-        // Unassign
+        // ===== Unassign =====
         if (managerId == null) {
             warehouse.setManagerId(null);
             return mapToResponse(warehouseRepository.save(warehouse));
         }
 
-        // Check manager đang ở warehouse khác
-        Warehouse currentWarehouseOfManager = warehouseRepository
+        // ===== Check manager đang ở warehouse khác =====
+        Warehouse currentWarehouse = warehouseRepository
                 .findByManagerIdAndDeletedFalse(managerId)
                 .orElse(null);
 
-        if (currentWarehouseOfManager != null &&
-                !currentWarehouseOfManager.getId().equals(warehouseId)) {
+        if (currentWarehouse != null &&
+                !currentWarehouse.getId().equals(warehouseId)) {
 
             if (!confirmReplace) {
                 throw new ResponseStatusException(
@@ -157,11 +147,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
 
             // remove khỏi warehouse cũ
-            currentWarehouseOfManager.setManagerId(null);
-            warehouseRepository.save(currentWarehouseOfManager);
+            currentWarehouse.setManagerId(null);
+            warehouseRepository.save(currentWarehouse);
         }
 
-        // Check warehouse đã có manager chưa
+        // ===== Check warehouse đã có manager =====
         if (warehouse.getManagerId() != null &&
                 !warehouse.getManagerId().equals(managerId)) {
 
@@ -173,24 +163,36 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
         }
 
-        // Assign
+        // ===== Assign =====
         warehouse.setManagerId(managerId);
 
         return mapToResponse(warehouseRepository.save(warehouse));
     }
-    public WarehouseResponse getByManagerId(UUID warehouseId) {
+
+    // ================= GET BY MANAGER =================
+    @Override
+    public WarehouseResponse getByManagerId(UUID managerId) {
         Warehouse warehouse = warehouseRepository
-                .findByManagerIdAndDeletedFalse(warehouseId)
+                .findByManagerIdAndDeletedFalse(managerId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Manager chưa được assign warehouse"
                 ));
+
         return mapToResponse(warehouse);
+    }
+
+    // ================= COMMON =================
+    private Warehouse findActiveWarehouseOrThrow(UUID id) {
+        return warehouseRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Warehouse not found with id " + id
+                ));
     }
 
     // ================= MAPPER =================
     private WarehouseResponse mapToResponse(Warehouse warehouse) {
-
         return WarehouseResponse.builder()
                 .id(warehouse.getId())
                 .code(warehouse.getCode())
@@ -205,10 +207,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .updatedAt(warehouse.getUpdatedAt())
                 .build();
     }
+
+    // ================= UTIL =================
     private String generateWarehouseCode() {
-
-        long count = warehouseRepository.count() + 1;
-
-        return "WH-" + String.format("%03d", count);
+        return "WH-" + System.currentTimeMillis();
     }
 }

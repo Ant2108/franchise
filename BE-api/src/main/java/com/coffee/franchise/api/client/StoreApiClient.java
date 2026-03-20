@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 // Nếu store.api.url không được cấu hình trong application.yml, nó sẽ lấy link ngrok mặc định
 @FeignClient(
     name = "storeApiClient", 
-    url = "${store.api.url:https://b7b4-2405-4800-5716-8cc0-90e0-1f1e-a265-e43a.ngrok-free.app}"
+    url = "${store.api.url:https://franchise-service-kc84.onrender.com}"
 )
 public interface StoreApiClient {
 
-    @PostMapping("/api/v1/inventory-imports/confirm")
+    @PostMapping("/g4/franchise/api/v1/inventory-imports/confirm")
     void confirmInventoryImport(@RequestBody StoreImportRequest request);
 }

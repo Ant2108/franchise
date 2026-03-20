@@ -61,6 +61,12 @@ public class WarehouseController {
     ) {
         return warehouseService.assignManager(id, managerId, confirmReplace);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public void deleteWarehouse(@PathVariable UUID id) {
+        warehouseService.deleteWarehouse(id);
+    }
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/by-manager/{managerId}")
     public WarehouseResponse getByManager(@PathVariable UUID managerId) {
         return warehouseService.getByManagerId(managerId);
