@@ -13,6 +13,8 @@ import {
 import { removeCookie, removeUserRoles } from "../../utils/cookieUtils";
 import { Modal, message } from "antd";
 import { getCookie } from "../../utils/cookieUtils";
+import { WarningOutlined, CloseOutlined, SearchOutlined, InboxOutlined } from "@ant-design/icons";
+import WareHouseInventoryLogAPI from "./AdminManager/AdminWareHousePageAPI/AdminWareHouseInventoryLogAPI";
 
 
 const WarehouseSidebar = () => {

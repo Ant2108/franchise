@@ -185,7 +185,7 @@ function WareHouseReports() {
     // Compute Stats
     const inboundTotal = useMemo(() => {
         return inboundOrders
-            .filter((o) => o.status === "COMPLETED")
+                .filter((o) => o.status === "COMPLETED")
             .reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0);
     }, [inboundOrders]);
 
